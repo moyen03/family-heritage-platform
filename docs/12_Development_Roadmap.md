@@ -1,0 +1,142 @@
+# 12 – Development Roadmap
+
+## Phase 1 – Foundation ✅ (Current)
+
+**Goal:** Working project skeleton that can be opened in PhpStorm and run locally.
+
+| Task | Status |
+|------|--------|
+| Project folder structure | ✅ Done |
+| Documentation (all docs/ files) | ✅ Done |
+| Docker Compose (PHP, Nginx, MySQL, phpMyAdmin) | ✅ Done |
+| Symfony 7 skeleton | ✅ Done |
+| PHP 8.3 configuration | ✅ Done |
+| Doctrine ORM | ✅ Done |
+| API Platform | ✅ Done |
+| JWT Authentication (LexikJWT) | ✅ Done |
+| PHPUnit | ✅ Done |
+| PHPStan | ✅ Done |
+| PHP-CS-Fixer | ✅ Done |
+| Git initialized | ✅ Done |
+| Claude Code prompts | ✅ Done |
+| DECISIONS.md | ✅ Done |
+| User entity + authentication | ✅ Done |
+| Role system | ✅ Done |
+| Branch entity + branch ownership | ✅ Done |
+
+---
+
+## Phase 2 – Core Genealogy ⏳
+
+**Goal:** The core of the platform — persons, relationships, ancestors, descendants.
+
+| Task | Status |
+|------|--------|
+| Person entity + CRUD API | ⏳ |
+| Person names (multiple names) | ⏳ |
+| Relationship entity (graph model) | ⏳ |
+| Marriage entity | ⏳ |
+| Ancestor traversal algorithm | ⏳ |
+| Descendant traversal algorithm | ⏳ |
+| Relationship finder (A to B path) | ⏳ |
+| Approval workflow for Member edits | ⏳ |
+| Audit log for all person/relationship changes | ⏳ |
+
+---
+
+## Phase 3 – Interactive Family Tree UI ⏳
+
+**Goal:** A web-based interactive family tree.
+
+| Task | Status |
+|------|--------|
+| React project setup | ⏳ |
+| Authentication (login/logout) | ⏳ |
+| Tree visualization (React Flow or D3.js) | ⏳ |
+| Zoom and pan | ⏳ |
+| Expand/collapse branches | ⏳ |
+| Highlight ancestors | ⏳ |
+| Highlight descendants | ⏳ |
+| Search by name | ⏳ |
+| Person profile drawer | ⏳ |
+| Multiple spouses display | ⏳ |
+| Adoption/step display | ⏳ |
+
+---
+
+## Phase 4 – Media ⏳
+
+**Goal:** Rich media library with tagging and privacy.
+
+| Task | Status |
+|------|--------|
+| Photo upload | ⏳ |
+| Video upload | ⏳ |
+| Document upload (PDF) | ⏳ |
+| Audio upload | ⏳ |
+| Media metadata (date, place, source) | ⏳ |
+| Tag people in photos | ⏳ |
+| Privacy levels per media item | ⏳ |
+| Media gallery UI | ⏳ |
+
+---
+
+## Phase 5 – Addresses and Maps ⏳
+
+**Goal:** Address history and geographic visualization.
+
+| Task | Status |
+|------|--------|
+| Address entity + CRUD | ⏳ |
+| Current address per person | ⏳ |
+| Historical addresses | ⏳ |
+| Map view (Leaflet + OpenStreetMap) | ⏳ |
+| Migration path visualization | ⏳ |
+| Family heat map by region | ⏳ |
+
+---
+
+## Phase 6 – Reports ⏳
+
+**Goal:** Generate PDF reports for printing and archiving.
+
+| Task | Status |
+|------|--------|
+| PDF library integration (Dompdf) | ⏳ |
+| Family Book report | ⏳ |
+| Ancestor report | ⏳ |
+| Descendant report | ⏳ |
+| Relationship report | ⏳ |
+| Birthday report | ⏳ |
+| Printable family tree (A0–A3) | ⏳ |
+| Statistics report | ⏳ |
+
+---
+
+## Phase 7 – Mobile App ⏳
+
+**Goal:** iOS and Android app for family members.
+
+| Task | Status |
+|------|--------|
+| React Native project setup | ⏳ |
+| Login / JWT auth | ⏳ |
+| Family tree view (SVG) | ⏳ |
+| Person profile | ⏳ |
+| Photo upload from camera | ⏳ |
+| Push notifications | ⏳ |
+
+---
+
+## Phase 8 – AI Features ⏳
+
+**Goal:** AI-assisted data entry and discovery.
+
+| Task | Status |
+|------|--------|
+| OCR for uploaded documents | ⏳ |
+| Duplicate person detection | ⏳ |
+| Relationship suggestions | ⏳ |
+| Auto-biography generation | ⏳ |
+| Name spelling normalization | ⏳ |
+

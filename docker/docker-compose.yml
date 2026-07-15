@@ -1,0 +1,78 @@
+services:
+
+  nginx:
+    image: nginx:1.25-alpine
+    container_name: fhp-nginx
+    ports:
+      - "8000:80"
+    volumes:
+      - ../backend:/var/www/html
+      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf
+    depends_on:
+      - php
+    networks:
+      - fhp-network
+
+  php:
+    build:
+      context: ./php
+      dockerfile: Dockerfile
+    container_name: fhp-php
+    volumes:
+      - ../backend:/var/www/html
+    environment:
+      - APP_ENV=dev
+      - DATABASE_URL=mysql://root:root@mysql:3306/family_heritage?serverVersion=8.0&charset=utf8mb4
+      - JWT_SECRET_KEY=%kernel.project_dir%/config/jwt/private.pem
+      - JWT_PUBLIC_KEY=%kernel.project_dir%/config/jwt/public.pem
+      - JWT_PASSPHRASE=family_heritage_jwt_passphrase
+    depends_on:
+      mysql:
+        condition: service_healthy
+    networks:
+      - fhp-network
+
+  mysql:
+    image: mysql:8.0
+    container_name: fhp-mysql
+    environment:
+      MYSQL_DATABASE: family_heritage
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_CHARACTER_SET_SERVER: utf8mb4
+      MYSQL_COLLATION_SERVER: utf8mb4_unicode_ci
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./mysql/init.sql:/docker-entrypoint-initdb.d/init.sql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-proot"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - fhp-network
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin:latest
+    container_name: fhp-phpmyadmin
+    environment:
+      PMA_HOST: mysql
+      PMA_USER: root
+      PMA_PASSWORD: root
+      UPLOAD_LIMIT: 50M
+    ports:
+      - "8080:80"
+    depends_on:
+      - mysql
+    networks:
+      - fhp-network
+
+networks:
+  fhp-network:
+    driver: bridge
+
+volumes:
+  mysql_data:
+    driver: local
+

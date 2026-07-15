@@ -1,0 +1,56 @@
+name: CI
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+
+jobs:
+  backend:
+    name: Backend (PHP 8.3 / Symfony 7)
+    runs-on: ubuntu-latest
+
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: family_heritage_test
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup PHP 8.3
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          extensions: mbstring, pdo, pdo_mysql, intl, zip, gd, bcmath
+          coverage: xdebug
+
+      - name: Install dependencies
+        working-directory: backend
+        run: composer install --no-interaction --prefer-dist --optimize-autoloader
+
+      - name: Check code style (PHP-CS-Fixer)
+        working-directory: backend
+        run: vendor/bin/php-cs-fixer fix --dry-run --diff
+
+      - name: Run PHPStan
+        working-directory: backend
+        run: vendor/bin/phpstan analyse --memory-limit=512M
+
+      - name: Run PHPUnit
+        working-directory: backend
+        env:
+          DATABASE_URL: mysql://root:root@127.0.0.1:3306/family_heritage_test?serverVersion=8.0
+        run: vendor/bin/phpunit --coverage-text
+

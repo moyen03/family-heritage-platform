@@ -1,0 +1,59 @@
+# OS / IDE
+.DS_Store
+.idea/
+.vscode/
+*.swp
+*.swo
+Thumbs.db
+
+# Backend (Symfony)
+backend/.env.local
+backend/.env.*.local
+backend/var/
+backend/vendor/
+backend/public/uploads/
+backend/.php-cs-fixer.cache
+backend/.phpunit.result.cache
+
+# Frontend (React)
+frontend/node_modules/
+frontend/build/
+frontend/dist/
+frontend/.env.local
+frontend/.env.production
+
+# Mobile (React Native)
+mobile/node_modules/
+mobile/.expo/
+mobile/dist/
+mobile/android/.gradle/
+mobile/android/app/build/
+mobile/ios/Pods/
+mobile/ios/build/
+
+# Docker
+docker/mysql/data/
+docker/.env
+
+# Logs
+*.log
+logs/
+
+# Certificates / Keys
+*.pem
+*.key
+*.crt
+jwt/
+
+# Environment
+.env
+.env.local
+
+# Build artifacts
+/build/
+/dist/
+
+# Temporary files
+tmp/
+temp/
+
