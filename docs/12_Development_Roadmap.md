@@ -39,7 +39,7 @@
 | Ancestor traversal algorithm | ✅ Done |
 | Descendant traversal algorithm | ✅ Done |
 | Relationship finder (A to B path) | ✅ Done |
-| Approval workflow for Member edits | ⏳ |
+| Approval workflow for Member edits | ✅ Done |
 | Audit log for all person/relationship changes | ⏳ |
 
 ---
