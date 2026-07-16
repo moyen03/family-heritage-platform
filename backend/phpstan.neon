@@ -5,6 +5,4 @@ parameters:
     excludePaths:
         - src/Kernel.php
     treatPhpDocTypesAsCertain: false
-    symfony:
-        containerXmlPath: var/cache/dev/App_KernelDevDebugContainer.xml
 
