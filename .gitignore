@@ -45,8 +45,9 @@ logs/
 *.crt
 jwt/
 
-# Environment
-.env
+# Environment (local overrides only — backend/.env is committed with safe defaults)
+backend/.env.local
+backend/.env.*.local
 .env.local
 
 # Build artifacts
