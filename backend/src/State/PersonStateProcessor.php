@@ -26,7 +26,9 @@ final class PersonStateProcessor implements ProcessorInterface
 
     public function process(mixed $data, Operation $operation, array $uriVariables = [], array $context = []): ?Person
     {
-        assert($data instanceof Person);
+        if (!$data instanceof Person) {
+            return null;
+        }
 
         if ($operation instanceof Delete) {
             $data->softDelete();

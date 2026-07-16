@@ -44,8 +44,20 @@ jobs:
         working-directory: backend
         run: vendor/bin/php-cs-fixer fix --dry-run --diff
 
+      - name: Warm up Symfony cache (needed for PHPStan container analysis)
+        working-directory: backend
+        env:
+          APP_ENV: dev
+          APP_SECRET: ci-secret-not-used
+          DATABASE_URL: mysql://root:root@127.0.0.1:3306/family_heritage_test?serverVersion=8.0
+        run: php bin/console cache:warmup --env=dev --no-debug
+
       - name: Run PHPStan
         working-directory: backend
+        env:
+          APP_ENV: dev
+          APP_SECRET: ci-secret-not-used
+          DATABASE_URL: mysql://root:root@127.0.0.1:3306/family_heritage_test?serverVersion=8.0
         run: vendor/bin/phpstan analyse --memory-limit=512M
 
       - name: Run PHPUnit
@@ -53,4 +65,3 @@ jobs:
         env:
           DATABASE_URL: mysql://root:root@127.0.0.1:3306/family_heritage_test?serverVersion=8.0
         run: vendor/bin/phpunit --coverage-text
-

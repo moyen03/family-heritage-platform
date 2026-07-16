@@ -75,6 +75,11 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     public function getUserIdentifier(): string
     {
+        // email is validated as non-empty on persist; assert satisfies static analysis
+        if ($this->email === '') {
+            throw new \LogicException('User email cannot be empty.');
+        }
+
         return $this->email;
     }
 

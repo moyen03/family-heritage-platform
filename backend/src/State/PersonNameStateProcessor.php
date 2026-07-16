@@ -22,7 +22,9 @@ final class PersonNameStateProcessor implements ProcessorInterface
 
     public function process(mixed $data, Operation $operation, array $uriVariables = [], array $context = []): ?PersonName
     {
-        assert($data instanceof PersonName);
+        if (!$data instanceof PersonName) {
+            return null;
+        }
 
         if ($operation instanceof Delete) {
             $this->entityManager->remove($data);

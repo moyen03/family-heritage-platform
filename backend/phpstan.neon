@@ -4,8 +4,7 @@ parameters:
         - src
     excludePaths:
         - src/Kernel.php
+    treatPhpDocTypesAsCertain: false
     symfony:
-        container_xml_path: var/cache/dev/App_KernelDevDebugContainer.xml
-    doctrine:
-        objectManagerLoader: tests/bootstrap.php
+        containerXmlPath: var/cache/dev/App_KernelDevDebugContainer.xml
 

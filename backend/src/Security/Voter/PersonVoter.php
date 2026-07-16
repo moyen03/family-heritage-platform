@@ -34,7 +34,9 @@ final class PersonVoter extends Voter
             return false;
         }
 
-        assert($subject instanceof Person);
+        if (!$subject instanceof Person) {
+            return false;
+        }
 
         return match ($attribute) {
             self::VIEW   => $this->canView($subject, $user),
@@ -55,7 +57,7 @@ final class PersonVoter extends Voter
             Visibility::Public  => true,
             Visibility::Family  => true,  // all authenticated family members
             Visibility::Branch  => true,  // simplify: all members for now (branch check Phase 5)
-            Visibility::Private => $user->getRole() === UserRole::SuperAdmin,
+            Visibility::Private => false, // only SuperAdmin can see private (already returned true above)
         };
     }
 
