@@ -26,7 +26,7 @@
 
 ---
 
-## Phase 2 – Core Genealogy ⏳
+## Phase 2 – Core Genealogy ✅
 
 **Goal:** The core of the platform — persons, relationships, ancestors, descendants.
 
@@ -40,7 +40,7 @@
 | Descendant traversal algorithm | ✅ Done |
 | Relationship finder (A to B path) | ✅ Done |
 | Approval workflow for Member edits | ✅ Done |
-| Audit log for all person/relationship changes | ⏳ |
+| Audit log for all person/relationship changes | ✅ Done |
 
 ---
 
