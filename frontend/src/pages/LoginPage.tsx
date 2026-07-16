@@ -81,7 +81,13 @@ export function LoginPage() {
           </form>
         </div>
 
-        <p className="text-center text-sm text-gray-500 mt-4">
+        {/* Demo credentials hint */}
+        <div className="mt-4 rounded-xl bg-white/70 border border-gray-200 px-4 py-3 text-xs text-gray-500 text-center space-y-0.5">
+          <p className="font-medium text-gray-600">Demo accounts</p>
+          <p><span className="font-mono">admin@family.local</span> · <span className="font-mono">Admin1234!</span></p>
+          <p><span className="font-mono">demo@family.local</span> · <span className="font-mono">demo1234</span></p>
+        </div>
+        <p className="text-center text-xs text-gray-400 mt-2">
           Family Heritage Platform — Private Access Only
         </p>
       </div>

@@ -4,7 +4,10 @@ const BASE_URL = '/api'
 
 export const api = axios.create({
   baseURL: BASE_URL,
-  headers: { 'Content-Type': 'application/json' },
+  headers: {
+    'Content-Type': 'application/json',
+    'Accept': 'application/ld+json',
+  },
 })
 
 // ── Token management ─────────────────────────────────────────────────────────
@@ -15,11 +18,14 @@ export const setAccessToken = (token: string | null) => {
   accessToken = token
   if (token) {
     api.defaults.headers.common['Authorization'] = `Bearer ${token}`
+    localStorage.setItem('access_token', token)
   } else {
     delete api.defaults.headers.common['Authorization']
+    localStorage.removeItem('access_token')
   }
 }
 
+export const getAccessToken = () => localStorage.getItem('access_token')
 export const getRefreshToken = () => localStorage.getItem('refresh_token')
 export const setRefreshToken = (token: string | null) => {
   if (token) localStorage.setItem('refresh_token', token)

@@ -44,7 +44,7 @@
 
 ---
 
-## Phase 3 – Interactive Family Tree UI ⏳
+## Phase 3 – Interactive Family Tree UI ✅ (mostly done)
 
 **Goal:** A web-based interactive family tree.
 
@@ -52,13 +52,14 @@
 |------|--------|
 | React project setup | ✅ Done |
 | Authentication (login/logout) | ✅ Done |
-| Tree visualization (React Flow or D3.js) | ⏳ |
-| Zoom and pan | ⏳ |
+| Tree visualization (React Flow + Dagre layout) | ✅ Done |
+| Zoom and pan | ✅ Done |
 | Expand/collapse branches | ⏳ |
-| Highlight ancestors | ⏳ |
-| Highlight descendants | ⏳ |
-| Search by name | ⏳ |
-| Person profile drawer | ⏳ |
+| Highlight ancestors | ✅ Done |
+| Highlight descendants | ✅ Done |
+| Search by name | ✅ Done |
+| Person profile drawer | ✅ Done |
+| Relationship path finder (A→B) | ✅ Done |
 | Multiple spouses display | ⏳ |
 | Adoption/step display | ⏳ |
 

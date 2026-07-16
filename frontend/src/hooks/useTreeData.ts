@@ -33,7 +33,7 @@ function buildLayout(nodes: Node[], edges: Edge[]): { nodes: Node[]; edges: Edge
 }
 
 export function useTreeData() {
-  const { data: personsData, isLoading: personsLoading } = useQuery({
+  const { data: personsData, isLoading: personsLoading, isError: personsError } = useQuery({
     queryKey: ['persons'],
     queryFn: () => personsService.getAll(),
   })
@@ -74,6 +74,7 @@ export function useTreeData() {
     nodes,
     edges,
     isLoading: personsLoading || relsLoading,
+    isError: personsError,
     totalPersons: personsData?.['totalItems'] ?? personsData?.['hydra:totalItems'] ?? 0,
   }
 }

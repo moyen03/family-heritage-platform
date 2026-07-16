@@ -1,12 +1,13 @@
 import { create } from 'zustand'
 import { authService } from '@/services/auth.service'
-import { getRefreshToken } from '@/services/api'
+import { getAccessToken, getRefreshToken, setAccessToken } from '@/services/api'
 import type { AuthUser, LoginCredentials } from '@/types/auth'
 
 interface AuthState {
   user: AuthUser | null
   token: string | null
   isLoading: boolean
+  isInitializing: boolean
   error: string | null
 
   login: (credentials: LoginCredentials) => Promise<void>
@@ -19,6 +20,7 @@ export const useAuthStore = create<AuthState>((set) => ({
   user: null,
   token: null,
   isLoading: false,
+  isInitializing: true,
   error: null,
 
   login: async (credentials) => {
@@ -26,7 +28,7 @@ export const useAuthStore = create<AuthState>((set) => ({
     try {
       const response = await authService.login(credentials)
       const user = authService.decodeToken(response.token)
-      set({ token: response.token, user, isLoading: false })
+      set({ token: response.token, user, isLoading: false, isInitializing: false })
     } catch (err: unknown) {
       const message =
         err instanceof Error ? err.message : 'Invalid email or password.'
@@ -36,20 +38,38 @@ export const useAuthStore = create<AuthState>((set) => ({
 
   logout: () => {
     authService.logout()
-    set({ user: null, token: null })
+    set({ user: null, token: null, isInitializing: false })
   },
 
   /**
-   * On page load: check if we have a refresh token and restore the session.
-   * We don't re-validate with the server here — the first API call will
-   * trigger the refresh interceptor if the access token is missing.
+   * On page load: restore access token from localStorage so API calls work immediately.
    */
   initFromStorage: () => {
+    const token = getAccessToken()
     const refreshToken = getRefreshToken()
-    if (!refreshToken) return
-    // Mark as authenticated with no access token yet;
-    // the interceptor will refresh on first request.
-    set({ user: { email: '', roles: [] } })
+
+    if (!token && !refreshToken) {
+      set({ isInitializing: false })
+      return
+    }
+
+    if (token) {
+      // Restore the token into the axios instance
+      setAccessToken(token)
+      const user = authService.decodeToken(token)
+      if (user) {
+        set({ user, token, isInitializing: false })
+        return
+      }
+    }
+
+    // No valid access token — fall back to marking authenticated so the
+    // 401→refresh interceptor can kick in on the first request.
+    if (refreshToken) {
+      set({ user: { email: '', roles: [] }, isInitializing: false })
+    } else {
+      set({ isInitializing: false })
+    }
   },
 
   clearError: () => set({ error: null }),

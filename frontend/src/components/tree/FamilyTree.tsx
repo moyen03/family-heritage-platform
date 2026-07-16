@@ -30,7 +30,7 @@ export interface FamilyTreeHandle {
 }
 
 export const FamilyTree = forwardRef<FamilyTreeHandle>(function FamilyTree(_props, ref) {
-  const { nodes: initialNodes, edges: initialEdges, isLoading } = useTreeData()
+  const { nodes: initialNodes, edges: initialEdges, isLoading, isError } = useTreeData()
   const { fitView, setCenter } = useReactFlow()
 
   const [nodes, setNodes, onNodesChange] = useNodesState<Node<PersonNodeData>>([])
@@ -160,7 +160,7 @@ export const FamilyTree = forwardRef<FamilyTreeHandle>(function FamilyTree(_prop
     },
   }), [nodes, setCenter])
 
-  if (isLoading) {
+  if (isLoading || (initialNodes.length > 0 && nodes.length === 0)) {
     return (
       <div className="flex-1 flex items-center justify-center bg-gray-50">
         <div className="text-center">
@@ -171,7 +171,18 @@ export const FamilyTree = forwardRef<FamilyTreeHandle>(function FamilyTree(_prop
     )
   }
 
-  if (nodes.length === 0) {
+  if (isError) {
+    return (
+      <div className="flex-1 flex items-center justify-center bg-gray-50">
+        <div className="text-center">
+          <p className="text-red-400 font-medium">Failed to load family tree.</p>
+          <p className="text-gray-400 text-sm mt-1">Please check your connection and try refreshing.</p>
+        </div>
+      </div>
+    )
+  }
+
+  if (nodes.length === 0 && initialNodes.length === 0) {
     return (
       <div className="flex-1 flex items-center justify-center bg-gray-50">
         <div className="text-center">
