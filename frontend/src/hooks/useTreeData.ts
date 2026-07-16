@@ -1,35 +1,130 @@
-import { useMemo } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import type { Node, Edge } from '@xyflow/react'
+import { MarkerType } from '@xyflow/react'
 import dagre from '@dagrejs/dagre'
 import { personsService } from '@/services/persons.service'
 import { relationshipsService } from '@/services/relationships.service'
 import type { Person } from '@/types/person'
+import type { Relationship } from '@/types/relationship'
 
 const NODE_WIDTH = 200
 const NODE_HEIGHT = 90
 
+// Relationship types that form parent→child tree edges
+const PARENT_TYPES = new Set(['parent', 'step_parent', 'adopted_parent'])
+
 export interface PersonNodeData {
   person: Person
+  hasChildren: boolean
+  isCollapsed: boolean
+  collapsedChildCount: number
+  onSelect?: (id: string) => void
+  onHighlightAncestors?: (id: string) => void
+  onHighlightDescendants?: (id: string) => void
+  onToggleCollapse?: (id: string) => void
+  isSelected?: boolean
+  highlightState?: 'ancestor' | 'descendant' | 'dimmed' | null
   [key: string]: unknown
 }
 
-function buildLayout(nodes: Node[], edges: Edge[]): { nodes: Node[]; edges: Edge[] } {
+function edgeStyle(type: string): Pick<Edge, 'style' | 'label' | 'labelStyle' | 'labelBgStyle' | 'markerEnd'> {
+  switch (type) {
+    case 'step_parent':
+      return {
+        style: { stroke: '#f97316', strokeWidth: 2, strokeDasharray: '6 4' },
+        label: 'step',
+        labelStyle: { fontSize: 9, fill: '#f97316', fontWeight: 600 },
+        labelBgStyle: { fill: 'white', fillOpacity: 0.85 },
+        markerEnd: { type: MarkerType.ArrowClosed, width: 12, height: 12, color: '#f97316' },
+      }
+    case 'adopted_parent':
+      return {
+        style: { stroke: '#8b5cf6', strokeWidth: 2, strokeDasharray: '6 4' },
+        label: 'adopted',
+        labelStyle: { fontSize: 9, fill: '#8b5cf6', fontWeight: 600 },
+        labelBgStyle: { fill: 'white', fillOpacity: 0.85 },
+        markerEnd: { type: MarkerType.ArrowClosed, width: 12, height: 12, color: '#8b5cf6' },
+      }
+    default:
+      return {
+        style: { stroke: '#94a3b8', strokeWidth: 2 },
+        markerEnd: { type: MarkerType.ArrowClosed, width: 12, height: 12, color: '#94a3b8' },
+      }
+  }
+}
+
+/**
+ * Build a Dagre-layouted React Flow graph from persons + relationships,
+ * respecting collapsed nodes (their entire subtrees are hidden).
+ */
+export function buildTreeLayout(
+  persons: Person[],
+  relationships: Relationship[],
+  collapsedIds: Set<string>,
+): { nodes: Node<PersonNodeData>[]; edges: Edge[] } {
+  if (!persons.length) return { nodes: [], edges: [] }
+
+  // Build parent→children map from all parent-type relationships
+  const childrenOf = new Map<string, Set<string>>()
+  relationships
+    .filter((r) => PARENT_TYPES.has(r.type))
+    .forEach((r) => {
+      if (!childrenOf.has(r.person1.id)) childrenOf.set(r.person1.id, new Set())
+      childrenOf.get(r.person1.id)!.add(r.person2.id)
+    })
+
+  // BFS to compute all hidden IDs (descendants of collapsed nodes)
+  const hiddenIds = new Set<string>()
+  for (const cId of collapsedIds) {
+    const queue = [...(childrenOf.get(cId) ?? [])]
+    while (queue.length) {
+      const id = queue.shift()!
+      if (!hiddenIds.has(id)) {
+        hiddenIds.add(id)
+        childrenOf.get(id)?.forEach((c) => queue.push(c))
+      }
+    }
+  }
+
+  const visiblePersons = persons.filter((p) => !hiddenIds.has(p.id))
+  const visibleRels = relationships.filter(
+    (r) => PARENT_TYPES.has(r.type) && !hiddenIds.has(r.person1.id) && !hiddenIds.has(r.person2.id),
+  )
+
+  // Dagre layout
   const graph = new dagre.graphlib.Graph()
   graph.setDefaultEdgeLabel(() => ({}))
   graph.setGraph({ rankdir: 'TB', ranksep: 80, nodesep: 50 })
-
-  nodes.forEach((n) => graph.setNode(n.id, { width: NODE_WIDTH, height: NODE_HEIGHT }))
-  edges.forEach((e) => graph.setEdge(e.source, e.target))
-
+  visiblePersons.forEach((p) => graph.setNode(p.id, { width: NODE_WIDTH, height: NODE_HEIGHT }))
+  visibleRels.forEach((r) => graph.setEdge(r.person1.id, r.person2.id))
   dagre.layout(graph)
 
-  const layouted = nodes.map((n) => {
-    const pos = graph.node(n.id)
-    return { ...n, position: { x: pos.x - NODE_WIDTH / 2, y: pos.y - NODE_HEIGHT / 2 } }
+  const nodes: Node<PersonNodeData>[] = visiblePersons.map((p) => {
+    const pos = graph.node(p.id)
+    const children = childrenOf.get(p.id) ?? new Set()
+    return {
+      id: p.id,
+      type: 'person',
+      position: { x: pos.x - NODE_WIDTH / 2, y: pos.y - NODE_HEIGHT / 2 },
+      data: {
+        person: p,
+        hasChildren: children.size > 0,
+        isCollapsed: collapsedIds.has(p.id),
+        collapsedChildCount: collapsedIds.has(p.id) ? children.size : 0,
+      },
+    }
   })
 
-  return { nodes: layouted, edges }
+  const edges: Edge[] = visibleRels.map((r) => ({
+    id: `e-${r.id}`,
+    source: r.person1.id,
+    target: r.person2.id,
+    type: 'smoothstep',
+    animated: false,
+    ...edgeStyle(r.type),
+  }))
+
+  return { nodes, edges }
 }
 
 export function useTreeData() {
@@ -43,39 +138,19 @@ export function useTreeData() {
     queryFn: () => relationshipsService.getAll(),
   })
 
-  const { nodes, edges } = useMemo(() => {
-    const persons = personsData?.['member'] ?? personsData?.['hydra:member'] ?? []
-    if (!persons.length) return { nodes: [], edges: [] }
+  const { data: marriages = [], isLoading: marriagesLoading } = useQuery({
+    queryKey: ['marriages'],
+    queryFn: () => relationshipsService.getAllMarriages(),
+  })
 
-    const rawNodes: Node<PersonNodeData>[] = persons.map((p) => ({
-      id: p.id,
-      type: 'person',
-      position: { x: 0, y: 0 },
-      data: { person: p },
-    }))
-
-    // Only use "parent" type edges to build the hierarchy (avoid duplicates from inverse)
-    const rawEdges: Edge[] = relationships
-      .filter((r) => r.type === 'parent')
-      .map((r) => ({
-        id: `e-${r.id}`,
-        source: r.person1.id, // person1 is the parent
-        target: r.person2.id, // person2 is the child
-        type: 'smoothstep',
-        style: { stroke: '#94a3b8', strokeWidth: 2 },
-        animated: false,
-      }))
-
-    const { nodes: layouted, edges: layoutedEdges } = buildLayout(rawNodes, rawEdges)
-    return { nodes: layouted, edges: layoutedEdges }
-  }, [personsData, relationships])
+  const persons: Person[] = personsData?.['member'] ?? personsData?.['hydra:member'] ?? []
 
   return {
-    nodes,
-    edges,
-    isLoading: personsLoading || relsLoading,
+    persons,
+    relationships,
+    marriages,
+    isLoading: personsLoading || relsLoading || marriagesLoading,
     isError: personsError,
     totalPersons: personsData?.['totalItems'] ?? personsData?.['hydra:totalItems'] ?? 0,
   }
 }
-

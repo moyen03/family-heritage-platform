@@ -1,7 +1,7 @@
 import { memo } from 'react'
 import { Handle, Position, type NodeProps } from '@xyflow/react'
 import { clsx } from 'clsx'
-import { Users, Dna } from 'lucide-react'
+import { Users, Dna, ChevronDown, ChevronUp } from 'lucide-react'
 import type { PersonNodeData } from '@/hooks/useTreeData'
 
 interface PersonNodeProps extends NodeProps {
@@ -11,18 +11,23 @@ interface PersonNodeProps extends NodeProps {
     onSelect?: (id: string) => void
     onHighlightAncestors?: (id: string) => void
     onHighlightDescendants?: (id: string) => void
+    onToggleCollapse?: (id: string) => void
   }
 }
 
 const genderColors = {
-  male:    { ring: 'ring-blue-400',  bg: 'bg-blue-50',   dot: 'bg-blue-400',   text: 'text-blue-700' },
-  female:  { ring: 'ring-pink-400',  bg: 'bg-pink-50',   dot: 'bg-pink-400',   text: 'text-pink-700' },
-  other:   { ring: 'ring-purple-400',bg: 'bg-purple-50', dot: 'bg-purple-400', text: 'text-purple-700' },
-  unknown: { ring: 'ring-gray-300',  bg: 'bg-gray-50',   dot: 'bg-gray-300',   text: 'text-gray-500' },
+  male:    { ring: 'ring-blue-400',   bg: 'bg-blue-50',    dot: 'bg-blue-400',   text: 'text-blue-700' },
+  female:  { ring: 'ring-pink-400',   bg: 'bg-pink-50',    dot: 'bg-pink-400',   text: 'text-pink-700' },
+  other:   { ring: 'ring-purple-400', bg: 'bg-purple-50',  dot: 'bg-purple-400', text: 'text-purple-700' },
+  unknown: { ring: 'ring-gray-300',   bg: 'bg-gray-50',    dot: 'bg-gray-300',   text: 'text-gray-500' },
 }
 
 export const PersonNode = memo(({ data }: PersonNodeProps) => {
-  const { person, isSelected, highlightState, onSelect, onHighlightAncestors, onHighlightDescendants } = data
+  const {
+    person, isSelected, highlightState,
+    onSelect, onHighlightAncestors, onHighlightDescendants, onToggleCollapse,
+    hasChildren, isCollapsed, collapsedChildCount,
+  } = data
   const colors = genderColors[person.gender] ?? genderColors.unknown
 
   const birthYear = person.birthDate ? new Date(person.birthDate).getFullYear() : null
@@ -40,11 +45,11 @@ export const PersonNode = memo(({ data }: PersonNodeProps) => {
           !isSelected && highlightState === 'ancestor'   && 'border-blue-400 bg-blue-50 shadow-blue-100',
           !isSelected && highlightState === 'descendant' && 'border-green-400 bg-green-50 shadow-green-100',
           !isSelected && highlightState === 'dimmed'     && 'opacity-30 border-gray-200',
-          !isSelected && !highlightState                 && `border-gray-200 hover:border-${colors.ring.split('-')[1]}-300 hover:shadow-md`,
+          !isSelected && !highlightState                 && `border-gray-200 hover:border-gray-300 hover:shadow-md`,
         )}
       >
         {/* Header */}
-        <div className={clsx('flex items-center gap-2 px-3 pt-2.5 pb-1')}>
+        <div className="flex items-center gap-2 px-3 pt-2.5 pb-1">
           <span className={clsx('h-2 w-2 rounded-full flex-shrink-0', colors.dot)} />
           <span className="text-xs font-medium text-gray-400 uppercase tracking-wide truncate">
             {person.gender}
@@ -95,10 +100,39 @@ export const PersonNode = memo(({ data }: PersonNodeProps) => {
         )}
       </div>
 
-      <Handle type="source" position={Position.Bottom} className="!bg-slate-400 !border-slate-300" />
+      {/* Collapse / expand toggle — shown below the node when it has children */}
+      {hasChildren && (
+        <div className="absolute -bottom-4 left-1/2 -translate-x-1/2 z-10">
+          <button
+            onClick={(e) => { e.stopPropagation(); onToggleCollapse?.(person.id) }}
+            className={clsx(
+              'flex items-center gap-0.5 px-2 py-0.5 rounded-full border text-xs font-medium transition-all shadow-sm',
+              isCollapsed
+                ? 'bg-slate-700 border-slate-600 text-white hover:bg-slate-600'
+                : 'bg-white border-gray-200 text-gray-500 hover:border-gray-400 hover:text-gray-700',
+            )}
+            title={isCollapsed ? `Expand ${collapsedChildCount} hidden` : 'Collapse children'}
+          >
+            {isCollapsed ? (
+              <>
+                <ChevronDown className="h-3 w-3" />
+                <span>+{collapsedChildCount}</span>
+              </>
+            ) : (
+              <ChevronUp className="h-3 w-3" />
+            )}
+          </button>
+        </div>
+      )}
+
+      <Handle
+        type="source"
+        position={Position.Bottom}
+        className="!bg-slate-400 !border-slate-300"
+        style={{ bottom: hasChildren ? 16 : 0 }}
+      />
     </>
   )
 })
 
 PersonNode.displayName = 'PersonNode'
-
