@@ -5,4 +5,6 @@ parameters:
     excludePaths:
         - src/Kernel.php
     treatPhpDocTypesAsCertain: false
+    doctrine:
+        objectManagerLoader: phpstan-object-manager.php
 
