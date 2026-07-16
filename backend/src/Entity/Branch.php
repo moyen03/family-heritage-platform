@@ -10,6 +10,7 @@ use App\Trait\TimestampableTrait;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 #[ORM\Entity(repositoryClass: BranchRepository::class)]
 #[ORM\Table(name: 'branches')]
@@ -21,12 +22,15 @@ class Branch
 
     #[ORM\Id]
     #[ORM\Column(type: 'string', length: 36)]
+    #[Groups(['person:read', 'branch:read'])]
     private string $id;
 
     #[ORM\Column(type: 'string', length: 255)]
+    #[Groups(['person:read', 'branch:read'])]
     private string $name;
 
     #[ORM\Column(type: 'text', nullable: true)]
+    #[Groups(['branch:read'])]
     private ?string $description = null;
 
     #[ORM\ManyToOne(targetEntity: User::class)]

@@ -11,6 +11,7 @@ use App\Trait\TimestampableTrait;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 #[ORM\Entity(repositoryClass: UserRepository::class)]
 #[ORM\Table(name: 'users')]
@@ -22,6 +23,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     #[ORM\Id]
     #[ORM\Column(type: 'string', length: 36)]
+    #[Groups(['person:read', 'branch:read'])]
     private string $id;
 
     #[ORM\Column(type: 'string', length: 255, unique: true)]
@@ -34,9 +36,11 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     private UserRole $role = UserRole::Member;
 
     #[ORM\Column(type: 'string', length: 100)]
+    #[Groups(['person:read', 'branch:read'])]
     private string $firstName;
 
     #[ORM\Column(type: 'string', length: 100)]
+    #[Groups(['person:read', 'branch:read'])]
     private string $lastName;
 
     #[ORM\Column(type: 'boolean')]
@@ -128,6 +132,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
+    #[Groups(['person:read', 'branch:read'])]
     public function getFullName(): string
     {
         return $this->firstName . ' ' . $this->lastName;

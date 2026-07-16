@@ -18,8 +18,10 @@
         "phpstan/phpdoc-parser": "^2.3",
         "ramsey/uuid": "^4.9",
         "stof/doctrine-extensions-bundle": "^1.15",
+        "symfony/asset": "7.2.*",
         "symfony/console": "7.2.*",
         "symfony/dotenv": "7.2.*",
+        "symfony/expression-language": "7.2.*",
         "symfony/flex": "^2",
         "symfony/framework-bundle": "7.2.*",
         "symfony/mailer": "7.2.*",
@@ -29,6 +31,7 @@
         "symfony/runtime": "7.2.*",
         "symfony/security-bundle": "7.2.*",
         "symfony/serializer": "7.2.*",
+        "symfony/twig-bundle": "7.2.*",
         "symfony/uid": "7.2.*",
         "symfony/validator": "7.2.*",
         "symfony/yaml": "7.2.*"

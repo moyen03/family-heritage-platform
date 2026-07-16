@@ -39,6 +39,9 @@ WORKDIR /var/www/html
 # Configure PHP
 COPY php.ini /usr/local/etc/php/conf.d/custom.ini
 
+# Override PHP-FPM pool to listen on 0.0.0.0:9000 (accessible from Nginx container)
+COPY www.conf /usr/local/etc/php-fpm.d/www.conf
+
 # Set permissions
 RUN adduser -D -H -u 1000 -s /bin/bash www && \
     chown -R www:www /var/www/html

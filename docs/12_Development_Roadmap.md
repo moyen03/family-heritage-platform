@@ -32,8 +32,8 @@
 
 | Task | Status |
 |------|--------|
-| Person entity + CRUD API | ⏳ |
-| Person names (multiple names) | ⏳ |
+| Person entity + CRUD API | ✅ Done |
+| Person names (multiple names) | ✅ Done |
 | Relationship entity (graph model) | ⏳ |
 | Marriage entity | ⏳ |
 | Ancestor traversal algorithm | ⏳ |

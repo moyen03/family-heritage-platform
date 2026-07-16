@@ -6,6 +6,7 @@ namespace App\Entity;
 
 use App\Repository\PersonBranchRepository;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 #[ORM\Entity(repositoryClass: PersonBranchRepository::class)]
 #[ORM\Table(name: 'person_branches')]
@@ -19,9 +20,11 @@ class PersonBranch
     #[ORM\Id]
     #[ORM\ManyToOne(targetEntity: Branch::class, inversedBy: 'personBranches')]
     #[ORM\JoinColumn(name: 'branch_id', nullable: false)]
+    #[Groups(['person:read'])]
     private Branch $branch;
 
     #[ORM\Column(type: 'boolean')]
+    #[Groups(['person:read'])]
     private bool $isPrimary = false;
 
     public function __construct(Person $person, Branch $branch, bool $isPrimary = false)
@@ -52,4 +55,3 @@ class PersonBranch
         return $this;
     }
 }
-
