@@ -11,4 +11,3 @@ enum Gender: string
     case Other = 'other';
     case Unknown = 'unknown';
 }
-

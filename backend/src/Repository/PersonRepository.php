@@ -66,4 +66,3 @@ class PersonRepository extends ServiceEntityRepository
             ->getResult();
     }
 }
-

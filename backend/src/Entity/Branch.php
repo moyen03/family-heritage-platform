@@ -106,4 +106,3 @@ class Branch
         return false;
     }
 }
-

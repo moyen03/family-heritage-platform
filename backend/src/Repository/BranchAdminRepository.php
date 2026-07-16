@@ -18,4 +18,3 @@ class BranchAdminRepository extends ServiceEntityRepository
         parent::__construct($registry, BranchAdmin::class);
     }
 }
-

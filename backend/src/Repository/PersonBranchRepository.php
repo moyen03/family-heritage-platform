@@ -18,4 +18,3 @@ class PersonBranchRepository extends ServiceEntityRepository
         parent::__construct($registry, PersonBranch::class);
     }
 }
-

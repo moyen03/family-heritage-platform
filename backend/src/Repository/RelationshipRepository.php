@@ -93,4 +93,3 @@ class RelationshipRepository extends ServiceEntityRepository
         return (int) $count > 0;
     }
 }
-

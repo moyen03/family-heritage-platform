@@ -38,4 +38,3 @@ trait TimestampableTrait
         $this->updatedAt = new \DateTimeImmutable();
     }
 }
-

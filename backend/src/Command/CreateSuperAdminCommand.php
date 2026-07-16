@@ -32,10 +32,10 @@ final class CreateSuperAdminCommand extends Command
     protected function configure(): void
     {
         $this
-            ->addArgument('email',     InputArgument::OPTIONAL, 'Email address')
+            ->addArgument('email', InputArgument::OPTIONAL, 'Email address')
             ->addArgument('firstName', InputArgument::OPTIONAL, 'First name')
-            ->addArgument('lastName',  InputArgument::OPTIONAL, 'Last name')
-            ->addArgument('password',  InputArgument::OPTIONAL, 'Password');
+            ->addArgument('lastName', InputArgument::OPTIONAL, 'Last name')
+            ->addArgument('password', InputArgument::OPTIONAL, 'Password');
     }
 
     protected function execute(InputInterface $input, OutputInterface $output): int
@@ -75,16 +75,15 @@ final class CreateSuperAdminCommand extends Command
         $this->entityManager->flush();
 
         $io->success([
-            "Super Admin created successfully!",
+            'Super Admin created successfully!',
             "Email:    $email",
             "Name:     $firstName $lastName",
-            "Role:     Super Admin",
-            "",
-            "Login at: POST /api/auth/login",
+            'Role:     Super Admin',
+            '',
+            'Login at: POST /api/auth/login',
             "Body:     {\"email\": \"$email\", \"password\": \"<your-password>\"}",
         ]);
 
         return Command::SUCCESS;
     }
 }
-

@@ -21,7 +21,8 @@ final class PersonStateProcessor implements ProcessorInterface
     public function __construct(
         private readonly EntityManagerInterface $entityManager,
         private readonly Security $security,
-    ) {}
+    ) {
+    }
 
     public function process(mixed $data, Operation $operation, array $uriVariables = [], array $context = []): ?Person
     {
@@ -46,4 +47,3 @@ final class PersonStateProcessor implements ProcessorInterface
         return $data;
     }
 }
-

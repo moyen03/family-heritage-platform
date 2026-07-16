@@ -11,4 +11,3 @@ enum DatePrecision: string
     case Approximate = 'approximate';
     case Unknown = 'unknown';
 }
-

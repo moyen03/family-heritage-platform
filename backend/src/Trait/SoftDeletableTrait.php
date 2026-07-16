@@ -31,4 +31,3 @@ trait SoftDeletableTrait
         $this->deletedAt = null;
     }
 }
-

@@ -104,4 +104,3 @@ class Relationship
         return $this;
     }
 }
-

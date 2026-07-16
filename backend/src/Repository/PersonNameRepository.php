@@ -32,4 +32,3 @@ class PersonNameRepository extends ServiceEntityRepository
             ->getResult();
     }
 }
-

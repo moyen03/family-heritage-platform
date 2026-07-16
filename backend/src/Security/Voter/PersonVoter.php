@@ -78,4 +78,3 @@ final class PersonVoter extends Voter
         return in_array($user->getRole(), [UserRole::SuperAdmin, UserRole::BranchAdmin], true);
     }
 }
-

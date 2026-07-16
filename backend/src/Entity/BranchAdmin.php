@@ -56,4 +56,3 @@ class BranchAdmin
         return $this->grantedBy;
     }
 }
-

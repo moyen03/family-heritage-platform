@@ -45,4 +45,3 @@ class BranchRepository extends ServiceEntityRepository
             ->getResult();
     }
 }
-

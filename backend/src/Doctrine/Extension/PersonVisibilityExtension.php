@@ -15,7 +15,9 @@ use Symfony\Bundle\SecurityBundle\Security;
 
 final class PersonVisibilityExtension implements QueryCollectionExtensionInterface, QueryItemExtensionInterface
 {
-    public function __construct(private readonly Security $security) {}
+    public function __construct(private readonly Security $security)
+    {
+    }
 
     public function applyToCollection(
         QueryBuilder $queryBuilder,
@@ -77,4 +79,3 @@ final class PersonVisibilityExtension implements QueryCollectionExtensionInterfa
            ]);
     }
 }
-

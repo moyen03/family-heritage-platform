@@ -181,4 +181,3 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         // No plaintext credentials to erase
     }
 }
-

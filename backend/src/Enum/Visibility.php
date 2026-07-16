@@ -11,4 +11,3 @@ enum Visibility: string
     case Branch = 'branch';
     case Private = 'private';
 }
-

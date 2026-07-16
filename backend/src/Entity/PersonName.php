@@ -185,4 +185,3 @@ class PersonName
         return $this->updatedAt->format(\DateTimeInterface::ATOM);
     }
 }
-
