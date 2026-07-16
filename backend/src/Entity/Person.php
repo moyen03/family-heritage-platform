@@ -66,11 +66,11 @@ class Person
 
     #[ORM\Id]
     #[ORM\Column(type: 'string', length: 36)]
-    #[Groups(['person:read'])]
+    #[Groups(['person:read', 'relationship:read', 'marriage:read'])]
     private string $id;
 
     #[ORM\Column(type: 'string', length: 100)]
-    #[Groups(['person:read', 'person:write'])]
+    #[Groups(['person:read', 'person:write', 'relationship:read', 'marriage:read'])]
     #[Assert\NotBlank]
     #[Assert\Length(max: 100)]
     private string $firstName;
@@ -81,7 +81,7 @@ class Person
     private ?string $middleName = null;
 
     #[ORM\Column(type: 'string', length: 100)]
-    #[Groups(['person:read', 'person:write'])]
+    #[Groups(['person:read', 'person:write', 'relationship:read', 'marriage:read'])]
     #[Assert\NotBlank]
     #[Assert\Length(max: 100)]
     private string $lastName;
@@ -92,7 +92,7 @@ class Person
     private ?string $maidenName = null;
 
     #[ORM\Column(type: 'string', enumType: Gender::class)]
-    #[Groups(['person:read', 'person:write'])]
+    #[Groups(['person:read', 'person:write', 'relationship:read', 'marriage:read'])]
     private Gender $gender = Gender::Unknown;
 
     #[ORM\Column(type: 'date', nullable: true)]
@@ -209,7 +209,7 @@ class Person
         return $this;
     }
 
-    #[Groups(['person:read'])]
+    #[Groups(['person:read', 'relationship:read', 'marriage:read'])]
     public function getFullName(): string
     {
         $parts = array_filter([$this->firstName, $this->middleName, $this->lastName]);
