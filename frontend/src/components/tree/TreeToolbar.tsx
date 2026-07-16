@@ -31,7 +31,7 @@ function PersonSearchInput({
     enabled: query.length >= 1,
   })
 
-  const filtered = (data?.['hydra:member'] ?? []).filter((p) =>
+  const filtered = (data?.['member'] ?? data?.['hydra:member'] ?? []).filter((p) =>
     `${p.firstName} ${p.lastName}`.toLowerCase().includes(query.toLowerCase())
   )
 

@@ -1,6 +1,9 @@
 export interface ApiCollection<T> {
-  'hydra:member': T[]
-  'hydra:totalItems': number
+  'member': T[]
+  'totalItems': number
+  // AP3 compatibility aliases
+  'hydra:member'?: T[]
+  'hydra:totalItems'?: number
 }
 
 export interface ApiError {
@@ -8,4 +11,3 @@ export interface ApiError {
   message: string
   violations?: { propertyPath: string; message: string }[]
 }
-

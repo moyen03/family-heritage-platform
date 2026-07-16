@@ -26,7 +26,7 @@ export function PersonsPage() {
     queryFn: () => personsService.getAll(),
   })
 
-  const persons = data?.['hydra:member'] ?? []
+  const persons = data?.['member'] ?? data?.['hydra:member'] ?? []
   const filtered = persons.filter(
     (p) =>
       p.fullName.toLowerCase().includes(search.toLowerCase()) ||
@@ -39,7 +39,7 @@ export function PersonsPage() {
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-gray-900">All Persons</h1>
         <p className="text-gray-500 mt-1">
-          {data?.['hydra:totalItems'] ?? 0} persons in the database
+          {(data?.['totalItems'] ?? data?.['hydra:totalItems'] ?? 0)} persons in the database
         </p>
       </div>
 

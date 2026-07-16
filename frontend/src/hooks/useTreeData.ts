@@ -44,7 +44,7 @@ export function useTreeData() {
   })
 
   const { nodes, edges } = useMemo(() => {
-    const persons = personsData?.['hydra:member'] ?? []
+    const persons = personsData?.['member'] ?? personsData?.['hydra:member'] ?? []
     if (!persons.length) return { nodes: [], edges: [] }
 
     const rawNodes: Node<PersonNodeData>[] = persons.map((p) => ({
@@ -74,7 +74,7 @@ export function useTreeData() {
     nodes,
     edges,
     isLoading: personsLoading || relsLoading,
-    totalPersons: personsData?.['hydra:totalItems'] ?? 0,
+    totalPersons: personsData?.['totalItems'] ?? personsData?.['hydra:totalItems'] ?? 0,
   }
 }
 

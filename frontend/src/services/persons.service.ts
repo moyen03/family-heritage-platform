@@ -34,14 +34,14 @@ export const personsService = {
     const { data } = await api.get<ApiCollection<Relationship>>(
       `/persons/${personId}/relationships`
     )
-    return data['hydra:member']
+    return data['member'] ?? data['hydra:member'] ?? []
   },
 
   async getMarriages(personId: string): Promise<Marriage[]> {
     const { data } = await api.get<ApiCollection<Marriage>>(
       `/persons/${personId}/marriages`
     )
-    return data['hydra:member']
+    return data['member'] ?? data['hydra:member'] ?? []
   },
 
   async getAncestors(personId: string, depth = 10): Promise<{
