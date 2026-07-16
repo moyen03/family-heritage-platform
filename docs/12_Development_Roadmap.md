@@ -50,8 +50,8 @@
 
 | Task | Status |
 |------|--------|
-| React project setup | ⏳ |
-| Authentication (login/logout) | ⏳ |
+| React project setup | ✅ Done |
+| Authentication (login/logout) | ✅ Done |
 | Tree visualization (React Flow or D3.js) | ⏳ |
 | Zoom and pan | ⏳ |
 | Expand/collapse branches | ⏳ |
