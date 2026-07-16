@@ -35,7 +35,7 @@
 | Person entity + CRUD API | ✅ Done |
 | Person names (multiple names) | ✅ Done |
 | Relationship entity (graph model) | ✅ Done |
-| Marriage entity | ⏳ |
+| Marriage entity | ✅ Done |
 | Ancestor traversal algorithm | ⏳ |
 | Descendant traversal algorithm | ⏳ |
 | Relationship finder (A to B path) | ⏳ |
