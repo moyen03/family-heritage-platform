@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Service;
 
 use App\DTO\PersonTreeNode;
+use App\DTO\RelationshipPathStep;
 use App\Entity\Person;
 use App\Repository\RelationshipRepository;
 
@@ -127,5 +128,63 @@ final class FamilyTreeService
         usort($result, static fn (PersonTreeNode $a, PersonTreeNode $b) => $a->generation <=> $b->generation);
 
         return $result;
+    }
+
+    /**
+     * Find the shortest path between two persons using BFS across ALL relationship types.
+     *
+     * Returns an ordered list of RelationshipPathStep from $from to $to,
+     * or null if no connection exists within $maxDepth steps.
+     *
+     * @return RelationshipPathStep[]|null
+     */
+    public function findPath(Person $from, Person $to, int $maxDepth = 20): ?array
+    {
+        if ($from->getId() === $to->getId()) {
+            return [new RelationshipPathStep($from, null)];
+        }
+
+        // BFS — each queue entry is a full path built so far
+        $startStep = new RelationshipPathStep($from, null);
+        $queue = [[$startStep]];
+        $visited = [$from->getId() => true];
+
+        while (!empty($queue)) {
+            /** @var RelationshipPathStep[] $currentPath */
+            $currentPath = array_shift($queue);
+
+            if (count($currentPath) > $maxDepth) {
+                continue;
+            }
+
+            $currentPerson = $currentPath[array_key_last($currentPath)]->person;
+
+            // All relationships touching this person (both directions)
+            $relationships = $this->relationshipRepository->findForPerson($currentPerson);
+
+            foreach ($relationships as $rel) {
+                // Determine the neighbour and label from this person's perspective
+                if ($rel->getPerson1()->getId() === $currentPerson->getId()) {
+                    $neighbour = $rel->getPerson2();
+                    $via = $rel->getType()->value;
+                } else {
+                    $neighbour = $rel->getPerson1();
+                    $via = $rel->getType()->inverse()->value;
+                }
+
+                $newPath = [...$currentPath, new RelationshipPathStep($neighbour, $via)];
+
+                if ($neighbour->getId() === $to->getId()) {
+                    return $newPath;
+                }
+
+                if (!isset($visited[$neighbour->getId()])) {
+                    $visited[$neighbour->getId()] = true;
+                    $queue[] = $newPath;
+                }
+            }
+        }
+
+        return null; // no path found
     }
 }

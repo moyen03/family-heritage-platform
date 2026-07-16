@@ -38,7 +38,7 @@
 | Marriage entity | ✅ Done |
 | Ancestor traversal algorithm | ✅ Done |
 | Descendant traversal algorithm | ✅ Done |
-| Relationship finder (A to B path) | ⏳ |
+| Relationship finder (A to B path) | ✅ Done |
 | Approval workflow for Member edits | ⏳ |
 | Audit log for all person/relationship changes | ⏳ |
 

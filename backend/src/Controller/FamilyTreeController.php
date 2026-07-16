@@ -60,6 +60,53 @@ final class FamilyTreeController extends AbstractController
         return $this->buildResponse('descendants', $person, $nodes, $depth);
     }
 
+    /**
+     * GET /api/persons/{id}/path-to/{toId}
+     *
+     * Finds the shortest relationship path between two persons using BFS.
+     * Returns the chain of persons and the relationship type at each step.
+     */
+    #[Route('/path-to/{toId}', methods: ['GET'])]
+    public function pathTo(
+        #[MapEntity(id: 'id')]
+        Person $person,
+        #[MapEntity(id: 'toId')]
+        Person $target,
+    ): JsonResponse {
+        if ($person->getId() === $target->getId()) {
+            return $this->json([
+                'found' => true,
+                'from' => ['id' => $person->getId(), 'fullName' => $person->getFullName()],
+                'to' => ['id' => $target->getId(), 'fullName' => $target->getFullName()],
+                'distance' => 0,
+                'path' => [['person' => $this->normalizer->normalize($person, 'json', ['groups' => ['person:read']]), 'via' => null]],
+            ]);
+        }
+
+        $path = $this->familyTreeService->findPath($person, $target);
+
+        if ($path === null) {
+            return $this->json([
+                'found' => false,
+                'from' => ['id' => $person->getId(), 'fullName' => $person->getFullName()],
+                'to' => ['id' => $target->getId(), 'fullName' => $target->getFullName()],
+                'distance' => null,
+                'path' => [],
+            ]);
+        }
+
+        /** @var array<int, mixed> $steps */
+        $steps = $this->normalizer->normalize($path, 'json', ['groups' => ['path:read', 'person:read']]);
+
+        return $this->json([
+            'found' => true,
+            'from' => ['id' => $person->getId(), 'fullName' => $person->getFullName()],
+            'to' => ['id' => $target->getId(), 'fullName' => $target->getFullName()],
+            'distance' => count($path) - 1,
+            'path' => $steps,
+        ]);
+    }
+
     // -------------------------------------------------------------------------
 
     private function parseDepth(Request $request): int
