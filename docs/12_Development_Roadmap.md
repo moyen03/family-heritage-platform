@@ -36,8 +36,8 @@
 | Person names (multiple names) | ✅ Done |
 | Relationship entity (graph model) | ✅ Done |
 | Marriage entity | ✅ Done |
-| Ancestor traversal algorithm | ⏳ |
-| Descendant traversal algorithm | ⏳ |
+| Ancestor traversal algorithm | ✅ Done |
+| Descendant traversal algorithm | ✅ Done |
 | Relationship finder (A to B path) | ⏳ |
 | Approval workflow for Member edits | ⏳ |
 | Audit log for all person/relationship changes | ⏳ |

@@ -59,6 +59,10 @@ class RelationshipRepository extends ServiceEntityRepository
     /**
      * Get children of a person.
      *
+     * Model: (person1=Parent, person2=Child, type=parent)
+     * So to find children of X: look for person1=X with a parent-type.
+     * person2 of each returned relationship is the child.
+     *
      * @return Relationship[]
      */
     public function findChildren(Person $person): array
@@ -68,9 +72,11 @@ class RelationshipRepository extends ServiceEntityRepository
             ->andWhere('r.type IN (:types)')
             ->setParameter('person', $person)
             ->setParameter('types', [
-                RelationshipType::Child,
-                RelationshipType::AdoptedChild,
-                RelationshipType::StepChild,
+                RelationshipType::Parent,
+                RelationshipType::AdoptedParent,
+                RelationshipType::StepParent,
+                RelationshipType::Guardian,
+                RelationshipType::FosterParent,
             ])
             ->getQuery()
             ->getResult();
