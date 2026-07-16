@@ -38,7 +38,7 @@ jobs:
 
       - name: Install dependencies
         working-directory: backend
-        run: composer install --no-interaction --prefer-dist --optimize-autoloader
+        run: composer install --no-interaction --prefer-dist --optimize-autoloader --no-scripts
 
       - name: Check code style (PHP-CS-Fixer)
         working-directory: backend

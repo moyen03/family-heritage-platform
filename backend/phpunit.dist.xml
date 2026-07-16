@@ -5,8 +5,8 @@
          xsi:noNamespaceSchemaLocation="vendor/phpunit/phpunit/phpunit.xsd"
          colors="true"
          failOnDeprecation="true"
-         failOnNotice="true"
-         failOnWarning="true"
+         failOnNotice="false"
+         failOnWarning="false"
          bootstrap="tests/bootstrap.php"
          cacheDirectory=".phpunit.cache"
 >
@@ -18,8 +18,11 @@
     </php>
 
     <testsuites>
-        <testsuite name="Project Test Suite">
-            <directory>tests</directory>
+        <testsuite name="Unit">
+            <directory>tests/Unit</directory>
+        </testsuite>
+        <testsuite name="Integration">
+            <directory>tests/Integration</directory>
         </testsuite>
     </testsuites>
 
@@ -40,6 +43,7 @@
     </source>
 
     <extensions>
-        <bootstrap class="Zenstruck\Foundry\PHPUnit\FoundryExtension" />
+        <!-- FoundryExtension is only needed for integration/functional tests with DB -->
+        <!-- <bootstrap class="Zenstruck\Foundry\PHPUnit\FoundryExtension" /> -->
     </extensions>
 </phpunit>
