@@ -89,34 +89,6 @@ export const FamilyTree = forwardRef<FamilyTreeHandle>(function FamilyTree(_prop
     enabled: !!descendantTargetId,
   })
 
-  // ── Sync layout → flow state ─────────────────────────────────────────────────
-  useEffect(() => {
-    if (layoutNodes.length > 0) {
-      setNodes(layoutNodes.map((n) => ({ ...n, data: { ...n.data } } as Node<PersonNodeData>)))
-      setEdges(layoutEdges)
-    }
-  }, [layoutNodes, layoutEdges, setNodes, setEdges])
-
-  // ── Fit view when nodes first appear ────────────────────────────────────────
-  useEffect(() => {
-    if (nodes.length > 0) {
-      setTimeout(() => fitView({ padding: 0.2, duration: 400 }), 100)
-    }
-  }, [nodes.length]) // eslint-disable-line react-hooks/exhaustive-deps
-
-  // ── Ancestor / descendant highlight ─────────────────────────────────────────
-  useEffect(() => {
-    if (!ancestorData) return
-    setHighlightedIds(new Set(ancestorData.members.map((n) => n.person.id)))
-    setHighlightMode('ancestor')
-  }, [ancestorData])
-
-  useEffect(() => {
-    if (!descendantData) return
-    setHighlightedIds(new Set(descendantData.members.map((n) => n.person.id)))
-    setHighlightMode('descendant')
-  }, [descendantData])
-
   // ── Handlers ─────────────────────────────────────────────────────────────────
   const handleSelect = useCallback((id: string) => {
     setSelectedId((prev) => {
@@ -146,10 +118,27 @@ export const FamilyTree = forwardRef<FamilyTreeHandle>(function FamilyTree(_prop
     setAncestorTargetId(null); setDescendantTargetId(null)
   }, [])
 
-  // ── Apply highlight + callbacks to node data ─────────────────────────────────
+  // ── Ancestor / descendant highlight ─────────────────────────────────────────
   useEffect(() => {
-    setNodes((prev) =>
-      prev.map((node) => {
+    if (!ancestorData) return
+    setHighlightedIds(new Set(ancestorData.members.map((n) => n.person.id)))
+    setHighlightMode('ancestor')
+  }, [ancestorData])
+
+  useEffect(() => {
+    if (!descendantData) return
+    setHighlightedIds(new Set(descendantData.members.map((n) => n.person.id)))
+    setHighlightMode('descendant')
+  }, [descendantData])
+
+  // ── Single effect: sync layout + callbacks + highlights into flow state ───────
+  // NOTE: This must be ONE effect so callbacks are always present when nodes
+  //       are first rendered (two separate effects caused callbacks to be missing
+  //       because Effect-2 ran before data was loaded and never re-ran).
+  useEffect(() => {
+    if (layoutNodes.length === 0) return
+    setNodes(
+      layoutNodes.map((node) => {
         const isSelected = node.id === selectedId
         let hs: 'ancestor' | 'descendant' | 'dimmed' | null = null
         if (highlightedIds.size > 0 && !isSelected) {
@@ -166,14 +155,23 @@ export const FamilyTree = forwardRef<FamilyTreeHandle>(function FamilyTree(_prop
             onHighlightDescendants: handleHighlightDescendants,
             onToggleCollapse: handleToggleCollapse,
           },
-        }
+        } as Node<PersonNodeData>
       })
     )
+    setEdges(layoutEdges)
   }, [
+    layoutNodes, layoutEdges,
     selectedId, highlightedIds, highlightMode,
     handleSelect, handleHighlightAncestors, handleHighlightDescendants, handleToggleCollapse,
-    setNodes,
+    setNodes, setEdges,
   ])
+
+  // ── Fit view when nodes first appear ────────────────────────────────────────
+  useEffect(() => {
+    if (nodes.length > 0) {
+      setTimeout(() => fitView({ padding: 0.25, duration: 500 }), 150)
+    }
+  }, [nodes.length]) // eslint-disable-line react-hooks/exhaustive-deps
 
   // ── Imperative handle ────────────────────────────────────────────────────────
   useImperativeHandle(ref, () => ({

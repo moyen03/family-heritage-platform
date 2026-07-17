@@ -5,6 +5,9 @@ import { ProtectedRoute } from '@/components/auth/ProtectedRoute'
 import { LoginPage } from '@/pages/LoginPage'
 import { FamilyTreePage } from '@/pages/FamilyTreePage'
 import { PersonsPage } from '@/pages/PersonsPage'
+import { PersonDetailPage } from '@/pages/PersonDetailPage'
+import { RelationshipsPage } from '@/pages/RelationshipsPage'
+import { MarriagesPage } from '@/pages/MarriagesPage'
 import { NotFoundPage } from '@/pages/NotFoundPage'
 import { useAuthStore } from '@/store/auth.store'
 
@@ -30,6 +33,9 @@ export default function App() {
                 <Route index element={<Navigate to="/tree" replace />} />
                 <Route path="tree" element={<FamilyTreePage />} />
                 <Route path="persons" element={<PersonsPage />} />
+                <Route path="persons/:id" element={<PersonDetailPage />} />
+                <Route path="relationships" element={<RelationshipsPage />} />
+                <Route path="marriages" element={<MarriagesPage />} />
                 <Route path="*" element={<NotFoundPage />} />
               </Routes>
             </Layout>

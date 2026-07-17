@@ -7,8 +7,8 @@ import { relationshipsService } from '@/services/relationships.service'
 import type { Person } from '@/types/person'
 import type { Relationship } from '@/types/relationship'
 
-const NODE_WIDTH = 200
-const NODE_HEIGHT = 90
+const NODE_WIDTH = 210
+const NODE_HEIGHT = 100
 
 // Relationship types that form parent→child tree edges
 const PARENT_TYPES = new Set(['parent', 'step_parent', 'adopted_parent'])
@@ -94,7 +94,7 @@ export function buildTreeLayout(
   // Dagre layout
   const graph = new dagre.graphlib.Graph()
   graph.setDefaultEdgeLabel(() => ({}))
-  graph.setGraph({ rankdir: 'TB', ranksep: 80, nodesep: 50 })
+  graph.setGraph({ rankdir: 'TB', ranksep: 120, nodesep: 60, marginx: 30, marginy: 30 })
   visiblePersons.forEach((p) => graph.setNode(p.id, { width: NODE_WIDTH, height: NODE_HEIGHT }))
   visibleRels.forEach((r) => graph.setEdge(r.person1.id, r.person2.id))
   dagre.layout(graph)
