@@ -1,10 +1,11 @@
 import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
-import { Search, User, ChevronRight } from 'lucide-react'
+import { Search, User, ChevronRight, UserPlus } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { personsService } from '@/services/persons.service'
 import { Badge } from '@/components/ui/Badge'
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner'
+import { PersonFormModal } from '@/components/persons/PersonFormModal'
 import type { Person } from '@/types/person'
 
 function GenderBadge({ gender }: { gender: Person['gender'] }) {
@@ -20,6 +21,7 @@ function GenderBadge({ gender }: { gender: Person['gender'] }) {
 
 export function PersonsPage() {
   const [search, setSearch] = useState('')
+  const [showAdd, setShowAdd] = useState(false)
 
   const { data, isLoading, error } = useQuery({
     queryKey: ['persons'],
@@ -36,11 +38,19 @@ export function PersonsPage() {
 
   return (
     <div className="p-8">
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-gray-900">All Persons</h1>
-        <p className="text-gray-500 mt-1">
-          {(data?.['totalItems'] ?? data?.['hydra:totalItems'] ?? 0)} persons in the database
-        </p>
+      <div className="mb-6 flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold text-gray-900">All Persons</h1>
+          <p className="text-gray-500 mt-1">
+            {(data?.['totalItems'] ?? data?.['hydra:totalItems'] ?? 0)} persons in the database
+          </p>
+        </div>
+        <button
+          onClick={() => setShowAdd(true)}
+          className="flex items-center gap-2 bg-indigo-600 text-white px-4 py-2 rounded-xl text-sm font-semibold hover:bg-indigo-700 transition-colors shadow-sm"
+        >
+          <UserPlus className="h-4 w-4" /> Add Person
+        </button>
       </div>
 
       {/* Search */}
@@ -125,6 +135,11 @@ export function PersonsPage() {
             </tbody>
           </table>
         </div>
+      )}
+
+      {/* Add Person modal */}
+      {showAdd && (
+        <PersonFormModal onClose={() => setShowAdd(false)} />
       )}
     </div>
   )

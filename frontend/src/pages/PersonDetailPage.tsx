@@ -1,12 +1,14 @@
 import { useParams, Link, useNavigate } from 'react-router-dom'
-import { useQuery } from '@tanstack/react-query'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
+import { useState } from 'react'
 import {
   ArrowLeft, Calendar, MapPin, User, Heart, GitBranch,
-  Users, Dna, BookOpen,
+  Users, Dna, BookOpen, Pencil,
 } from 'lucide-react'
 import { personsService } from '@/services/persons.service'
 import { Badge } from '@/components/ui/Badge'
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner'
+import { PersonFormModal } from '@/components/persons/PersonFormModal'
 
 function Section({ title, icon: Icon, children }: {
   title: string
@@ -50,6 +52,7 @@ const RELATIONSHIP_LABELS: Record<string, string> = {
 export function PersonDetailPage() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
+  const [showEdit, setShowEdit] = useState(false)
 
   const { data: person, isLoading, error } = useQuery({
     queryKey: ['person', id],
@@ -135,6 +138,12 @@ export function PersonDetailPage() {
         >
           <GitBranch className="h-3 w-3" /> View in tree
         </Link>
+        <button
+          onClick={() => setShowEdit(true)}
+          className="flex items-center gap-1.5 px-3 py-1.5 bg-indigo-600 text-white text-xs font-semibold rounded-lg hover:bg-indigo-700 transition-colors flex-shrink-0"
+        >
+          <Pencil className="h-3 w-3" /> Edit
+        </button>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -272,6 +281,14 @@ export function PersonDetailPage() {
           </Section>
         )}
       </div>
+
+      {/* Edit modal */}
+      {showEdit && (
+        <PersonFormModal
+          person={person}
+          onClose={() => setShowEdit(false)}
+        />
+      )}
     </div>
   )
 }

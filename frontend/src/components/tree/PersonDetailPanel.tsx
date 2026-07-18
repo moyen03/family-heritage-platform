@@ -1,11 +1,12 @@
 import { useState } from 'react'
-import { X, Calendar, MapPin, User, Heart, BookOpen, Users, Dna, GitBranch } from 'lucide-react'
+import { X, Calendar, MapPin, User, Heart, BookOpen, Users, Dna, GitBranch, Pencil } from 'lucide-react'
 import { useQuery } from '@tanstack/react-query'
 import { Link } from 'react-router-dom'
 import { Badge } from '@/components/ui/Badge'
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner'
 import { personsService } from '@/services/persons.service'
 import { FamilyUnitView } from './FamilyUnitView'
+import { PersonFormModal } from '@/components/persons/PersonFormModal'
 import type { Person } from '@/types/person'
 import type { Relationship, Marriage } from '@/types/relationship'
 
@@ -32,6 +33,7 @@ export function PersonDetailPanel({
   onHighlightAncestors, onHighlightDescendants, onClearHighlight,
 }: PersonDetailPanelProps) {
   const [tab, setTab] = useState<Tab>('family')
+  const [showEdit, setShowEdit] = useState(false)
 
   const { data: person, isLoading } = useQuery({
     queryKey: ['person', personId],
@@ -66,6 +68,12 @@ export function PersonDetailPanel({
           <Link to={`/persons/${personId}`} className="text-xs text-indigo-600 hover:text-indigo-800 px-2 py-1 rounded-lg hover:bg-indigo-50 transition-colors">
             Full profile →
           </Link>
+          <button
+            onClick={() => setShowEdit(true)}
+            className="flex items-center gap-1 text-xs text-white bg-indigo-600 hover:bg-indigo-700 px-2 py-1 rounded-lg transition-colors"
+          >
+            <Pencil className="h-3 w-3" /> Edit
+          </button>
           <button onClick={onClose} className="text-gray-400 hover:text-gray-600 p-1 rounded-lg hover:bg-gray-100 transition-colors">
             <X className="h-4 w-4" />
           </button>
@@ -126,6 +134,15 @@ export function PersonDetailPanel({
           <DetailsTab person={person} personId={personId} isLoading={isLoading} marriages={marriages} />
         )}
       </div>
+
+      {/* Edit modal — rendered outside the panel so it can overlay everything */}
+      {showEdit && focal && (
+        <PersonFormModal
+          person={focal}
+          onClose={() => setShowEdit(false)}
+          onSaved={() => setShowEdit(false)}
+        />
+      )}
     </div>
   )
 }
