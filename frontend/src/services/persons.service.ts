@@ -22,7 +22,9 @@ export const personsService = {
   },
 
   async update(id: string, dto: Partial<CreatePersonDto>): Promise<Person> {
-    const { data } = await api.patch<Person>(`/persons/${id}`, dto)
+    const { data } = await api.patch<Person>(`/persons/${id}`, dto, {
+      headers: { 'Content-Type': 'application/merge-patch+json' },
+    })
     return data
   },
 
