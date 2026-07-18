@@ -7,9 +7,7 @@
     "dataCollector": "Md Moyen Uddin",
     "notes": "DOBs shown as YYYY-01-01 mean ONLY the year is known (birthDatePrecision=year). _placeholder=true means real name still needed. Run: docker compose exec php bin/console app:seed-moyen-family --force"
   },
-
   "persons": [
-
     {
       "_comment": "GENERATION -3: Great-Great Grandparents",
       "id": "damulla-uddin-molla",
@@ -19,7 +17,11 @@
       "isLiving": false,
       "biography": "Great-great grandfather of Md Moyen Uddin.",
       "_status": "partial",
-      "_todo": ["birthDate", "deathDate", "birthPlace"]
+      "_todo": [
+        "birthDate",
+        "deathDate",
+        "birthPlace"
+      ]
     },
     {
       "id": "maryum-begum",
@@ -29,9 +31,12 @@
       "isLiving": false,
       "biography": "Great-great grandmother of Md Moyen Uddin. Wife of Md Damulla Uddin Molla.",
       "_status": "partial",
-      "_todo": ["maiden name", "birthDate", "deathDate"]
+      "_todo": [
+        "maiden name",
+        "birthDate",
+        "deathDate"
+      ]
     },
-
     {
       "_comment": "GENERATION -2: Great Grandparents",
       "id": "azim-uddin-molla",
@@ -41,7 +46,11 @@
       "isLiving": false,
       "biography": "Great grandfather of Md Moyen Uddin. Son of Md Damulla Uddin Molla and Maryum.",
       "_status": "partial",
-      "_todo": ["birthDate", "deathDate", "birthPlace"]
+      "_todo": [
+        "birthDate",
+        "deathDate",
+        "birthPlace"
+      ]
     },
     {
       "id": "rahima-begum",
@@ -51,9 +60,12 @@
       "isLiving": false,
       "biography": "Great grandmother of Md Moyen Uddin. Wife of Md Azim Uddin Molla.",
       "_status": "partial",
-      "_todo": ["maiden name", "birthDate", "deathDate"]
+      "_todo": [
+        "maiden name",
+        "birthDate",
+        "deathDate"
+      ]
     },
-
     {
       "_comment": "GENERATION -1: 1.1.1 Md Hafez Uddin Molla + Atia Beti",
       "id": "hafez-uddin-molla",
@@ -63,7 +75,10 @@
       "isLiving": true,
       "biography": "Son of Md Azim Uddin Molla and Mrs Rahima Begum. Husband of Atia Beti.",
       "_status": "partial",
-      "_todo": ["birthDate", "isLiving confirm"]
+      "_todo": [
+        "birthDate",
+        "isLiving confirm"
+      ]
     },
     {
       "id": "atia-beti",
@@ -73,9 +88,12 @@
       "isLiving": true,
       "biography": "Wife of Md Hafez Uddin Molla. Mother of Mota, Mono, Nazrul Islam, Alom, Lily, Sultana and Zahurul Islam.",
       "_status": "partial",
-      "_todo": ["birthDate", "maiden name", "isLiving confirm"]
+      "_todo": [
+        "birthDate",
+        "maiden name",
+        "isLiving confirm"
+      ]
     },
-
     {
       "_comment": "GENERATION -1: 1.1.2 Md Hazar Uddin Molla",
       "id": "hazar-uddin-molla",
@@ -85,9 +103,12 @@
       "isLiving": true,
       "biography": "Son of Md Azim Uddin Molla and Mrs Rahima Begum.",
       "_status": "partial",
-      "_todo": ["birthDate", "isLiving confirm", "wife's name"]
+      "_todo": [
+        "birthDate",
+        "isLiving confirm",
+        "wife's name"
+      ]
     },
-
     {
       "_comment": "GENERATION -1: 1.1.3 Md Zillur Rahman Molla",
       "id": "zillur-rahman-molla",
@@ -97,9 +118,12 @@
       "isLiving": true,
       "biography": "Son of Md Azim Uddin Molla and Mrs Rahima Begum.",
       "_status": "partial",
-      "_todo": ["birthDate", "isLiving confirm", "wife's name"]
+      "_todo": [
+        "birthDate",
+        "isLiving confirm",
+        "wife's name"
+      ]
     },
-
     {
       "_comment": "GENERATION -1: 1.1.4 Md Siraz Uddin Molla + Mrs Munnuzan Begum",
       "id": "siraz-uddin-molla",
@@ -109,7 +133,11 @@
       "isLiving": true,
       "biography": "Father of Md Moyen Uddin. Son of Md Azim Uddin Molla and Mrs Rahima Begum.",
       "_status": "partial",
-      "_todo": ["birthDate", "birthPlace", "isLiving confirm"]
+      "_todo": [
+        "birthDate",
+        "birthPlace",
+        "isLiving confirm"
+      ]
     },
     {
       "id": "munnuzan-begum",
@@ -119,9 +147,14 @@
       "isLiving": true,
       "biography": "Mother of Md Moyen Uddin. Wife of Md Siraz Uddin Molla.",
       "_status": "partial",
-      "_todo": ["full formal name", "maiden name", "birthDate", "birthPlace", "isLiving confirm"]
+      "_todo": [
+        "full formal name",
+        "maiden name",
+        "birthDate",
+        "birthPlace",
+        "isLiving confirm"
+      ]
     },
-
     {
       "_comment": "GENERATION -1: 1.1.5 Md Royes Uddin Molla + Momena Begum",
       "id": "royes-uddin-molla",
@@ -131,7 +164,10 @@
       "isLiving": true,
       "biography": "Son of Md Azim Uddin Molla and Mrs Rahima Begum. Husband of Ms. Momena.",
       "_status": "partial",
-      "_todo": ["birthDate", "isLiving confirm"]
+      "_todo": [
+        "birthDate",
+        "isLiving confirm"
+      ]
     },
     {
       "id": "momena",
@@ -141,87 +177,108 @@
       "isLiving": true,
       "biography": "Wife of Md Royes Uddin Molla.",
       "_status": "partial",
-      "_todo": ["birthDate", "maiden name", "isLiving confirm"]
+      "_todo": [
+        "birthDate",
+        "maiden name",
+        "isLiving confirm"
+      ]
     },
-
     {
       "_comment": "GENERATION -1: 1.1.6 Fuppi Katihar",
       "id": "fuppi-katihar",
-      "firstName": "Unknown",
-      "lastName": "Katihar",
+      "firstName": "Fuppi Katihar",
+      "lastName": "Molla",
       "nickname": "Fuppi Katihar",
       "gender": "female",
       "isLiving": true,
       "biography": "Daughter of Md Azim Uddin Molla and Mrs Rahima Begum. Married into Katihar village. Real first name unknown.",
       "_placeholder": true,
       "_status": "partial",
-      "_todo": ["real first name", "birthDate", "children"]
+      "_todo": [
+        "real first name",
+        "birthDate",
+        "children"
+      ]
     },
     {
       "id": "fuppi-katihar-husband",
-      "firstName": "Unknown",
-      "lastName": "Katihar",
+      "firstName": "Fuppi Katihar'r Bor",
+      "lastName": "",
       "nickname": "Fuppi Katihar'r Bor",
       "gender": "male",
       "isLiving": true,
       "biography": "Husband of Fuppi Katihar. From Katihar village. Real name unknown.",
       "_placeholder": true,
       "_status": "placeholder",
-      "_todo": ["full name", "birthDate"]
+      "_todo": [
+        "full name",
+        "birthDate"
+      ]
     },
-
     {
       "_comment": "GENERATION -1: 1.1.7 Fuppi Debipur",
       "id": "fuppi-debipur",
-      "firstName": "Unknown",
-      "lastName": "Debipur",
+      "firstName": "Fuppi Debipur",
+      "lastName": "Molla",
       "nickname": "Fuppi Debipur",
       "gender": "female",
       "isLiving": true,
       "biography": "Daughter of Md Azim Uddin Molla and Mrs Rahima Begum. Married into Debipur village. Real first name unknown.",
       "_placeholder": true,
       "_status": "partial",
-      "_todo": ["real first name", "birthDate", "children"]
+      "_todo": [
+        "real first name",
+        "birthDate",
+        "children"
+      ]
     },
     {
       "id": "fuppi-debipur-husband",
-      "firstName": "Unknown",
-      "lastName": "Debipur",
+      "firstName": "Fuppi Debipur'r Bor",
+      "lastName": "",
       "nickname": "Fuppi Debipur'r Bor",
       "gender": "male",
       "isLiving": true,
       "biography": "Husband of Fuppi Debipur. From Debipur village. Real name unknown.",
       "_placeholder": true,
       "_status": "placeholder",
-      "_todo": ["full name", "birthDate"]
+      "_todo": [
+        "full name",
+        "birthDate"
+      ]
     },
-
     {
       "_comment": "GENERATION -1: 1.1.8 Fuppi Pagha",
       "id": "fuppi-pagha",
-      "firstName": "Unknown",
-      "lastName": "Pagha",
+      "firstName": "Fuppi Pagha",
+      "lastName": "Molla",
       "nickname": "Fuppi Pagha",
       "gender": "female",
       "isLiving": true,
       "biography": "Daughter of Md Azim Uddin Molla and Mrs Rahima Begum. Married into Pagha village. Real first name unknown.",
       "_placeholder": true,
       "_status": "partial",
-      "_todo": ["real first name", "birthDate", "children"]
+      "_todo": [
+        "real first name",
+        "birthDate",
+        "children"
+      ]
     },
     {
       "id": "fuppi-pagha-husband",
-      "firstName": "Unknown",
-      "lastName": "Pagha",
+      "firstName": "Fuppi Pagha'r Bor",
+      "lastName": "",
       "nickname": "Fuppi Pagha'r Bor",
       "gender": "male",
       "isLiving": true,
       "biography": "Husband of Fuppi Pagha. From Pagha village. Real name unknown.",
       "_placeholder": true,
       "_status": "placeholder",
-      "_todo": ["full name", "birthDate"]
+      "_todo": [
+        "full name",
+        "birthDate"
+      ]
     },
-
     {
       "_comment": "GENERATION 0 — Branch 1.1.1 (children of Hafez + Atia Beti)",
       "id": "mota",
@@ -235,19 +292,25 @@
       "biography": "Daughter of Md Hafez Uddin Molla and Atia Beti. 'Mota' is a family nickname; actual name unknown.",
       "_placeholder": true,
       "_status": "partial",
-      "_todo": ["real first name", "isLiving confirm"]
+      "_todo": [
+        "real first name",
+        "isLiving confirm"
+      ]
     },
     {
       "id": "mota-husband",
-      "firstName": "Unknown",
-      "lastName": "Unknown",
+      "firstName": "Mota'r Bor",
+      "lastName": "",
       "nickname": "Mota'r Bor",
       "gender": "male",
       "isLiving": true,
       "biography": "Husband of Mota. Real name unknown.",
       "_placeholder": true,
       "_status": "placeholder",
-      "_todo": ["full name", "birthDate"]
+      "_todo": [
+        "full name",
+        "birthDate"
+      ]
     },
     {
       "id": "mono",
@@ -261,19 +324,25 @@
       "biography": "Daughter of Md Hafez Uddin Molla and Atia Beti. 'Mono' is a family nickname; actual name unknown.",
       "_placeholder": true,
       "_status": "partial",
-      "_todo": ["real first name", "isLiving confirm"]
+      "_todo": [
+        "real first name",
+        "isLiving confirm"
+      ]
     },
     {
       "id": "mono-husband",
-      "firstName": "Unknown",
-      "lastName": "Unknown",
+      "firstName": "Mono'r Bor",
+      "lastName": "",
       "nickname": "Mono'r Bor",
       "gender": "male",
       "isLiving": true,
       "biography": "Husband of Mono. Real name unknown.",
       "_placeholder": true,
       "_status": "placeholder",
-      "_todo": ["full name", "birthDate"]
+      "_todo": [
+        "full name",
+        "birthDate"
+      ]
     },
     {
       "id": "nazrul-islam-hafez",
@@ -286,7 +355,10 @@
       "isLiving": false,
       "biography": "Son of Md Hafez Uddin Molla and Atia Beti. Born and passed away in 1990 as an infant.",
       "_status": "partial",
-      "_todo": ["exact birthDate", "exact deathDate"]
+      "_todo": [
+        "exact birthDate",
+        "exact deathDate"
+      ]
     },
     {
       "id": "alom",
@@ -298,19 +370,25 @@
       "isLiving": true,
       "biography": "Son of Md Hafez Uddin Molla and Atia Beti.",
       "_status": "partial",
-      "_todo": ["full name confirm", "isLiving confirm"]
+      "_todo": [
+        "full name confirm",
+        "isLiving confirm"
+      ]
     },
     {
       "id": "alom-wife",
-      "firstName": "Unknown",
-      "lastName": "Unknown",
+      "firstName": "Alom'r Bou",
+      "lastName": "",
       "nickname": "Alom'r Bou",
       "gender": "female",
       "isLiving": true,
       "biography": "Wife of Alom. Real name unknown.",
       "_placeholder": true,
       "_status": "placeholder",
-      "_todo": ["full name", "birthDate"]
+      "_todo": [
+        "full name",
+        "birthDate"
+      ]
     },
     {
       "id": "lily",
@@ -322,19 +400,25 @@
       "isLiving": true,
       "biography": "Daughter of Md Hafez Uddin Molla and Atia Beti.",
       "_status": "partial",
-      "_todo": ["confirm if Lily is real name or nickname", "isLiving confirm"]
+      "_todo": [
+        "confirm if Lily is real name or nickname",
+        "isLiving confirm"
+      ]
     },
     {
       "id": "lily-husband",
-      "firstName": "Unknown",
-      "lastName": "Unknown",
+      "firstName": "Lily'r Bor",
+      "lastName": "",
       "nickname": "Lily'r Bor",
       "gender": "male",
       "isLiving": true,
       "biography": "Husband of Lily. Real name unknown.",
       "_placeholder": true,
       "_status": "placeholder",
-      "_todo": ["full name", "birthDate"]
+      "_todo": [
+        "full name",
+        "birthDate"
+      ]
     },
     {
       "id": "sultana",
@@ -346,7 +430,11 @@
       "isLiving": true,
       "biography": "Daughter of Md Hafez Uddin Molla and Atia Beti.",
       "_status": "partial",
-      "_todo": ["full name confirm", "husband's name if married", "isLiving confirm"]
+      "_todo": [
+        "full name confirm",
+        "husband's name if married",
+        "isLiving confirm"
+      ]
     },
     {
       "id": "zahurul-islam",
@@ -358,9 +446,11 @@
       "isLiving": true,
       "biography": "Son of Md Hafez Uddin Molla and Atia Beti.",
       "_status": "partial",
-      "_todo": ["wife's name", "isLiving confirm"]
+      "_todo": [
+        "wife's name",
+        "isLiving confirm"
+      ]
     },
-
     {
       "_comment": "GENERATION 0 — Branch 1.1.2 (children of Hazar Uddin Molla)",
       "id": "pochi",
@@ -374,19 +464,25 @@
       "biography": "Daughter of Md Hazar Uddin Molla. 'Pochi' is likely a nickname; actual name unknown.",
       "_placeholder": true,
       "_status": "partial",
-      "_todo": ["real first name", "isLiving confirm"]
+      "_todo": [
+        "real first name",
+        "isLiving confirm"
+      ]
     },
     {
       "id": "pochi-husband",
-      "firstName": "Unknown",
-      "lastName": "Unknown",
+      "firstName": "Pochi'r Bor",
+      "lastName": "",
       "nickname": "Pochi'r Bor",
       "gender": "male",
       "isLiving": true,
       "biography": "Husband of Pochi. Real name unknown.",
       "_placeholder": true,
       "_status": "placeholder",
-      "_todo": ["full name", "birthDate"]
+      "_todo": [
+        "full name",
+        "birthDate"
+      ]
     },
     {
       "id": "akbar-molla",
@@ -398,7 +494,9 @@
       "isLiving": true,
       "biography": "Son of Md Hazar Uddin Molla.",
       "_status": "partial",
-      "_todo": ["isLiving confirm"]
+      "_todo": [
+        "isLiving confirm"
+      ]
     },
     {
       "id": "mahabuba",
@@ -408,7 +506,11 @@
       "isLiving": true,
       "biography": "Wife of Md Akbar Molla.",
       "_status": "partial",
-      "_todo": ["birthDate", "maiden name", "isLiving confirm"]
+      "_todo": [
+        "birthDate",
+        "maiden name",
+        "isLiving confirm"
+      ]
     },
     {
       "id": "zossna-bibi",
@@ -420,24 +522,30 @@
       "isLiving": true,
       "biography": "Daughter of Md Hazar Uddin Molla. First married to Mr. Zobbar (divorced); second marriage to Mr. Zossna-second (died 2020).",
       "_status": "partial",
-      "_todo": ["real name confirm", "isLiving confirm"]
+      "_todo": [
+        "real name confirm",
+        "isLiving confirm"
+      ]
     },
     {
       "id": "zobbar",
       "firstName": "Zobbar",
-      "lastName": "Unknown",
+      "lastName": "",
       "nickname": "Mr. Zobbar",
       "gender": "male",
       "isLiving": true,
       "biography": "First husband of Zossna Bibi. Marriage ended in divorce. Real full name unknown.",
       "_placeholder": true,
       "_status": "placeholder",
-      "_todo": ["full name", "birthDate"]
+      "_todo": [
+        "full name",
+        "birthDate"
+      ]
     },
     {
       "id": "zossna-second-husband",
-      "firstName": "Unknown",
-      "lastName": "Unknown",
+      "firstName": "Zossna'r Dwitio Bor",
+      "lastName": "",
       "nickname": "Zossna'r Dwitio Bor",
       "gender": "male",
       "isLiving": false,
@@ -445,9 +553,11 @@
       "biography": "Second husband of Zossna Bibi. Died in 2020. Real name unknown.",
       "_placeholder": true,
       "_status": "placeholder",
-      "_todo": ["full name", "birthDate"]
+      "_todo": [
+        "full name",
+        "birthDate"
+      ]
     },
-
     {
       "_comment": "GENERATION 0 — Branch 1.1.3 (children of Zillur Rahman Molla)",
       "id": "zinna-begum",
@@ -459,7 +569,9 @@
       "isLiving": true,
       "biography": "Daughter of Md Zillur Rahman Molla. Married to Mamun ar Rashid.",
       "_status": "partial",
-      "_todo": ["isLiving confirm"]
+      "_todo": [
+        "isLiving confirm"
+      ]
     },
     {
       "id": "mamun-ar-rashid",
@@ -469,7 +581,10 @@
       "isLiving": true,
       "biography": "Husband of Zinna Begum.",
       "_status": "partial",
-      "_todo": ["birthDate", "isLiving confirm"]
+      "_todo": [
+        "birthDate",
+        "isLiving confirm"
+      ]
     },
     {
       "id": "rina-begum",
@@ -481,19 +596,24 @@
       "isLiving": true,
       "biography": "Daughter of Md Zillur Rahman Molla.",
       "_status": "partial",
-      "_todo": ["isLiving confirm"]
+      "_todo": [
+        "isLiving confirm"
+      ]
     },
     {
       "id": "rina-husband",
-      "firstName": "Unknown",
-      "lastName": "Unknown",
+      "firstName": "Rina'r Bor",
+      "lastName": "",
       "nickname": "Rina'r Bor",
       "gender": "male",
       "isLiving": true,
       "biography": "Husband of Rina Begum. Real name unknown.",
       "_placeholder": true,
       "_status": "placeholder",
-      "_todo": ["full name", "birthDate"]
+      "_todo": [
+        "full name",
+        "birthDate"
+      ]
     },
     {
       "id": "aktar-begum",
@@ -505,19 +625,24 @@
       "isLiving": true,
       "biography": "Daughter of Md Zillur Rahman Molla.",
       "_status": "partial",
-      "_todo": ["isLiving confirm"]
+      "_todo": [
+        "isLiving confirm"
+      ]
     },
     {
       "id": "akter-husband",
-      "firstName": "Unknown",
-      "lastName": "Unknown",
+      "firstName": "Aktar'r Bor",
+      "lastName": "",
       "nickname": "Aktar'r Bor",
       "gender": "male",
       "isLiving": true,
       "biography": "Husband of Aktar Begum. Real name unknown.",
       "_placeholder": true,
       "_status": "placeholder",
-      "_todo": ["full name", "birthDate"]
+      "_todo": [
+        "full name",
+        "birthDate"
+      ]
     },
     {
       "id": "shiuly-begum",
@@ -530,19 +655,24 @@
       "isLiving": false,
       "biography": "Daughter of Md Zillur Rahman Molla. Passed away in 2020.",
       "_status": "partial",
-      "_todo": ["exact deathDate"]
+      "_todo": [
+        "exact deathDate"
+      ]
     },
     {
       "id": "shiuly-husband",
-      "firstName": "Unknown",
-      "lastName": "Unknown",
+      "firstName": "Shiuly'r Bor",
+      "lastName": "",
       "nickname": "Shiuly'r Bor",
       "gender": "male",
       "isLiving": true,
       "biography": "Husband of Shiuly Begum. Real name unknown.",
       "_placeholder": true,
       "_status": "placeholder",
-      "_todo": ["full name", "birthDate"]
+      "_todo": [
+        "full name",
+        "birthDate"
+      ]
     },
     {
       "id": "sweet-molla",
@@ -554,7 +684,10 @@
       "isLiving": true,
       "biography": "Son of Md Zillur Rahman Molla. 'Sweet' may be a nickname.",
       "_status": "partial",
-      "_todo": ["full name confirm", "isLiving confirm"]
+      "_todo": [
+        "full name confirm",
+        "isLiving confirm"
+      ]
     },
     {
       "id": "golapi",
@@ -564,9 +697,12 @@
       "isLiving": true,
       "biography": "Wife of Sweet Molla.",
       "_status": "partial",
-      "_todo": ["birthDate", "maiden name", "isLiving confirm"]
+      "_todo": [
+        "birthDate",
+        "maiden name",
+        "isLiving confirm"
+      ]
     },
-
     {
       "_comment": "GENERATION 0 — Branch 1.1.4 (Moyen's siblings)",
       "id": "shahanaz-parveen",
@@ -576,7 +712,10 @@
       "isLiving": true,
       "biography": "Eldest sibling of Md Moyen Uddin. Daughter of Md Siraz Uddin Molla and Mrs Munnuzan Begum.",
       "_status": "partial",
-      "_todo": ["birthDate", "husband's name"]
+      "_todo": [
+        "birthDate",
+        "husband's name"
+      ]
     },
     {
       "id": "monir-uddin-molla",
@@ -586,7 +725,10 @@
       "isLiving": true,
       "biography": "Brother of Md Moyen Uddin. Son of Md Siraz Uddin Molla and Mrs Munnuzan Begum.",
       "_status": "partial",
-      "_todo": ["birthDate", "wife's name"]
+      "_todo": [
+        "birthDate",
+        "wife's name"
+      ]
     },
     {
       "id": "sabina-yasmin",
@@ -596,7 +738,10 @@
       "isLiving": true,
       "biography": "Sister of Md Moyen Uddin. Daughter of Md Siraz Uddin Molla and Mrs Munnuzan Begum.",
       "_status": "partial",
-      "_todo": ["birthDate", "husband's name"]
+      "_todo": [
+        "birthDate",
+        "husband's name"
+      ]
     },
     {
       "id": "moyen-uddin",
@@ -606,26 +751,32 @@
       "isLiving": true,
       "biography": "Creator of this family tree. Son of Md Siraz Uddin Molla and Mrs Munnuzan Begum.",
       "_status": "partial",
-      "_todo": ["birthDate", "birthPlace", "spouse name"]
+      "_todo": [
+        "birthDate",
+        "birthPlace",
+        "spouse name"
+      ]
     },
-
     {
       "_comment": "GENERATION +1 — Hafez branch grandchildren",
       "id": "chumki",
       "firstName": "Chumki",
-      "lastName": "Unknown",
+      "lastName": "Molla",
       "nickname": "Chumki (Elder)",
       "gender": "female",
       "isLiving": true,
       "biography": "Elder daughter of Mota and Mota's husband.",
       "_placeholder": true,
       "_status": "partial",
-      "_todo": ["real full name", "birthDate"]
+      "_todo": [
+        "real full name",
+        "birthDate"
+      ]
     },
     {
       "id": "chumki-sotobon",
-      "firstName": "Chumki",
-      "lastName": "Unknown",
+      "firstName": "Chumki Sotobon",
+      "lastName": "Molla",
       "nickname": "Chumki Sotobon",
       "gender": "female",
       "birthDate": "1990-01-01",
@@ -634,43 +785,52 @@
       "biography": "Younger daughter of Mota. Known as 'Chumki Sotobon'. Actual name unknown.",
       "_placeholder": true,
       "_status": "partial",
-      "_todo": ["real full name", "husband's name (if married)"]
+      "_todo": [
+        "real full name",
+        "husband's name (if married)"
+      ]
     },
     {
       "id": "masum",
       "firstName": "Masum",
-      "lastName": "Unknown",
+      "lastName": "Molla",
       "gender": "male",
       "birthDate": "1985-01-01",
       "birthDatePrecision": "year",
       "isLiving": true,
       "biography": "Son of Mono and Mono's husband.",
       "_status": "partial",
-      "_todo": ["full name with last name"]
+      "_todo": [
+        "full name with last name"
+      ]
     },
     {
       "id": "masud",
       "firstName": "Masud",
-      "lastName": "Unknown",
+      "lastName": "Molla",
       "gender": "male",
       "birthDate": "1987-01-01",
       "birthDatePrecision": "year",
       "isLiving": true,
       "biography": "Son of Mono and Mono's husband.",
       "_status": "partial",
-      "_todo": ["full name with last name"]
+      "_todo": [
+        "full name with last name"
+      ]
     },
     {
       "id": "masuma",
       "firstName": "Masuma",
-      "lastName": "Unknown",
+      "lastName": "Molla",
       "gender": "female",
       "birthDate": "1989-01-01",
       "birthDatePrecision": "year",
       "isLiving": true,
       "biography": "Daughter of Mono and Mono's husband.",
       "_status": "partial",
-      "_todo": ["full name with last name"]
+      "_todo": [
+        "full name with last name"
+      ]
     },
     {
       "id": "sadia",
@@ -682,18 +842,24 @@
       "isLiving": true,
       "biography": "Daughter of Alom and Alom's wife. Married to Rayhan.",
       "_status": "partial",
-      "_todo": ["full name", "confirm marriage date"]
+      "_todo": [
+        "full name",
+        "confirm marriage date"
+      ]
     },
     {
       "id": "rayhan",
       "firstName": "Rayhan",
-      "lastName": "Unknown",
+      "lastName": "",
       "gender": "male",
       "isLiving": true,
       "biography": "Husband of Sadia. Known only as 'Mr. Rayhan'.",
       "_placeholder": true,
       "_status": "partial",
-      "_todo": ["full name", "birthDate"]
+      "_todo": [
+        "full name",
+        "birthDate"
+      ]
     },
     {
       "id": "nyeem",
@@ -705,12 +871,14 @@
       "isLiving": true,
       "biography": "Son of Alom and Alom's wife.",
       "_status": "partial",
-      "_todo": ["full name confirm"]
+      "_todo": [
+        "full name confirm"
+      ]
     },
     {
       "id": "lily-meye",
-      "firstName": "Unknown",
-      "lastName": "Unknown",
+      "firstName": "Lily Meye",
+      "lastName": "Molla",
       "nickname": "Lily Meye",
       "gender": "female",
       "birthDate": "2005-01-01",
@@ -719,12 +887,14 @@
       "biography": "Daughter of Lily and Lily's husband. Actual name unknown.",
       "_placeholder": true,
       "_status": "placeholder",
-      "_todo": ["real full name"]
+      "_todo": [
+        "real full name"
+      ]
     },
     {
       "id": "lily-sele",
-      "firstName": "Unknown",
-      "lastName": "Unknown",
+      "firstName": "Lily Sele",
+      "lastName": "Molla",
       "nickname": "Lily Sele",
       "gender": "male",
       "birthDate": "2007-01-01",
@@ -733,12 +903,14 @@
       "biography": "Son of Lily and Lily's husband. Actual name unknown.",
       "_placeholder": true,
       "_status": "placeholder",
-      "_todo": ["real full name"]
+      "_todo": [
+        "real full name"
+      ]
     },
     {
       "id": "sultana-meye",
-      "firstName": "Unknown",
-      "lastName": "Unknown",
+      "firstName": "Sultana Meye",
+      "lastName": "Molla",
       "nickname": "Sultana Meye",
       "gender": "female",
       "birthDate": "2020-01-01",
@@ -747,11 +919,14 @@
       "biography": "Daughter of Sultana. Father unknown. Actual name unknown.",
       "_placeholder": true,
       "_status": "placeholder",
-      "_todo": ["real full name", "father's name"]
+      "_todo": [
+        "real full name",
+        "father's name"
+      ]
     },
     {
       "id": "zahurul-sele",
-      "firstName": "Unknown",
+      "firstName": "Zahurul Sele",
       "lastName": "Islam",
       "nickname": "Zahurul Sele",
       "gender": "male",
@@ -761,11 +936,14 @@
       "biography": "Son of Zahurul Islam. Mother unknown. Actual name unknown.",
       "_placeholder": true,
       "_status": "placeholder",
-      "_todo": ["real full name", "mother's name"]
+      "_todo": [
+        "real full name",
+        "mother's name"
+      ]
     },
     {
       "id": "zahurul-meye",
-      "firstName": "Unknown",
+      "firstName": "Zahurul Meye",
       "lastName": "Islam",
       "nickname": "Zahurul Meye",
       "gender": "female",
@@ -775,14 +953,16 @@
       "biography": "Daughter of Zahurul Islam. Mother unknown. Actual name unknown.",
       "_placeholder": true,
       "_status": "placeholder",
-      "_todo": ["real full name", "mother's name"]
+      "_todo": [
+        "real full name",
+        "mother's name"
+      ]
     },
-
     {
       "_comment": "GENERATION +1 — Hazar branch grandchildren",
       "id": "pochi-meye",
-      "firstName": "Unknown",
-      "lastName": "Unknown",
+      "firstName": "Pochi Meye",
+      "lastName": "Molla",
       "nickname": "Pochi Meye",
       "gender": "female",
       "birthDate": "1990-01-01",
@@ -791,24 +971,28 @@
       "biography": "Daughter of Pochi and Pochi's husband. Actual name unknown.",
       "_placeholder": true,
       "_status": "placeholder",
-      "_todo": ["real full name"]
+      "_todo": [
+        "real full name"
+      ]
     },
     {
       "id": "shahin",
       "firstName": "Shahin",
-      "lastName": "Unknown",
+      "lastName": "Molla",
       "gender": "male",
       "birthDate": "1985-01-01",
       "birthDatePrecision": "year",
       "isLiving": true,
       "biography": "Son of Pochi and Pochi's husband.",
       "_status": "partial",
-      "_todo": ["full name with last name"]
+      "_todo": [
+        "full name with last name"
+      ]
     },
     {
       "id": "shahin-soto",
       "firstName": "Shahin Soto",
-      "lastName": "Unknown",
+      "lastName": "Molla",
       "nickname": "Shahin Soto",
       "gender": "male",
       "birthDate": "1987-01-01",
@@ -816,7 +1000,10 @@
       "isLiving": true,
       "biography": "Younger son of Pochi and Pochi's husband. Known as 'Shahin Soto' (younger Shahin).",
       "_status": "partial",
-      "_todo": ["real full name", "last name"]
+      "_todo": [
+        "real full name",
+        "last name"
+      ]
     },
     {
       "id": "mahafuz-molla",
@@ -828,7 +1015,9 @@
       "isLiving": true,
       "biography": "Son of Md Akbar Molla and Ms. Mahabuba.",
       "_status": "partial",
-      "_todo": ["isLiving confirm"]
+      "_todo": [
+        "isLiving confirm"
+      ]
     },
     {
       "id": "habiba",
@@ -838,7 +1027,11 @@
       "isLiving": true,
       "biography": "Wife of Md Mahafuz Molla.",
       "_status": "partial",
-      "_todo": ["birthDate", "maiden name", "isLiving confirm"]
+      "_todo": [
+        "birthDate",
+        "maiden name",
+        "isLiving confirm"
+      ]
     },
     {
       "id": "akhi-bibi",
@@ -850,19 +1043,25 @@
       "isLiving": true,
       "biography": "Daughter of Md Akbar Molla and Ms. Mahabuba.",
       "_status": "partial",
-      "_todo": ["full name confirm", "isLiving confirm"]
+      "_todo": [
+        "full name confirm",
+        "isLiving confirm"
+      ]
     },
     {
       "id": "akhi-husband",
-      "firstName": "Unknown",
-      "lastName": "Unknown",
+      "firstName": "Akhi'r Bor",
+      "lastName": "",
       "nickname": "Akhi'r Bor",
       "gender": "male",
       "isLiving": true,
       "biography": "Husband of Akhi Bibi. Real name unknown.",
       "_placeholder": true,
       "_status": "placeholder",
-      "_todo": ["full name", "birthDate"]
+      "_todo": [
+        "full name",
+        "birthDate"
+      ]
     },
     {
       "id": "pinkki-bibi",
@@ -874,20 +1073,25 @@
       "isLiving": true,
       "biography": "Daughter of Md Akbar Molla and Ms. Mahabuba.",
       "_status": "partial",
-      "_todo": ["full name confirm", "isLiving confirm"]
+      "_todo": [
+        "full name confirm",
+        "isLiving confirm"
+      ]
     },
     {
       "id": "rony",
       "firstName": "Rony",
-      "lastName": "Unknown",
+      "lastName": "",
       "gender": "male",
       "isLiving": true,
       "biography": "Husband of Pinkki Bibi. Known as 'Mr. Rony'.",
       "_placeholder": true,
       "_status": "partial",
-      "_todo": ["full name", "birthDate"]
+      "_todo": [
+        "full name",
+        "birthDate"
+      ]
     },
-
     {
       "_comment": "GENERATION +1 — Zillur branch grandchildren",
       "id": "mitu-rashid",
@@ -899,7 +1103,9 @@
       "isLiving": true,
       "biography": "Daughter of Zinna Begum and Mamun ar Rashid.",
       "_status": "partial",
-      "_todo": ["full name confirm"]
+      "_todo": [
+        "full name confirm"
+      ]
     },
     {
       "id": "sujon-rashid",
@@ -911,7 +1117,9 @@
       "isLiving": true,
       "biography": "Son of Zinna Begum and Mamun ar Rashid.",
       "_status": "partial",
-      "_todo": ["full name confirm"]
+      "_todo": [
+        "full name confirm"
+      ]
     },
     {
       "id": "mitu-soto",
@@ -924,12 +1132,14 @@
       "isLiving": true,
       "biography": "Younger daughter of Zinna Begum and Mamun ar Rashid. Known as 'Mitu Soto' (younger Mitu).",
       "_status": "partial",
-      "_todo": ["real full name confirm"]
+      "_todo": [
+        "real full name confirm"
+      ]
     },
     {
       "id": "rinna-meye",
-      "firstName": "Unknown",
-      "lastName": "Unknown",
+      "firstName": "Rinna Meye",
+      "lastName": "Begum",
       "nickname": "Rinna Meye",
       "gender": "female",
       "birthDate": "2010-01-01",
@@ -938,12 +1148,14 @@
       "biography": "Daughter of Rina Begum and Rina's husband. Actual name unknown.",
       "_placeholder": true,
       "_status": "placeholder",
-      "_todo": ["real full name"]
+      "_todo": [
+        "real full name"
+      ]
     },
     {
       "id": "akter-meye1",
-      "firstName": "Unknown",
-      "lastName": "Unknown",
+      "firstName": "Akter Meye 1",
+      "lastName": "Begum",
       "nickname": "Akter Meye 1",
       "gender": "female",
       "birthDate": "2015-01-01",
@@ -952,12 +1164,14 @@
       "biography": "Elder daughter of Aktar Begum and Akter's husband. Actual name unknown.",
       "_placeholder": true,
       "_status": "placeholder",
-      "_todo": ["real full name"]
+      "_todo": [
+        "real full name"
+      ]
     },
     {
       "id": "akter-meye2",
-      "firstName": "Unknown",
-      "lastName": "Unknown",
+      "firstName": "Akter Meye 2",
+      "lastName": "Begum",
       "nickname": "Akter Meye 2",
       "gender": "female",
       "birthDate": "2018-01-01",
@@ -966,12 +1180,14 @@
       "biography": "Younger daughter of Aktar Begum and Akter's husband. Actual name unknown.",
       "_placeholder": true,
       "_status": "placeholder",
-      "_todo": ["real full name"]
+      "_todo": [
+        "real full name"
+      ]
     },
     {
       "id": "shiuly-sele",
-      "firstName": "Unknown",
-      "lastName": "Unknown",
+      "firstName": "Shiuly Sele",
+      "lastName": "Molla",
       "nickname": "Shiuly Sele",
       "gender": "female",
       "birthDate": "2014-01-01",
@@ -980,12 +1196,15 @@
       "biography": "Child of Shiuly Begum and Shiuly's husband. Actual name unknown.",
       "_placeholder": true,
       "_status": "placeholder",
-      "_todo": ["real full name", "confirm gender"]
+      "_todo": [
+        "real full name",
+        "confirm gender"
+      ]
     },
     {
       "id": "sweet-sele",
-      "firstName": "Unknown",
-      "lastName": "Unknown",
+      "firstName": "Sweet Sele",
+      "lastName": "Molla",
       "nickname": "Sweet Sele",
       "gender": "female",
       "birthDate": "2013-01-01",
@@ -994,9 +1213,11 @@
       "biography": "Child of Sweet Molla and Golapi. Actual name unknown.",
       "_placeholder": true,
       "_status": "placeholder",
-      "_todo": ["real full name", "confirm gender"]
+      "_todo": [
+        "real full name",
+        "confirm gender"
+      ]
     },
-
     {
       "_comment": "GENERATION +1 — Royes branch grandchildren",
       "id": "muminul-islam",
@@ -1008,7 +1229,10 @@
       "isLiving": true,
       "biography": "Son of Md Royes Uddin Molla and Mrs Momena.",
       "_status": "partial",
-      "_todo": ["isLiving confirm", "wife's name"]
+      "_todo": [
+        "isLiving confirm",
+        "wife's name"
+      ]
     },
     {
       "id": "rehena-yasmin",
@@ -1020,9 +1244,11 @@
       "isLiving": true,
       "biography": "Daughter of Md Royes Uddin Molla and Mrs Momena.",
       "_status": "partial",
-      "_todo": ["isLiving confirm", "husband's name"]
+      "_todo": [
+        "isLiving confirm",
+        "husband's name"
+      ]
     },
-
     {
       "_comment": "GENERATION +1 — Siraz branch (Moyen's siblings' children)",
       "id": "abdul-bashar",
@@ -1032,7 +1258,10 @@
       "isLiving": true,
       "biography": "Son of Shahanaz Parveen.",
       "_status": "partial",
-      "_todo": ["birthDate", "father's name"]
+      "_todo": [
+        "birthDate",
+        "father's name"
+      ]
     },
     {
       "id": "shakkhor",
@@ -1042,7 +1271,10 @@
       "isLiving": true,
       "biography": "Son of Md Monir Uddin Molla. 'Shakkhor' may be a nickname.",
       "_status": "partial",
-      "_todo": ["real full name confirm", "birthDate"]
+      "_todo": [
+        "real full name confirm",
+        "birthDate"
+      ]
     },
     {
       "id": "shahitto",
@@ -1052,37 +1284,52 @@
       "isLiving": true,
       "biography": "Son of Md Monir Uddin Molla. 'Shahitto' may be a nickname.",
       "_status": "partial",
-      "_todo": ["real full name confirm", "birthDate"]
+      "_todo": [
+        "real full name confirm",
+        "birthDate"
+      ]
     },
     {
       "id": "saikat",
       "firstName": "Saikat",
-      "lastName": "Unknown",
+      "lastName": "Molla",
       "gender": "male",
       "isLiving": true,
       "biography": "Son of Sabina Yasmin.",
       "_status": "partial",
-      "_todo": ["full name with last name", "birthDate", "father's name"]
+      "_todo": [
+        "full name with last name",
+        "birthDate",
+        "father's name"
+      ]
     },
     {
       "id": "shihab",
       "firstName": "Shihab",
-      "lastName": "Unknown",
+      "lastName": "Molla",
       "gender": "male",
       "isLiving": true,
       "biography": "Son of Sabina Yasmin.",
       "_status": "partial",
-      "_todo": ["full name with last name", "birthDate", "father's name"]
+      "_todo": [
+        "full name with last name",
+        "birthDate",
+        "father's name"
+      ]
     },
     {
       "id": "apon",
       "firstName": "Apon",
-      "lastName": "Unknown",
+      "lastName": "Molla",
       "gender": "male",
       "isLiving": true,
       "biography": "Son of Sabina Yasmin. 'Apon' (আপন) may be a nickname.",
       "_status": "partial",
-      "_todo": ["real full name confirm", "birthDate", "father's name"]
+      "_todo": [
+        "real full name confirm",
+        "birthDate",
+        "father's name"
+      ]
     },
     {
       "id": "shikto-anubhab",
@@ -1092,14 +1339,16 @@
       "isLiving": true,
       "biography": "Son of Md Moyen Uddin.",
       "_status": "partial",
-      "_todo": ["birthDate", "birthPlace"]
+      "_todo": [
+        "birthDate",
+        "birthPlace"
+      ]
     },
-
     {
       "_comment": "GENERATION +2 — Great-grandchildren",
       "id": "chumki-soto-meye",
-      "firstName": "Unknown",
-      "lastName": "Unknown",
+      "firstName": "Chumki Soto Meye",
+      "lastName": "Molla",
       "nickname": "Chumki Soto Meye",
       "gender": "female",
       "birthDate": "2024-01-01",
@@ -1108,11 +1357,14 @@
       "biography": "Daughter of Chumki Sotobon. Actual name unknown.",
       "_placeholder": true,
       "_status": "placeholder",
-      "_todo": ["real full name", "father's name"]
+      "_todo": [
+        "real full name",
+        "father's name"
+      ]
     },
     {
       "id": "mominul-meye",
-      "firstName": "Unknown",
+      "firstName": "Mominul Meye",
       "lastName": "Molla",
       "nickname": "Mominul Meye",
       "gender": "female",
@@ -1122,12 +1374,15 @@
       "biography": "Daughter of Md Muminul Islam Molla. Born 20 June 2024. Mother unknown.",
       "_placeholder": true,
       "_status": "placeholder",
-      "_todo": ["real full name", "mother's name"]
+      "_todo": [
+        "real full name",
+        "mother's name"
+      ]
     },
     {
       "id": "rehena-meye1",
-      "firstName": "Unknown",
-      "lastName": "Unknown",
+      "firstName": "Rehena Meye 1",
+      "lastName": "Begum",
       "nickname": "Rehena Meye 1",
       "gender": "female",
       "birthDate": "2010-01-01",
@@ -1136,12 +1391,15 @@
       "biography": "Elder daughter of Rehena Yasmin. Father unknown. Actual name unknown.",
       "_placeholder": true,
       "_status": "placeholder",
-      "_todo": ["real full name", "father's name"]
+      "_todo": [
+        "real full name",
+        "father's name"
+      ]
     },
     {
       "id": "rehena-meye2",
-      "firstName": "Unknown",
-      "lastName": "Unknown",
+      "firstName": "Rehena Meye 2",
+      "lastName": "Begum",
       "nickname": "Rehena Meye 2",
       "gender": "female",
       "birthDate": "2014-01-01",
@@ -1150,12 +1408,15 @@
       "biography": "Younger daughter of Rehena Yasmin. Father unknown. Actual name unknown.",
       "_placeholder": true,
       "_status": "placeholder",
-      "_todo": ["real full name", "father's name"]
+      "_todo": [
+        "real full name",
+        "father's name"
+      ]
     },
     {
       "id": "rehena-sele1",
-      "firstName": "Unknown",
-      "lastName": "Unknown",
+      "firstName": "Rehena Sele 1",
+      "lastName": "Molla",
       "nickname": "Rehena Sele 1",
       "gender": "male",
       "birthDate": "2020-01-01",
@@ -1164,188 +1425,693 @@
       "biography": "Son of Rehena Yasmin. Father unknown. Actual name unknown.",
       "_placeholder": true,
       "_status": "placeholder",
-      "_todo": ["real full name", "father's name"]
+      "_todo": [
+        "real full name",
+        "father's name"
+      ]
     }
   ],
-
   "marriages": [
-    { "id": "damulla-maryum",          "spouse1": "damulla-uddin-molla",   "spouse2": "maryum-begum",            "_todo": ["marriageDate", "marriagePlace"] },
-    { "id": "azim-rahima",             "spouse1": "azim-uddin-molla",       "spouse2": "rahima-begum",            "_todo": ["marriageDate", "marriagePlace"] },
-    { "id": "hafez-atia",              "spouse1": "hafez-uddin-molla",      "spouse2": "atia-beti",               "_todo": ["marriageDate", "marriagePlace"] },
-    { "id": "siraz-munnuzan",          "spouse1": "siraz-uddin-molla",      "spouse2": "munnuzan-begum",          "_todo": ["marriageDate", "marriagePlace"] },
-    { "id": "royes-momena",            "spouse1": "royes-uddin-molla",      "spouse2": "momena",                  "_todo": ["marriageDate", "marriagePlace"] },
-    { "id": "fuppi-katihar-marriage",  "spouse1": "fuppi-katihar",          "spouse2": "fuppi-katihar-husband",   "_todo": ["marriageDate", "both real names"] },
-    { "id": "fuppi-debipur-marriage",  "spouse1": "fuppi-debipur",          "spouse2": "fuppi-debipur-husband",   "_todo": ["marriageDate", "both real names"] },
-    { "id": "fuppi-pagha-marriage",    "spouse1": "fuppi-pagha",            "spouse2": "fuppi-pagha-husband",     "_todo": ["marriageDate", "both real names"] },
-    { "id": "pochi-marriage",          "spouse1": "pochi",                  "spouse2": "pochi-husband",           "_todo": ["marriageDate", "husband's real name"] },
-    { "id": "akbar-mahabuba",          "spouse1": "akbar-molla",            "spouse2": "mahabuba",                "_todo": ["marriageDate", "marriagePlace"] },
-    { "id": "mahafuz-habiba",          "spouse1": "mahafuz-molla",          "spouse2": "habiba",                  "_todo": ["marriageDate", "marriagePlace"] },
-    { "id": "akhi-marriage",           "spouse1": "akhi-bibi",              "spouse2": "akhi-husband",            "_todo": ["marriageDate", "husband's real name"] },
-    { "id": "pinkki-rony",             "spouse1": "pinkki-bibi",            "spouse2": "rony",                    "_todo": ["marriageDate", "Rony's full name"] },
+    {
+      "id": "damulla-maryum",
+      "spouse1": "damulla-uddin-molla",
+      "spouse2": "maryum-begum",
+      "_todo": [
+        "marriageDate",
+        "marriagePlace"
+      ]
+    },
+    {
+      "id": "azim-rahima",
+      "spouse1": "azim-uddin-molla",
+      "spouse2": "rahima-begum",
+      "_todo": [
+        "marriageDate",
+        "marriagePlace"
+      ]
+    },
+    {
+      "id": "hafez-atia",
+      "spouse1": "hafez-uddin-molla",
+      "spouse2": "atia-beti",
+      "_todo": [
+        "marriageDate",
+        "marriagePlace"
+      ]
+    },
+    {
+      "id": "siraz-munnuzan",
+      "spouse1": "siraz-uddin-molla",
+      "spouse2": "munnuzan-begum",
+      "_todo": [
+        "marriageDate",
+        "marriagePlace"
+      ]
+    },
+    {
+      "id": "royes-momena",
+      "spouse1": "royes-uddin-molla",
+      "spouse2": "momena",
+      "_todo": [
+        "marriageDate",
+        "marriagePlace"
+      ]
+    },
+    {
+      "id": "fuppi-katihar-marriage",
+      "spouse1": "fuppi-katihar",
+      "spouse2": "fuppi-katihar-husband",
+      "_todo": [
+        "marriageDate",
+        "both real names"
+      ]
+    },
+    {
+      "id": "fuppi-debipur-marriage",
+      "spouse1": "fuppi-debipur",
+      "spouse2": "fuppi-debipur-husband",
+      "_todo": [
+        "marriageDate",
+        "both real names"
+      ]
+    },
+    {
+      "id": "fuppi-pagha-marriage",
+      "spouse1": "fuppi-pagha",
+      "spouse2": "fuppi-pagha-husband",
+      "_todo": [
+        "marriageDate",
+        "both real names"
+      ]
+    },
+    {
+      "id": "pochi-marriage",
+      "spouse1": "pochi",
+      "spouse2": "pochi-husband",
+      "_todo": [
+        "marriageDate",
+        "husband's real name"
+      ]
+    },
+    {
+      "id": "akbar-mahabuba",
+      "spouse1": "akbar-molla",
+      "spouse2": "mahabuba",
+      "_todo": [
+        "marriageDate",
+        "marriagePlace"
+      ]
+    },
+    {
+      "id": "mahafuz-habiba",
+      "spouse1": "mahafuz-molla",
+      "spouse2": "habiba",
+      "_todo": [
+        "marriageDate",
+        "marriagePlace"
+      ]
+    },
+    {
+      "id": "akhi-marriage",
+      "spouse1": "akhi-bibi",
+      "spouse2": "akhi-husband",
+      "_todo": [
+        "marriageDate",
+        "husband's real name"
+      ]
+    },
+    {
+      "id": "pinkki-rony",
+      "spouse1": "pinkki-bibi",
+      "spouse2": "rony",
+      "_todo": [
+        "marriageDate",
+        "Rony's full name"
+      ]
+    },
     {
       "id": "zossna-zobbar",
       "spouse1": "zossna-bibi",
       "spouse2": "zobbar",
       "isDivorced": true,
-      "_todo": ["marriageDate", "divorceDate", "Zobbar's full name"]
+      "_todo": [
+        "marriageDate",
+        "divorceDate",
+        "Zobbar's full name"
+      ]
     },
     {
       "id": "zossna-second",
       "spouse1": "zossna-bibi",
       "spouse2": "zossna-second-husband",
-      "_todo": ["marriageDate", "husband's real name"]
+      "_todo": [
+        "marriageDate",
+        "husband's real name"
+      ]
     },
-    { "id": "zinna-mamun",             "spouse1": "zinna-begum",            "spouse2": "mamun-ar-rashid",         "_todo": ["marriageDate", "marriagePlace"] },
-    { "id": "rina-marriage",           "spouse1": "rina-begum",             "spouse2": "rina-husband",            "_todo": ["marriageDate", "husband's real name"] },
-    { "id": "aktar-marriage",          "spouse1": "aktar-begum",            "spouse2": "akter-husband",           "_todo": ["marriageDate", "husband's real name"] },
-    { "id": "shiuly-marriage",         "spouse1": "shiuly-begum",           "spouse2": "shiuly-husband",          "_todo": ["marriageDate", "husband's real name"] },
-    { "id": "sweet-golapi",            "spouse1": "sweet-molla",            "spouse2": "golapi",                  "_todo": ["marriageDate", "marriagePlace"] },
-    { "id": "mota-marriage",           "spouse1": "mota",                   "spouse2": "mota-husband",            "_todo": ["marriageDate", "husband's real name"] },
-    { "id": "mono-marriage",           "spouse1": "mono",                   "spouse2": "mono-husband",            "_todo": ["marriageDate", "husband's real name"] },
-    { "id": "alom-marriage",           "spouse1": "alom",                   "spouse2": "alom-wife",               "_todo": ["marriageDate", "wife's real name"] },
-    { "id": "lily-marriage",           "spouse1": "lily",                   "spouse2": "lily-husband",            "_todo": ["marriageDate", "husband's real name"] },
-    { "id": "sadia-rayhan",            "spouse1": "sadia",                  "spouse2": "rayhan",                  "_todo": ["marriageDate", "Rayhan's full name"] }
+    {
+      "id": "zinna-mamun",
+      "spouse1": "zinna-begum",
+      "spouse2": "mamun-ar-rashid",
+      "_todo": [
+        "marriageDate",
+        "marriagePlace"
+      ]
+    },
+    {
+      "id": "rina-marriage",
+      "spouse1": "rina-begum",
+      "spouse2": "rina-husband",
+      "_todo": [
+        "marriageDate",
+        "husband's real name"
+      ]
+    },
+    {
+      "id": "aktar-marriage",
+      "spouse1": "aktar-begum",
+      "spouse2": "akter-husband",
+      "_todo": [
+        "marriageDate",
+        "husband's real name"
+      ]
+    },
+    {
+      "id": "shiuly-marriage",
+      "spouse1": "shiuly-begum",
+      "spouse2": "shiuly-husband",
+      "_todo": [
+        "marriageDate",
+        "husband's real name"
+      ]
+    },
+    {
+      "id": "sweet-golapi",
+      "spouse1": "sweet-molla",
+      "spouse2": "golapi",
+      "_todo": [
+        "marriageDate",
+        "marriagePlace"
+      ]
+    },
+    {
+      "id": "mota-marriage",
+      "spouse1": "mota",
+      "spouse2": "mota-husband",
+      "_todo": [
+        "marriageDate",
+        "husband's real name"
+      ]
+    },
+    {
+      "id": "mono-marriage",
+      "spouse1": "mono",
+      "spouse2": "mono-husband",
+      "_todo": [
+        "marriageDate",
+        "husband's real name"
+      ]
+    },
+    {
+      "id": "alom-marriage",
+      "spouse1": "alom",
+      "spouse2": "alom-wife",
+      "_todo": [
+        "marriageDate",
+        "wife's real name"
+      ]
+    },
+    {
+      "id": "lily-marriage",
+      "spouse1": "lily",
+      "spouse2": "lily-husband",
+      "_todo": [
+        "marriageDate",
+        "husband's real name"
+      ]
+    },
+    {
+      "id": "sadia-rayhan",
+      "spouse1": "sadia",
+      "spouse2": "rayhan",
+      "_todo": [
+        "marriageDate",
+        "Rayhan's full name"
+      ]
+    }
   ],
-
   "parentChild": [
-    { "parent": "damulla-uddin-molla", "child": "azim-uddin-molla" },
-    { "parent": "maryum-begum",        "child": "azim-uddin-molla" },
-
-    { "parent": "azim-uddin-molla", "child": "hafez-uddin-molla" },
-    { "parent": "azim-uddin-molla", "child": "hazar-uddin-molla" },
-    { "parent": "azim-uddin-molla", "child": "zillur-rahman-molla" },
-    { "parent": "azim-uddin-molla", "child": "siraz-uddin-molla" },
-    { "parent": "azim-uddin-molla", "child": "royes-uddin-molla" },
-    { "parent": "azim-uddin-molla", "child": "fuppi-katihar" },
-    { "parent": "azim-uddin-molla", "child": "fuppi-debipur" },
-    { "parent": "azim-uddin-molla", "child": "fuppi-pagha" },
-    { "parent": "rahima-begum",     "child": "hafez-uddin-molla" },
-    { "parent": "rahima-begum",     "child": "hazar-uddin-molla" },
-    { "parent": "rahima-begum",     "child": "zillur-rahman-molla" },
-    { "parent": "rahima-begum",     "child": "siraz-uddin-molla" },
-    { "parent": "rahima-begum",     "child": "royes-uddin-molla" },
-    { "parent": "rahima-begum",     "child": "fuppi-katihar" },
-    { "parent": "rahima-begum",     "child": "fuppi-debipur" },
-    { "parent": "rahima-begum",     "child": "fuppi-pagha" },
-
-    { "parent": "hafez-uddin-molla", "child": "mota" },
-    { "parent": "hafez-uddin-molla", "child": "mono" },
-    { "parent": "hafez-uddin-molla", "child": "nazrul-islam-hafez" },
-    { "parent": "hafez-uddin-molla", "child": "alom" },
-    { "parent": "hafez-uddin-molla", "child": "lily" },
-    { "parent": "hafez-uddin-molla", "child": "sultana" },
-    { "parent": "hafez-uddin-molla", "child": "zahurul-islam" },
-    { "parent": "atia-beti",         "child": "mota" },
-    { "parent": "atia-beti",         "child": "mono" },
-    { "parent": "atia-beti",         "child": "nazrul-islam-hafez" },
-    { "parent": "atia-beti",         "child": "alom" },
-    { "parent": "atia-beti",         "child": "lily" },
-    { "parent": "atia-beti",         "child": "sultana" },
-    { "parent": "atia-beti",         "child": "zahurul-islam" },
-
-    { "parent": "hazar-uddin-molla", "child": "pochi" },
-    { "parent": "hazar-uddin-molla", "child": "akbar-molla" },
-    { "parent": "hazar-uddin-molla", "child": "zossna-bibi" },
-
-    { "parent": "pochi",         "child": "pochi-meye" },
-    { "parent": "pochi",         "child": "shahin" },
-    { "parent": "pochi",         "child": "shahin-soto" },
-    { "parent": "pochi-husband", "child": "pochi-meye" },
-    { "parent": "pochi-husband", "child": "shahin" },
-    { "parent": "pochi-husband", "child": "shahin-soto" },
-
-    { "parent": "akbar-molla", "child": "mahafuz-molla" },
-    { "parent": "akbar-molla", "child": "akhi-bibi" },
-    { "parent": "akbar-molla", "child": "pinkki-bibi" },
-    { "parent": "mahabuba",    "child": "mahafuz-molla" },
-    { "parent": "mahabuba",    "child": "akhi-bibi" },
-    { "parent": "mahabuba",    "child": "pinkki-bibi" },
-
-    { "parent": "zillur-rahman-molla", "child": "zinna-begum" },
-    { "parent": "zillur-rahman-molla", "child": "rina-begum" },
-    { "parent": "zillur-rahman-molla", "child": "aktar-begum" },
-    { "parent": "zillur-rahman-molla", "child": "shiuly-begum" },
-    { "parent": "zillur-rahman-molla", "child": "sweet-molla" },
-
-    { "parent": "zinna-begum",     "child": "mitu-rashid" },
-    { "parent": "zinna-begum",     "child": "sujon-rashid" },
-    { "parent": "zinna-begum",     "child": "mitu-soto" },
-    { "parent": "mamun-ar-rashid", "child": "mitu-rashid" },
-    { "parent": "mamun-ar-rashid", "child": "sujon-rashid" },
-    { "parent": "mamun-ar-rashid", "child": "mitu-soto" },
-
-    { "parent": "rina-begum",    "child": "rinna-meye" },
-    { "parent": "rina-husband",  "child": "rinna-meye" },
-
-    { "parent": "aktar-begum",   "child": "akter-meye1" },
-    { "parent": "aktar-begum",   "child": "akter-meye2" },
-    { "parent": "akter-husband", "child": "akter-meye1" },
-    { "parent": "akter-husband", "child": "akter-meye2" },
-
-    { "parent": "shiuly-begum",  "child": "shiuly-sele" },
-    { "parent": "shiuly-husband","child": "shiuly-sele" },
-
-    { "parent": "sweet-molla",   "child": "sweet-sele" },
-    { "parent": "golapi",        "child": "sweet-sele" },
-
-    { "parent": "siraz-uddin-molla", "child": "shahanaz-parveen" },
-    { "parent": "siraz-uddin-molla", "child": "monir-uddin-molla" },
-    { "parent": "siraz-uddin-molla", "child": "sabina-yasmin" },
-    { "parent": "siraz-uddin-molla", "child": "moyen-uddin" },
-    { "parent": "munnuzan-begum",    "child": "shahanaz-parveen" },
-    { "parent": "munnuzan-begum",    "child": "monir-uddin-molla" },
-    { "parent": "munnuzan-begum",    "child": "sabina-yasmin" },
-    { "parent": "munnuzan-begum",    "child": "moyen-uddin" },
-
-    { "parent": "royes-uddin-molla", "child": "muminul-islam" },
-    { "parent": "royes-uddin-molla", "child": "rehena-yasmin" },
-    { "parent": "momena",            "child": "muminul-islam" },
-    { "parent": "momena",            "child": "rehena-yasmin" },
-
-    { "parent": "muminul-islam", "child": "mominul-meye" },
-
-    { "parent": "rehena-yasmin", "child": "rehena-meye1" },
-    { "parent": "rehena-yasmin", "child": "rehena-meye2" },
-    { "parent": "rehena-yasmin", "child": "rehena-sele1" },
-
-    { "parent": "mota",         "child": "chumki" },
-    { "parent": "mota",         "child": "chumki-sotobon" },
-    { "parent": "mota-husband", "child": "chumki" },
-    { "parent": "mota-husband", "child": "chumki-sotobon" },
-
-    { "parent": "mono",         "child": "masum" },
-    { "parent": "mono",         "child": "masud" },
-    { "parent": "mono",         "child": "masuma" },
-    { "parent": "mono-husband", "child": "masum" },
-    { "parent": "mono-husband", "child": "masud" },
-    { "parent": "mono-husband", "child": "masuma" },
-
-    { "parent": "alom",      "child": "sadia" },
-    { "parent": "alom",      "child": "nyeem" },
-    { "parent": "alom-wife", "child": "sadia" },
-    { "parent": "alom-wife", "child": "nyeem" },
-
-    { "parent": "lily",         "child": "lily-meye" },
-    { "parent": "lily",         "child": "lily-sele" },
-    { "parent": "lily-husband", "child": "lily-meye" },
-    { "parent": "lily-husband", "child": "lily-sele" },
-
-    { "parent": "sultana",       "child": "sultana-meye" },
-
-    { "parent": "zahurul-islam", "child": "zahurul-sele" },
-    { "parent": "zahurul-islam", "child": "zahurul-meye" },
-
-    { "parent": "shahanaz-parveen",  "child": "abdul-bashar" },
-    { "parent": "monir-uddin-molla", "child": "shakkhor" },
-    { "parent": "monir-uddin-molla", "child": "shahitto" },
-
-    { "parent": "sabina-yasmin", "child": "saikat" },
-    { "parent": "sabina-yasmin", "child": "shihab" },
-    { "parent": "sabina-yasmin", "child": "apon" },
-
-    { "parent": "moyen-uddin", "child": "shikto-anubhab" },
-
-    { "parent": "chumki-sotobon", "child": "chumki-soto-meye" }
+    {
+      "parent": "damulla-uddin-molla",
+      "child": "azim-uddin-molla"
+    },
+    {
+      "parent": "maryum-begum",
+      "child": "azim-uddin-molla"
+    },
+    {
+      "parent": "azim-uddin-molla",
+      "child": "hafez-uddin-molla"
+    },
+    {
+      "parent": "azim-uddin-molla",
+      "child": "hazar-uddin-molla"
+    },
+    {
+      "parent": "azim-uddin-molla",
+      "child": "zillur-rahman-molla"
+    },
+    {
+      "parent": "azim-uddin-molla",
+      "child": "siraz-uddin-molla"
+    },
+    {
+      "parent": "azim-uddin-molla",
+      "child": "royes-uddin-molla"
+    },
+    {
+      "parent": "azim-uddin-molla",
+      "child": "fuppi-katihar"
+    },
+    {
+      "parent": "azim-uddin-molla",
+      "child": "fuppi-debipur"
+    },
+    {
+      "parent": "azim-uddin-molla",
+      "child": "fuppi-pagha"
+    },
+    {
+      "parent": "rahima-begum",
+      "child": "hafez-uddin-molla"
+    },
+    {
+      "parent": "rahima-begum",
+      "child": "hazar-uddin-molla"
+    },
+    {
+      "parent": "rahima-begum",
+      "child": "zillur-rahman-molla"
+    },
+    {
+      "parent": "rahima-begum",
+      "child": "siraz-uddin-molla"
+    },
+    {
+      "parent": "rahima-begum",
+      "child": "royes-uddin-molla"
+    },
+    {
+      "parent": "rahima-begum",
+      "child": "fuppi-katihar"
+    },
+    {
+      "parent": "rahima-begum",
+      "child": "fuppi-debipur"
+    },
+    {
+      "parent": "rahima-begum",
+      "child": "fuppi-pagha"
+    },
+    {
+      "parent": "hafez-uddin-molla",
+      "child": "mota"
+    },
+    {
+      "parent": "hafez-uddin-molla",
+      "child": "mono"
+    },
+    {
+      "parent": "hafez-uddin-molla",
+      "child": "nazrul-islam-hafez"
+    },
+    {
+      "parent": "hafez-uddin-molla",
+      "child": "alom"
+    },
+    {
+      "parent": "hafez-uddin-molla",
+      "child": "lily"
+    },
+    {
+      "parent": "hafez-uddin-molla",
+      "child": "sultana"
+    },
+    {
+      "parent": "hafez-uddin-molla",
+      "child": "zahurul-islam"
+    },
+    {
+      "parent": "atia-beti",
+      "child": "mota"
+    },
+    {
+      "parent": "atia-beti",
+      "child": "mono"
+    },
+    {
+      "parent": "atia-beti",
+      "child": "nazrul-islam-hafez"
+    },
+    {
+      "parent": "atia-beti",
+      "child": "alom"
+    },
+    {
+      "parent": "atia-beti",
+      "child": "lily"
+    },
+    {
+      "parent": "atia-beti",
+      "child": "sultana"
+    },
+    {
+      "parent": "atia-beti",
+      "child": "zahurul-islam"
+    },
+    {
+      "parent": "hazar-uddin-molla",
+      "child": "pochi"
+    },
+    {
+      "parent": "hazar-uddin-molla",
+      "child": "akbar-molla"
+    },
+    {
+      "parent": "hazar-uddin-molla",
+      "child": "zossna-bibi"
+    },
+    {
+      "parent": "pochi",
+      "child": "pochi-meye"
+    },
+    {
+      "parent": "pochi",
+      "child": "shahin"
+    },
+    {
+      "parent": "pochi",
+      "child": "shahin-soto"
+    },
+    {
+      "parent": "pochi-husband",
+      "child": "pochi-meye"
+    },
+    {
+      "parent": "pochi-husband",
+      "child": "shahin"
+    },
+    {
+      "parent": "pochi-husband",
+      "child": "shahin-soto"
+    },
+    {
+      "parent": "akbar-molla",
+      "child": "mahafuz-molla"
+    },
+    {
+      "parent": "akbar-molla",
+      "child": "akhi-bibi"
+    },
+    {
+      "parent": "akbar-molla",
+      "child": "pinkki-bibi"
+    },
+    {
+      "parent": "mahabuba",
+      "child": "mahafuz-molla"
+    },
+    {
+      "parent": "mahabuba",
+      "child": "akhi-bibi"
+    },
+    {
+      "parent": "mahabuba",
+      "child": "pinkki-bibi"
+    },
+    {
+      "parent": "zillur-rahman-molla",
+      "child": "zinna-begum"
+    },
+    {
+      "parent": "zillur-rahman-molla",
+      "child": "rina-begum"
+    },
+    {
+      "parent": "zillur-rahman-molla",
+      "child": "aktar-begum"
+    },
+    {
+      "parent": "zillur-rahman-molla",
+      "child": "shiuly-begum"
+    },
+    {
+      "parent": "zillur-rahman-molla",
+      "child": "sweet-molla"
+    },
+    {
+      "parent": "zinna-begum",
+      "child": "mitu-rashid"
+    },
+    {
+      "parent": "zinna-begum",
+      "child": "sujon-rashid"
+    },
+    {
+      "parent": "zinna-begum",
+      "child": "mitu-soto"
+    },
+    {
+      "parent": "mamun-ar-rashid",
+      "child": "mitu-rashid"
+    },
+    {
+      "parent": "mamun-ar-rashid",
+      "child": "sujon-rashid"
+    },
+    {
+      "parent": "mamun-ar-rashid",
+      "child": "mitu-soto"
+    },
+    {
+      "parent": "rina-begum",
+      "child": "rinna-meye"
+    },
+    {
+      "parent": "rina-husband",
+      "child": "rinna-meye"
+    },
+    {
+      "parent": "aktar-begum",
+      "child": "akter-meye1"
+    },
+    {
+      "parent": "aktar-begum",
+      "child": "akter-meye2"
+    },
+    {
+      "parent": "akter-husband",
+      "child": "akter-meye1"
+    },
+    {
+      "parent": "akter-husband",
+      "child": "akter-meye2"
+    },
+    {
+      "parent": "shiuly-begum",
+      "child": "shiuly-sele"
+    },
+    {
+      "parent": "shiuly-husband",
+      "child": "shiuly-sele"
+    },
+    {
+      "parent": "sweet-molla",
+      "child": "sweet-sele"
+    },
+    {
+      "parent": "golapi",
+      "child": "sweet-sele"
+    },
+    {
+      "parent": "siraz-uddin-molla",
+      "child": "shahanaz-parveen"
+    },
+    {
+      "parent": "siraz-uddin-molla",
+      "child": "monir-uddin-molla"
+    },
+    {
+      "parent": "siraz-uddin-molla",
+      "child": "sabina-yasmin"
+    },
+    {
+      "parent": "siraz-uddin-molla",
+      "child": "moyen-uddin"
+    },
+    {
+      "parent": "munnuzan-begum",
+      "child": "shahanaz-parveen"
+    },
+    {
+      "parent": "munnuzan-begum",
+      "child": "monir-uddin-molla"
+    },
+    {
+      "parent": "munnuzan-begum",
+      "child": "sabina-yasmin"
+    },
+    {
+      "parent": "munnuzan-begum",
+      "child": "moyen-uddin"
+    },
+    {
+      "parent": "royes-uddin-molla",
+      "child": "muminul-islam"
+    },
+    {
+      "parent": "royes-uddin-molla",
+      "child": "rehena-yasmin"
+    },
+    {
+      "parent": "momena",
+      "child": "muminul-islam"
+    },
+    {
+      "parent": "momena",
+      "child": "rehena-yasmin"
+    },
+    {
+      "parent": "muminul-islam",
+      "child": "mominul-meye"
+    },
+    {
+      "parent": "rehena-yasmin",
+      "child": "rehena-meye1"
+    },
+    {
+      "parent": "rehena-yasmin",
+      "child": "rehena-meye2"
+    },
+    {
+      "parent": "rehena-yasmin",
+      "child": "rehena-sele1"
+    },
+    {
+      "parent": "mota",
+      "child": "chumki"
+    },
+    {
+      "parent": "mota",
+      "child": "chumki-sotobon"
+    },
+    {
+      "parent": "mota-husband",
+      "child": "chumki"
+    },
+    {
+      "parent": "mota-husband",
+      "child": "chumki-sotobon"
+    },
+    {
+      "parent": "mono",
+      "child": "masum"
+    },
+    {
+      "parent": "mono",
+      "child": "masud"
+    },
+    {
+      "parent": "mono",
+      "child": "masuma"
+    },
+    {
+      "parent": "mono-husband",
+      "child": "masum"
+    },
+    {
+      "parent": "mono-husband",
+      "child": "masud"
+    },
+    {
+      "parent": "mono-husband",
+      "child": "masuma"
+    },
+    {
+      "parent": "alom",
+      "child": "sadia"
+    },
+    {
+      "parent": "alom",
+      "child": "nyeem"
+    },
+    {
+      "parent": "alom-wife",
+      "child": "sadia"
+    },
+    {
+      "parent": "alom-wife",
+      "child": "nyeem"
+    },
+    {
+      "parent": "lily",
+      "child": "lily-meye"
+    },
+    {
+      "parent": "lily",
+      "child": "lily-sele"
+    },
+    {
+      "parent": "lily-husband",
+      "child": "lily-meye"
+    },
+    {
+      "parent": "lily-husband",
+      "child": "lily-sele"
+    },
+    {
+      "parent": "sultana",
+      "child": "sultana-meye"
+    },
+    {
+      "parent": "zahurul-islam",
+      "child": "zahurul-sele"
+    },
+    {
+      "parent": "zahurul-islam",
+      "child": "zahurul-meye"
+    },
+    {
+      "parent": "shahanaz-parveen",
+      "child": "abdul-bashar"
+    },
+    {
+      "parent": "monir-uddin-molla",
+      "child": "shakkhor"
+    },
+    {
+      "parent": "monir-uddin-molla",
+      "child": "shahitto"
+    },
+    {
+      "parent": "sabina-yasmin",
+      "child": "saikat"
+    },
+    {
+      "parent": "sabina-yasmin",
+      "child": "shihab"
+    },
+    {
+      "parent": "sabina-yasmin",
+      "child": "apon"
+    },
+    {
+      "parent": "moyen-uddin",
+      "child": "shikto-anubhab"
+    },
+    {
+      "parent": "chumki-sotobon",
+      "child": "chumki-soto-meye"
+    }
   ]
 }
-
