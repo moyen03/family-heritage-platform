@@ -101,7 +101,12 @@ export const FamilyTree = forwardRef<FamilyTreeHandle>(function FamilyTree(_prop
       }
       return id
     })
-  }, [])
+    // Also center the tree on the selected node
+    const node = nodes.find((n) => n.id === id)
+    if (node) {
+      setTimeout(() => setCenter(node.position.x + 100, node.position.y + 45, { zoom: 1.1, duration: 400 }), 50)
+    }
+  }, [nodes, setCenter])
 
   const handleHighlightAncestors = useCallback((id: string) => {
     setHighlightedIds(new Set()); setHighlightMode(null)
@@ -281,9 +286,20 @@ export const FamilyTree = forwardRef<FamilyTreeHandle>(function FamilyTree(_prop
       {selectedId && (
         <PersonDetailPanel
           personId={selectedId}
+          persons={persons}
+          relationships={relationships}
+          marriages={marriages}
           onClose={() => { setSelectedId(null); handleClearHighlight() }}
+          onNavigate={(id) => {
+            setSelectedId(id)
+            const node = nodes.find((n) => n.id === id)
+            if (node) setTimeout(() => setCenter(node.position.x + 100, node.position.y + 45, { zoom: 1.2, duration: 500 }), 50)
+          }}
           highlightMode={highlightMode}
           highlightCount={highlightedIds.size}
+          onHighlightAncestors={handleHighlightAncestors}
+          onHighlightDescendants={handleHighlightDescendants}
+          onClearHighlight={handleClearHighlight}
         />
       )}
     </div>

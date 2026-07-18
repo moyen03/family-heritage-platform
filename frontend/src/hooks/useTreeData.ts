@@ -94,7 +94,7 @@ export function buildTreeLayout(
   // Dagre layout
   const graph = new dagre.graphlib.Graph()
   graph.setDefaultEdgeLabel(() => ({}))
-  graph.setGraph({ rankdir: 'TB', ranksep: 120, nodesep: 60, marginx: 30, marginy: 30 })
+  graph.setGraph({ rankdir: 'TB', ranksep: 180, nodesep: 80, marginx: 40, marginy: 40 })
   visiblePersons.forEach((p) => graph.setNode(p.id, { width: NODE_WIDTH, height: NODE_HEIGHT }))
   visibleRels.forEach((r) => graph.setEdge(r.person1.id, r.person2.id))
   dagre.layout(graph)

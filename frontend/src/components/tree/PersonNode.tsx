@@ -1,7 +1,7 @@
 import { memo } from 'react'
 import { Handle, Position, type NodeProps } from '@xyflow/react'
 import { clsx } from 'clsx'
-import { Users, Dna, ChevronDown, ChevronUp } from 'lucide-react'
+import { ChevronDown, ChevronUp } from 'lucide-react'
 import type { PersonNodeData } from '@/hooks/useTreeData'
 
 interface PersonNodeProps extends NodeProps {
@@ -79,23 +79,10 @@ export const PersonNode = memo(({ data }: PersonNodeProps) => {
           )}
         </div>
 
-        {/* Action buttons — only show when selected */}
+        {/* Subtle selected indicator */}
         {isSelected && (
-          <div className="flex border-t border-gray-100 divide-x divide-gray-100">
-            <button
-              onClick={(e) => { e.stopPropagation(); onHighlightAncestors?.(person.id) }}
-              className="flex-1 flex items-center justify-center gap-1 py-1.5 text-xs text-blue-600 hover:bg-blue-50 transition-colors rounded-bl-xl"
-              title="Highlight ancestors"
-            >
-              <Dna className="h-3 w-3" /> Ancestors
-            </button>
-            <button
-              onClick={(e) => { e.stopPropagation(); onHighlightDescendants?.(person.id) }}
-              className="flex-1 flex items-center justify-center gap-1 py-1.5 text-xs text-green-600 hover:bg-green-50 transition-colors rounded-br-xl"
-              title="Highlight descendants"
-            >
-              <Users className="h-3 w-3" /> Descendants
-            </button>
+          <div className="border-t border-amber-200 mx-3 pt-1 pb-1.5 text-center">
+            <span className="text-xs text-amber-500 font-medium">Selected — see panel →</span>
           </div>
         )}
       </div>
