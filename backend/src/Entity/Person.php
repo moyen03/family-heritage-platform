@@ -126,6 +126,10 @@ class Person
     #[Groups(['person:read', 'person:write'])]
     private bool $isLiving = true;
 
+    #[ORM\Column(type: 'string', length: 50, nullable: true)]
+    #[Groups(['person:read', 'person:write'])]
+    private ?string $phone = null;
+
     #[ORM\Column(type: 'text', nullable: true)]
     #[Groups(['person:read', 'person:write'])]
     private ?string $biography = null;
@@ -317,6 +321,17 @@ class Person
     public function setIsLiving(bool $isLiving): static
     {
         $this->isLiving = $isLiving;
+        return $this;
+    }
+
+    public function getPhone(): ?string
+    {
+        return $this->phone;
+    }
+
+    public function setPhone(?string $phone): static
+    {
+        $this->phone = $phone;
         return $this;
     }
 

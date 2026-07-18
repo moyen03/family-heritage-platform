@@ -3,7 +3,7 @@ import { useQuery } from '@tanstack/react-query'
 import { useState } from 'react'
 import {
   ArrowLeft, Calendar, MapPin, User,
-  GitBranch, Dna, BookOpen, Pencil, Network,
+  GitBranch, Dna, BookOpen, Pencil, Network, Phone,
 } from 'lucide-react'
 import { personsService } from '@/services/persons.service'
 import { relationshipsService } from '@/services/relationships.service'
@@ -179,6 +179,19 @@ export function PersonDetailPage() {
             <p className="text-sm text-gray-400">No life event records</p>
           )}
         </Section>
+
+        {/* Contact */}
+        {person.phone && (
+          <Section title="Contact" icon={Phone}>
+            <a
+              href={`tel:${person.phone}`}
+              className="flex items-center gap-2 text-sm text-indigo-600 hover:text-indigo-800 font-medium"
+            >
+              <Phone className="h-4 w-4" />
+              {person.phone}
+            </a>
+          </Section>
+        )}
 
         {/* Names */}
         <Section title="Alternative Names" icon={User}>

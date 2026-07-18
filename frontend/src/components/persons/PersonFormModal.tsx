@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useNavigate } from 'react-router-dom'
-import { X, User, Calendar, MapPin, BookOpen, Eye, Save, Loader2, AlertCircle } from 'lucide-react'
+import { X, User, Calendar, MapPin, BookOpen, Eye, Save, Loader2, AlertCircle, Phone } from 'lucide-react'
 import { personsService } from '@/services/persons.service'
 import type { Person, CreatePersonDto, Gender, DatePrecision, Visibility } from '@/types/person'
 
@@ -45,6 +45,7 @@ const empty: CreatePersonDto = {
   maidenName: '',
   gender: 'unknown',
   isLiving: true,
+  phone: '',
   birthDate: '',
   birthDatePrecision: 'unknown',
   birthPlace: '',
@@ -63,6 +64,7 @@ function dtoFromPerson(p: Person): CreatePersonDto {
     maidenName:         p.maidenName ?? '',
     gender:             p.gender,
     isLiving:           p.isLiving,
+    phone:              p.phone ?? '',
     birthDate:          p.birthDate ?? '',
     birthDatePrecision: p.birthDatePrecision,
     birthPlace:         p.birthPlace ?? '',
@@ -86,6 +88,7 @@ function cleanDto(dto: CreatePersonDto): CreatePersonDto {
   }
   if (dto.middleName?.trim()) clean.middleName = dto.middleName.trim()
   if (dto.maidenName?.trim()) clean.maidenName = dto.maidenName.trim()
+  if (dto.phone?.trim())      clean.phone      = dto.phone.trim()
   if (dto.birthDate?.trim())  clean.birthDate  = dto.birthDate.trim()
   if (dto.birthPlace?.trim()) clean.birthPlace = dto.birthPlace.trim()
   if (!dto.isLiving) {

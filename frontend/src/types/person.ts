@@ -32,6 +32,7 @@ export interface Person {
   deathDatePrecision: DatePrecision
   deathPlace: string | null
   isLiving: boolean
+  phone: string | null
   biography: string | null
   visibility: Visibility
   createdBy: PersonCreatedBy
@@ -63,6 +64,7 @@ export interface CreatePersonDto {
   deathDatePrecision?: DatePrecision
   deathPlace?: string
   isLiving?: boolean
+  phone?: string
   biography?: string
   visibility?: Visibility
 }
