@@ -53,7 +53,7 @@ use Symfony\Component\Validator\Constraints as Assert;
             processor: PersonStateProcessor::class,
         ),
     ],
-    normalizationContext: ['groups' => ['person:read']],
+    normalizationContext: ['groups' => ['person:read'], 'skip_null_values' => false],
     denormalizationContext: ['groups' => ['person:write']],
     order: ['lastName' => 'ASC', 'firstName' => 'ASC'],
 )]
@@ -298,6 +298,12 @@ class Person
     }
 
     public function isLiving(): bool
+    {
+        return $this->isLiving;
+    }
+
+    /** Alias for Symfony Serializer which looks for get* prefix on boolean properties */
+    public function getIsLiving(): bool
     {
         return $this->isLiving;
     }
