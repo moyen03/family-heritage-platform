@@ -153,12 +153,18 @@ class Person
     #[ORM\OneToMany(targetEntity: Relationship::class, mappedBy: 'person1', cascade: ['persist'])]
     private Collection $relationships;
 
+    /** @var Collection<int, Address> */
+    #[ORM\OneToMany(targetEntity: Address::class, mappedBy: 'person', cascade: ['persist', 'remove'])]
+    #[Groups(['person:read'])]
+    private Collection $addresses;
+
     public function __construct(string $id = '')
     {
         $this->id = $id ?: Uuid::uuid4()->toString();
         $this->personNames = new ArrayCollection();
         $this->personBranches = new ArrayCollection();
         $this->relationships = new ArrayCollection();
+        $this->addresses = new ArrayCollection();
     }
 
     public function getId(): string
@@ -378,6 +384,27 @@ class Person
     public function getRelationships(): Collection
     {
         return $this->relationships;
+    }
+
+    /** @return Collection<int, Address> */
+    public function getAddresses(): Collection
+    {
+        return $this->addresses;
+    }
+
+    public function addAddress(Address $address): static
+    {
+        if (!$this->addresses->contains($address)) {
+            $this->addresses->add($address);
+            $address->setPerson($this);
+        }
+        return $this;
+    }
+
+    public function removeAddress(Address $address): static
+    {
+        $this->addresses->removeElement($address);
+        return $this;
     }
 
     #[Groups(['person:read'])]

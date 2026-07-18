@@ -11,6 +11,7 @@ import { Badge } from '@/components/ui/Badge'
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner'
 import { PersonFormModal } from '@/components/persons/PersonFormModal'
 import { FamilyConnectionsSection } from '@/components/persons/FamilyConnectionsSection'
+import { PersonAddressPanel } from '@/components/addresses/PersonAddressPanel'
 
 function Section({ title, icon: Icon, children }: {
   title: string
@@ -235,6 +236,14 @@ export function PersonDetailPage() {
           persons={allPersons}
           relationships={personRelationships}
           marriages={personMarriages}
+        />
+      </div>
+
+      {/* Addresses — full width */}
+      <div className="mt-6 bg-white rounded-xl border border-gray-100 shadow-sm p-5">
+        <PersonAddressPanel
+          personId={person.id}
+          personName={person.fullName}
         />
       </div>
 

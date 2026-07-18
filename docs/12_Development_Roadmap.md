@@ -89,18 +89,18 @@
 
 ---
 
-## Phase 5 – Addresses and Maps ⏳
+## Phase 5 – Addresses and Maps ✅
 
 **Goal:** Address history and geographic visualization.
 
 | Task | Status |
 |------|--------|
-| Address entity + CRUD | ⏳ |
-| Current address per person | ⏳ |
-| Historical addresses | ⏳ |
-| Map view (Leaflet + OpenStreetMap) | ⏳ |
-| Migration path visualization | ⏳ |
-| Family heat map by region | ⏳ |
+| Address entity + CRUD | ✅ Done |
+| Current address per person | ✅ Done |
+| Historical addresses | ✅ Done |
+| Map view (Leaflet + OpenStreetMap) | ✅ Done |
+| Migration path visualization | ✅ Done |
+| Family heat map by region | ✅ Done |
 
 ---
 
