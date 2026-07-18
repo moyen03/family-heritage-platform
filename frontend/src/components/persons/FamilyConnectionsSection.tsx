@@ -334,9 +334,21 @@ export function FamilyConnectionsSection({
   const [removing, setRemoving] = useState<string | null>(null)
 
   // ── Compute connections from relationships ──────────────────────────────────
-  const parents = relationships.filter(r => r.type === 'parent'  && r.person2.id === personId)
-  const children = relationships.filter(r => r.type === 'parent' && r.person1.id === personId)
-  const siblings = relationships.filter(r => r.type === 'sibling' && (r.person1.id === personId || r.person2.id === personId))
+  const parents  = relationships.filter(r => r.type === 'parent'  && r.person2.id === personId)
+  const children = relationships.filter(r => r.type === 'parent'  && r.person1.id === personId)
+
+  // Siblings: deduplicate — DB stores both A→B and B→A, keep only one per unique sibling
+  const _siblingsRaw = relationships.filter(r =>
+    r.type === 'sibling' && (r.person1.id === personId || r.person2.id === personId)
+  )
+  const _seenSiblings = new Set<string>()
+  const siblings = _siblingsRaw.filter(r => {
+    const otherId = r.person1.id === personId ? r.person2.id : r.person1.id
+    if (_seenSiblings.has(otherId)) return false
+    _seenSiblings.add(otherId)
+    return true
+  })
+
   const personMarriages = marriages.filter(m => m.spouse1.id === personId || m.spouse2.id === personId)
 
   // PersonName records come from the person object — fetch from cache

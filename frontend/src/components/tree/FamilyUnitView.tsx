@@ -124,12 +124,19 @@ export function FamilyUnitView({ focalId, persons, relationships, marriages, onN
     .map(r => byId(r.person2.id))
     .filter(Boolean) as Person[]
 
-  // Siblings = share at least one parent with focal (exclude focal)
+  // Siblings = share at least one parent with focal (exclude focal) — deduplicated
   const parentIds = new Set(parents.map(p => p.id))
   const siblingIds = new Set<string>()
   relationships
     .filter(r => r.type === 'parent' && parentIds.has(r.person1.id) && r.person2.id !== focalId)
     .forEach(r => siblingIds.add(r.person2.id))
+  // Also include explicit sibling relationships (deduplicated by Set)
+  relationships
+    .filter(r => r.type === 'sibling' && (r.person1.id === focalId || r.person2.id === focalId))
+    .forEach(r => {
+      const otherId = r.person1.id === focalId ? r.person2.id : r.person1.id
+      siblingIds.add(otherId)
+    })
   const siblings = [...siblingIds]
     .map(id => byId(id))
     .filter(Boolean) as Person[]
