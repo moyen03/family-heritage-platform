@@ -29,6 +29,7 @@ use Symfony\Component\Validator\Constraints as Assert;
         new GetCollection(
             uriTemplate: '/persons',
             security: "is_granted('ROLE_USER')",
+            paginationEnabled: false,
         ),
         new Post(
             uriTemplate: '/persons',

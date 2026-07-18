@@ -32,6 +32,7 @@ use Vich\UploaderBundle\Mapping\Annotation as Vich;
             uriTemplate: '/media',
             normalizationContext: ['groups' => ['media:read']],
             security: "is_granted('ROLE_VIEWER')",
+            paginationEnabled: false,
         ),
         new Get(
             uriTemplate: '/media/{id}',

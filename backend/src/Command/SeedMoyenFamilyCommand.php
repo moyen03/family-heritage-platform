@@ -88,7 +88,7 @@ final class SeedMoyenFamilyCommand extends Command
             return Command::FAILURE;
         }
 
-        // ── Guard ─────────────────────────────────────────────────────────────
+        // ── Guard / truncate ──────────────────────────────────────────────────
         $existing = $this->em->getRepository(Person::class)->findOneBy([
             'firstName' => 'Md Siraz Uddin',
             'lastName'  => 'Molla',
@@ -96,6 +96,21 @@ final class SeedMoyenFamilyCommand extends Command
         if ($existing !== null && !$input->getOption('force')) {
             $io->warning('Moyen family data already exists. Use --force to re-import.');
             return Command::SUCCESS;
+        }
+
+        // When --force: wipe existing family data before re-inserting
+        if ($existing !== null && $input->getOption('force')) {
+            $io->text('  🗑  Truncating existing family data before re-import…');
+            $conn = $this->em->getConnection();
+            $conn->executeStatement('SET FOREIGN_KEY_CHECKS=0');
+            $conn->executeStatement('TRUNCATE TABLE relationships');
+            $conn->executeStatement('TRUNCATE TABLE marriages');
+            $conn->executeStatement('TRUNCATE TABLE person_branches');
+            $conn->executeStatement('TRUNCATE TABLE person_names');
+            $conn->executeStatement('TRUNCATE TABLE persons');
+            $conn->executeStatement('SET FOREIGN_KEY_CHECKS=1');
+            $this->em->clear();
+            $io->text('  ✓ Tables cleared');
         }
 
         // ── Create / find admin user ───────────────────────────────────────────

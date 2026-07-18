@@ -26,6 +26,7 @@ use Symfony\Component\Validator\Constraints as Assert;
         new GetCollection(
             uriTemplate: '/relationships',
             security: "is_granted('ROLE_USER')",
+            paginationEnabled: false,
         ),
         new GetCollection(
             uriTemplate: '/persons/{personId}/relationships',
@@ -34,6 +35,7 @@ use Symfony\Component\Validator\Constraints as Assert;
             ],
             security: "is_granted('ROLE_USER')",
             provider: RelationshipStateProvider::class,
+            paginationEnabled: false,
         ),
         new Post(
             uriTemplate: '/relationships',
