@@ -60,10 +60,22 @@ final class SeedMoyenFamilyCommand extends Command
         $io->title('Import — Moyen Uddin Family Tree');
 
         // ── Load JSON data file ────────────────────────────────────────────────
-        $jsonPath = dirname(__DIR__, 3) . '/database/seed/moyen_family_data.json';
-        if (!file_exists($jsonPath)) {
-            $io->error("JSON data file not found: {$jsonPath}");
-            $io->text('Expected location: <project-root>/database/seed/moyen_family_data.json');
+        // Search in multiple locations so it works both in Docker and locally.
+        $candidates = [
+            dirname(__DIR__, 2) . '/data/moyen_family_data.json',                    // backend/data/ (Docker)
+            dirname(__DIR__, 3) . '/database/seed/moyen_family_data.json',            // project-root/database/seed/ (local)
+            dirname(__DIR__, 4) . '/database/seed/moyen_family_data.json',            // one more level up
+        ];
+        $jsonPath = null;
+        foreach ($candidates as $candidate) {
+            if (file_exists($candidate)) {
+                $jsonPath = $candidate;
+                break;
+            }
+        }
+        if ($jsonPath === null) {
+            $io->error('JSON data file not found. Tried:');
+            foreach ($candidates as $c) { $io->text("  · {$c}"); }
             return Command::FAILURE;
         }
 
@@ -107,8 +119,8 @@ final class SeedMoyenFamilyCommand extends Command
         $io->section('Creating persons');
         $personCount = 0;
         foreach ($data['persons'] as $pd) {
-            if (isset($pd['_comment'])) {
-                continue; // skip comment-only entries
+            if (!isset($pd['id'])) {
+                continue; // skip pure comment-only entries (no id)
             }
             $person = $this->buildPerson($pd, $admin);
             $this->personMap[$pd['id']] = $person;
@@ -122,7 +134,7 @@ final class SeedMoyenFamilyCommand extends Command
         $io->section('Adding nicknames');
         $nameCount = 0;
         foreach ($data['persons'] as $pd) {
-            if (isset($pd['_comment']) || empty($pd['nickname'])) {
+            if (!isset($pd['id']) || empty($pd['nickname'])) {
                 continue;
             }
             $pn = new PersonName();
