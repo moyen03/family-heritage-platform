@@ -60,7 +60,7 @@
 | Search by name | ✅ Done |
 | Person profile drawer | ✅ Done |
 | Relationship path finder (A→B) | ✅ Done |
-| Multiple spouses display (dashed rose ♥ edges) | ✅ Done |
+| Add/Edit person form (modal) | ✅ Done |
 | Adoption/step display (dashed purple/orange edges) | ✅ Done |
 | Edge legend overlay | ✅ Done |
 | Person detail page | ✅ Done |
