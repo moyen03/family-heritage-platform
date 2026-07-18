@@ -246,6 +246,9 @@
             "config/packages/validator.yaml"
         ]
     },
+    "vich/uploader-bundle": {
+        "version": "v2.9.4"
+    },
     "zenstruck/foundry": {
         "version": "2.10",
         "recipe": {

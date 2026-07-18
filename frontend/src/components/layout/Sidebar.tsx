@@ -1,5 +1,5 @@
 import { NavLink, useNavigate } from 'react-router-dom'
-import { TreePine, Users, GitBranch, Heart, ClipboardList, LogOut, ChevronRight } from 'lucide-react'
+import { TreePine, Users, GitBranch, Heart, Image, ClipboardList, LogOut, ChevronRight } from 'lucide-react'
 import { clsx } from 'clsx'
 import { useAuthStore, selectIsAdmin } from '@/store/auth.store'
 
@@ -8,6 +8,7 @@ const NAV_ITEMS = [
   { to: '/persons', icon: Users, label: 'All Persons' },
   { to: '/relationships', icon: GitBranch, label: 'Relationships' },
   { to: '/marriages', icon: Heart, label: 'Marriages' },
+  { to: '/media', icon: Image, label: 'Media Library' },
 ]
 
 const ADMIN_NAV_ITEMS = [
