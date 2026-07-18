@@ -35,7 +35,11 @@ export function RelationshipsPage() {
     queryFn: () => relationshipsService.getAll(),
   })
 
-  const filtered = relationships.filter((r) => {
+  // De-duplicate: keep only canonical direction (parent/step_parent/adopted_parent/guardian/foster_parent over their inverse)
+  const CANONICAL = new Set(['parent', 'sibling', 'half_sibling', 'step_parent', 'adopted_parent', 'guardian', 'foster_parent'])
+  const unique = relationships.filter(r => CANONICAL.has(r.type))
+
+  const filtered = unique.filter((r) => {
     const searchLower = search.toLowerCase()
     const matchesSearch =
       !search ||
@@ -55,7 +59,7 @@ export function RelationshipsPage() {
     <div className="p-8 overflow-y-auto flex-1">
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-gray-900">Relationships</h1>
-        <p className="text-gray-500 mt-1">{relationships.length} relationship records</p>
+        <p className="text-gray-500 mt-1">{unique.length} unique relationship records ({relationships.length} total including inverses)</p>
       </div>
 
       {/* Filters */}
@@ -147,7 +151,7 @@ export function RelationshipsPage() {
             </tbody>
           </table>
           <div className="px-6 py-3 border-t border-gray-100 text-xs text-gray-400">
-            Showing {filtered.length} of {relationships.length} records
+            Showing {filtered.length} of {unique.length} records
           </div>
         </div>
       )}

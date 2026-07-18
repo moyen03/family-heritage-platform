@@ -1,14 +1,15 @@
 import { NavLink, useNavigate } from 'react-router-dom'
-import { TreePine, Users, GitBranch, Heart, Image, ClipboardList, LogOut, ChevronRight } from 'lucide-react'
+import { LayoutDashboard, TreePine, Users, GitBranch, Heart, Image, ClipboardList, LogOut, ChevronRight } from 'lucide-react'
 import { clsx } from 'clsx'
 import { useAuthStore, selectIsAdmin } from '@/store/auth.store'
 
 const NAV_ITEMS = [
-  { to: '/tree', icon: TreePine, label: 'Family Tree' },
-  { to: '/persons', icon: Users, label: 'All Persons' },
-  { to: '/relationships', icon: GitBranch, label: 'Relationships' },
-  { to: '/marriages', icon: Heart, label: 'Marriages' },
-  { to: '/media', icon: Image, label: 'Media Library' },
+  { to: '/dashboard',     icon: LayoutDashboard, label: 'Dashboard' },
+  { to: '/tree',          icon: TreePine,         label: 'Family Tree' },
+  { to: '/persons',       icon: Users,            label: 'All Persons' },
+  { to: '/relationships', icon: GitBranch,        label: 'Relationships' },
+  { to: '/marriages',     icon: Heart,            label: 'Marriages' },
+  { to: '/media',         icon: Image,            label: 'Media Library' },
 ]
 
 const ADMIN_NAV_ITEMS = [
@@ -89,11 +90,13 @@ export function Sidebar() {
       {/* User footer */}
       <div className="border-t border-gray-700 px-3 py-3">
         <div className="flex items-center gap-3 rounded-lg px-3 py-2">
-          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary-600 text-xs font-medium text-white">
-            {user?.email.charAt(0).toUpperCase() ?? '?'}
+          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-indigo-600 text-xs font-medium text-white">
+            {user?.email && user.email !== '' ? user.email.charAt(0).toUpperCase() : 'U'}
           </div>
           <div className="min-w-0 flex-1">
-            <p className="truncate text-xs font-medium text-white">{user?.email}</p>
+            <p className="truncate text-xs font-medium text-white">
+              {user?.email && user.email !== '' ? user.email : 'Signed in'}
+            </p>
           </div>
           <button
             onClick={handleLogout}
@@ -107,4 +110,3 @@ export function Sidebar() {
     </aside>
   )
 }
-

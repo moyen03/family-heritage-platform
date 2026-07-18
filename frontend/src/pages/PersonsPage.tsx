@@ -104,7 +104,7 @@ export function PersonsPage() {
                       ? new Date(person.birthDate).getFullYear()
                       : '—'}
                     {person.birthPlace && (
-                      <span className="text-gray-400"> · {person.birthPlace}</span>
+                      <span className="block text-xs text-gray-400 mt-0.5">{person.birthPlace}</span>
                     )}
                   </td>
                   <td className="px-6 py-4">

@@ -3,6 +3,7 @@ import { useEffect } from 'react'
 import { Layout } from '@/components/layout/Layout'
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute'
 import { LoginPage } from '@/pages/LoginPage'
+import { DashboardPage } from '@/pages/DashboardPage'
 import { FamilyTreePage } from '@/pages/FamilyTreePage'
 import { PersonsPage } from '@/pages/PersonsPage'
 import { PersonDetailPage } from '@/pages/PersonDetailPage'
@@ -31,7 +32,8 @@ export default function App() {
           <ProtectedRoute>
             <Layout>
               <Routes>
-                <Route index element={<Navigate to="/tree" replace />} />
+                <Route index element={<Navigate to="/dashboard" replace />} />
+                <Route path="dashboard" element={<DashboardPage />} />
                 <Route path="tree" element={<FamilyTreePage />} />
                 <Route path="persons" element={<PersonsPage />} />
                 <Route path="persons/:id" element={<PersonDetailPage />} />
