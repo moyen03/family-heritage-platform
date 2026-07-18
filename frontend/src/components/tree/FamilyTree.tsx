@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState, useMemo, forwardRef, useImperativeHandle } from 'react'
+import { useCallback, useEffect, useState, useMemo, useRef, forwardRef, useImperativeHandle } from 'react'
 import {
   ReactFlow,
   Background,
@@ -71,6 +71,11 @@ export const FamilyTree = forwardRef<FamilyTreeHandle>(function FamilyTree(_prop
   const [nodes, setNodes, onNodesChange] = useNodesState<Node<PersonNodeData>>([])
   const [edges, setEdges, onEdgesChange] = useEdgesState<Edge>([])
 
+  // Keep a ref to the latest nodes so handlers can read positions without
+  // being listed as deps (which would cause the sync effect to re-run infinitely).
+  const nodesRef = useRef(nodes)
+  nodesRef.current = nodes
+
   const [selectedId, setSelectedId] = useState<string | null>(null)
   const [highlightedIds, setHighlightedIds] = useState<Set<string>>(new Set())
   const [highlightMode, setHighlightMode] = useState<HighlightMode>(null)
@@ -101,12 +106,12 @@ export const FamilyTree = forwardRef<FamilyTreeHandle>(function FamilyTree(_prop
       }
       return id
     })
-    // Also center the tree on the selected node
-    const node = nodes.find((n) => n.id === id)
+    // Use ref so this callback never re-creates when nodes change
+    const node = nodesRef.current.find((n) => n.id === id)
     if (node) {
       setTimeout(() => setCenter(node.position.x + 100, node.position.y + 45, { zoom: 1.1, duration: 400 }), 50)
     }
-  }, [nodes, setCenter])
+  }, [setCenter]) // ← no `nodes` dep — uses ref instead
 
   const handleHighlightAncestors = useCallback((id: string) => {
     setHighlightedIds(new Set()); setHighlightMode(null)
@@ -117,6 +122,13 @@ export const FamilyTree = forwardRef<FamilyTreeHandle>(function FamilyTree(_prop
     setHighlightedIds(new Set()); setHighlightMode(null)
     setAncestorTargetId(null); setDescendantTargetId(id)
   }, [])
+
+  // ── Navigate handler (used by panel) ────────────────────────────────────────
+  const handleNavigate = useCallback((id: string) => {
+    setSelectedId(id)
+    const node = nodesRef.current.find((n) => n.id === id)
+    if (node) setTimeout(() => setCenter(node.position.x + 100, node.position.y + 45, { zoom: 1.2, duration: 500 }), 50)
+  }, [setCenter])
 
   const handleClearHighlight = useCallback(() => {
     setHighlightedIds(new Set()); setHighlightMode(null)
@@ -182,10 +194,10 @@ export const FamilyTree = forwardRef<FamilyTreeHandle>(function FamilyTree(_prop
   useImperativeHandle(ref, () => ({
     focusPerson(id: string) {
       setSelectedId(id)
-      const node = nodes.find((n) => n.id === id)
+      const node = nodesRef.current.find((n) => n.id === id)
       if (node) setCenter(node.position.x + 100, node.position.y + 45, { zoom: 1.2, duration: 600 })
     },
-  }), [nodes, setCenter])
+  }), [setCenter]) // ← no `nodes` dep
 
   // ── Render guards ────────────────────────────────────────────────────────────
   if (isLoading || (layoutNodes.length > 0 && nodes.length === 0)) {
@@ -290,11 +302,7 @@ export const FamilyTree = forwardRef<FamilyTreeHandle>(function FamilyTree(_prop
           relationships={relationships}
           marriages={marriages}
           onClose={() => { setSelectedId(null); handleClearHighlight() }}
-          onNavigate={(id) => {
-            setSelectedId(id)
-            const node = nodes.find((n) => n.id === id)
-            if (node) setTimeout(() => setCenter(node.position.x + 100, node.position.y + 45, { zoom: 1.2, duration: 500 }), 50)
-          }}
+          onNavigate={handleNavigate}
           highlightMode={highlightMode}
           highlightCount={highlightedIds.size}
           onHighlightAncestors={handleHighlightAncestors}
