@@ -44,8 +44,8 @@ export function useAddresses(personId?: string) {
   return useQuery<Address[]>({
     queryKey: ['addresses', personId ?? 'all'],
     queryFn: async () => {
-      const params = personId ? { person: personId } : {}
-      const res = await api.get<ApiCollection<Address>>('/api/addresses', { params })
+      const params = personId ? { 'person.id': personId } : {}
+      const res = await api.get<ApiCollection<Address>>('/addresses', { params })
       return res.data?.['member'] ?? res.data?.['hydra:member'] ?? []
     },
   })
@@ -55,7 +55,7 @@ export function useAllAddressesWithCoords() {
   return useQuery<Address[]>({
     queryKey: ['addresses', 'with-coords'],
     queryFn: async () => {
-      const res = await api.get<ApiCollection<Address>>('/api/addresses')
+      const res = await api.get<ApiCollection<Address>>('/addresses')
       const all: Address[] = res.data?.['member'] ?? res.data?.['hydra:member'] ?? []
       return all.filter((a) => a.latitude !== null && a.longitude !== null)
     },
@@ -65,7 +65,7 @@ export function useAllAddressesWithCoords() {
 export function useCreateAddress() {
   const qc = useQueryClient()
   return useMutation({
-    mutationFn: (data: AddressFormData) => api.post<Address>('/api/addresses', data),
+    mutationFn: (data: AddressFormData) => api.post<Address>('/addresses', data),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['addresses'] })
       qc.invalidateQueries({ queryKey: ['persons'] })
@@ -77,7 +77,7 @@ export function useUpdateAddress() {
   const qc = useQueryClient()
   return useMutation({
     mutationFn: ({ id, data }: { id: string; data: Partial<AddressFormData> }) =>
-      api.patch<Address>(`/api/addresses/${id}`, data, {
+      api.patch<Address>(`/addresses/${id}`, data, {
         headers: { 'Content-Type': 'application/merge-patch+json' },
       }),
     onSuccess: () => {
@@ -89,7 +89,7 @@ export function useUpdateAddress() {
 export function useDeleteAddress() {
   const qc = useQueryClient()
   return useMutation({
-    mutationFn: (id: string) => api.delete(`/api/addresses/${id}`),
+    mutationFn: (id: string) => api.delete(`/addresses/${id}`),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['addresses'] })
     },
