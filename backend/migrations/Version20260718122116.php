@@ -26,7 +26,7 @@ final class Version20260718122116 extends AbstractMigration
         $this->addSql('ALTER TABLE media_tag ADD CONSTRAINT FK_48D8C57EEA9FDD75 FOREIGN KEY (media_id) REFERENCES media (id) ON DELETE CASCADE');
         $this->addSql('ALTER TABLE media_tag ADD CONSTRAINT FK_48D8C57E217BBB47 FOREIGN KEY (person_id) REFERENCES persons (id) ON DELETE CASCADE');
         $this->addSql('ALTER TABLE media_tag ADD CONSTRAINT FK_48D8C57EB0156D6A FOREIGN KEY (tagged_by_id) REFERENCES users (id)');
-        $this->addSql('DROP TABLE refresh_tokens');
+        // NOTE: refresh_tokens is managed by gesdinet/jwt-refresh-token-bundle — do NOT drop it
         $this->addSql('DROP INDEX IDX_approval_entity ON approval_requests');
         $this->addSql('DROP INDEX IDX_approval_status ON approval_requests');
         $this->addSql('ALTER TABLE approval_requests CHANGE status status VARCHAR(255) NOT NULL, CHANGE reviewed_at reviewed_at DATETIME DEFAULT NULL');
@@ -68,7 +68,7 @@ final class Version20260718122116 extends AbstractMigration
     public function down(Schema $schema): void
     {
         // this down() migration is auto-generated, please modify it to your needs
-        $this->addSql('CREATE TABLE refresh_tokens (id INT AUTO_INCREMENT NOT NULL, refresh_token VARCHAR(128) CHARACTER SET utf8mb4 NOT NULL COLLATE `utf8mb4_unicode_ci`, username VARCHAR(255) CHARACTER SET utf8mb4 NOT NULL COLLATE `utf8mb4_unicode_ci`, valid DATETIME NOT NULL, UNIQUE INDEX UNIQ_refresh_token (refresh_token), PRIMARY KEY (id)) DEFAULT CHARACTER SET utf8mb4 COLLATE `utf8mb4_unicode_ci` ENGINE = InnoDB COMMENT = \'\' ');
+        // NOTE: refresh_tokens is managed by gesdinet/jwt-refresh-token-bundle — do NOT recreate/drop it here
         $this->addSql('ALTER TABLE media DROP FOREIGN KEY FK_6A2CA10CA2B28FE8');
         $this->addSql('ALTER TABLE media_tag DROP FOREIGN KEY FK_48D8C57EEA9FDD75');
         $this->addSql('ALTER TABLE media_tag DROP FOREIGN KEY FK_48D8C57E217BBB47');
