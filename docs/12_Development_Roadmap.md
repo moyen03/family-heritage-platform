@@ -44,7 +44,7 @@
 
 ---
 
-## Phase 3 – Interactive Family Tree UI ✅ (mostly done)
+## Phase 3 – Interactive Family Tree UI ✅
 
 **Goal:** A web-based interactive family tree.
 
@@ -54,31 +54,38 @@
 | Authentication (login/logout) | ✅ Done |
 | Tree visualization (React Flow + Dagre layout) | ✅ Done |
 | Zoom and pan | ✅ Done |
-| Expand/collapse branches | ⏳ |
+| Expand/collapse branches | ✅ Done |
 | Highlight ancestors | ✅ Done |
 | Highlight descendants | ✅ Done |
 | Search by name | ✅ Done |
 | Person profile drawer | ✅ Done |
 | Relationship path finder (A→B) | ✅ Done |
-| Multiple spouses display | ⏳ |
-| Adoption/step display | ⏳ |
+| Multiple spouses display (dashed rose ♥ edges) | ✅ Done |
+| Adoption/step display (dashed purple/orange edges) | ✅ Done |
+| Edge legend overlay | ✅ Done |
+| Person detail page | ✅ Done |
+| Relationships page (searchable table) | ✅ Done |
+| Marriages page (card grid, filter active/divorced) | ✅ Done |
+| All Persons list page | ✅ Done |
 
 ---
 
-## Phase 4 – Media ⏳
+## Phase 4 – Media ✅
 
 **Goal:** Rich media library with tagging and privacy.
 
 | Task | Status |
 |------|--------|
-| Photo upload | ⏳ |
-| Video upload | ⏳ |
-| Document upload (PDF) | ⏳ |
-| Audio upload | ⏳ |
-| Media metadata (date, place, source) | ⏳ |
-| Tag people in photos | ⏳ |
-| Privacy levels per media item | ⏳ |
-| Media gallery UI | ⏳ |
+| Photo upload | ✅ Done |
+| Video upload | ✅ Done |
+| Document upload (PDF) | ✅ Done |
+| Audio upload | ✅ Done |
+| Media metadata (date, place, source, title, description) | ✅ Done |
+| Tag people in photos (MediaTag entity + API) | ✅ Done |
+| Privacy levels per media item (public/family/private) | ✅ Done |
+| Media gallery UI (responsive grid, type filter, search) | ✅ Done |
+| Upload modal (drag & drop, all metadata fields) | ✅ Done |
+| Media detail modal (inline preview, download link) | ✅ Done |
 
 ---
 
