@@ -1,14 +1,16 @@
 import { useParams, Link, useNavigate } from 'react-router-dom'
-import { useQuery, useQueryClient } from '@tanstack/react-query'
+import { useQuery } from '@tanstack/react-query'
 import { useState } from 'react'
 import {
-  ArrowLeft, Calendar, MapPin, User, Heart, GitBranch,
-  Users, Dna, BookOpen, Pencil,
+  ArrowLeft, Calendar, MapPin, User,
+  GitBranch, Dna, BookOpen, Pencil, Network,
 } from 'lucide-react'
 import { personsService } from '@/services/persons.service'
+import { relationshipsService } from '@/services/relationships.service'
 import { Badge } from '@/components/ui/Badge'
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner'
 import { PersonFormModal } from '@/components/persons/PersonFormModal'
+import { FamilyConnectionsSection } from '@/components/persons/FamilyConnectionsSection'
 
 function Section({ title, icon: Icon, children }: {
   title: string
@@ -36,19 +38,6 @@ function InfoRow({ label, value }: { label: string; value: React.ReactNode }) {
   )
 }
 
-const RELATIONSHIP_LABELS: Record<string, string> = {
-  parent: 'Parent',
-  child: 'Child',
-  sibling: 'Sibling',
-  half_sibling: 'Half Sibling',
-  step_parent: 'Step Parent',
-  step_child: 'Step Child',
-  adopted_parent: 'Adoptive Parent',
-  adopted_child: 'Adopted Child',
-  guardian: 'Guardian',
-  foster_parent: 'Foster Parent',
-}
-
 export function PersonDetailPage() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
@@ -61,15 +50,19 @@ export function PersonDetailPage() {
   })
 
   const { data: relationships = [] } = useQuery({
-    queryKey: ['person-relationships', id],
-    queryFn: () => personsService.getRelationships(id!),
-    enabled: !!id,
+    queryKey: ['relationships'],
+    queryFn: () => relationshipsService.getAll(),
   })
 
   const { data: marriages = [] } = useQuery({
-    queryKey: ['person-marriages', id],
-    queryFn: () => personsService.getMarriages(id!),
-    enabled: !!id,
+    queryKey: ['marriages'],
+    queryFn: () => relationshipsService.getAllMarriages(),
+  })
+
+  const { data: allPersons = [] } = useQuery({
+    queryKey: ['persons'],
+    queryFn: () => personsService.getAll(),
+    select: (d) => d?.['member'] ?? d?.['hydra:member'] ?? [],
   })
 
   if (isLoading) {
@@ -92,6 +85,14 @@ export function PersonDetailPage() {
 
   const birthYear = person.birthDate ? new Date(person.birthDate).getFullYear() : null
   const deathYear = person.deathDate ? new Date(person.deathDate).getFullYear() : null
+
+  // Filter global data to this person
+  const personRelationships = relationships.filter(
+    r => r.person1.id === id || r.person2.id === id
+  )
+  const personMarriages = marriages.filter(
+    m => m.spouse1.id === id || m.spouse2.id === id
+  )
 
   return (
     <div className="p-8 overflow-y-auto flex-1">
@@ -194,66 +195,6 @@ export function PersonDetailPage() {
           )}
         </Section>
 
-        {/* Marriages */}
-        {marriages.length > 0 && (
-          <Section title="Marriages" icon={Heart}>
-            <div className="space-y-3">
-              {marriages.map((m) => {
-                const spouse = m.spouse1.id === id ? m.spouse2 : m.spouse1
-                return (
-                  <div key={m.id} className="rounded-lg border border-gray-100 p-3">
-                    <div className="flex items-start justify-between">
-                      <div>
-                        <Link
-                          to={`/persons/${spouse.id}`}
-                          className="font-medium text-sm text-primary-700 hover:text-primary-900"
-                        >
-                          {spouse.fullName}
-                        </Link>
-                        {m.marriageDate && (
-                          <p className="text-xs text-gray-500 mt-0.5 flex items-center gap-1">
-                            <Calendar className="h-3 w-3" />
-                            Married {new Date(m.marriageDate).toLocaleDateString('en-GB', { year: 'numeric', month: 'long' })}
-                            {m.marriagePlace && ` in ${m.marriagePlace}`}
-                          </p>
-                        )}
-                        {m.divorceDate && (
-                          <p className="text-xs text-gray-400 mt-0.5">
-                            Divorced {new Date(m.divorceDate).getFullYear()}
-                          </p>
-                        )}
-                      </div>
-                      {m.isDivorced && <Badge variant="default">Divorced</Badge>}
-                    </div>
-                  </div>
-                )
-              })}
-            </div>
-          </Section>
-        )}
-
-        {/* Relationships */}
-        {relationships.length > 0 && (
-          <Section title={`Relationships (${relationships.length})`} icon={Users}>
-            <div className="space-y-1 max-h-64 overflow-y-auto">
-              {relationships.map((r) => {
-                const other = r.person1.id === id ? r.person2 : r.person1
-                return (
-                  <div key={r.id} className="flex items-center justify-between py-1.5 border-b border-gray-50 last:border-0">
-                    <Link
-                      to={`/persons/${other.id}`}
-                      className="text-sm text-primary-700 hover:text-primary-900 font-medium"
-                    >
-                      {other.fullName}
-                    </Link>
-                    <Badge variant="default">{RELATIONSHIP_LABELS[r.type] ?? r.type}</Badge>
-                  </div>
-                )
-              })}
-            </div>
-          </Section>
-        )}
-
         {/* Ancestors quick view */}
         <Section title="Ancestry" icon={Dna}>
           <div className="flex gap-3">
@@ -280,6 +221,21 @@ export function PersonDetailPage() {
             <p className="text-sm text-gray-700 leading-relaxed whitespace-pre-wrap">{person.biography}</p>
           </Section>
         )}
+      </div>
+
+      {/* Family Connections — full width below the grid */}
+      <div className="mt-6">
+        <div className="flex items-center gap-2 mb-4">
+          <Network className="h-5 w-5 text-indigo-600" />
+          <h2 className="text-lg font-bold text-gray-900">Family Connections</h2>
+          <span className="text-sm text-gray-400">— link parents, children, siblings, spouses and names</span>
+        </div>
+        <FamilyConnectionsSection
+          personId={person.id}
+          persons={allPersons}
+          relationships={personRelationships}
+          marriages={personMarriages}
+        />
       </div>
 
       {/* Edit modal */}
