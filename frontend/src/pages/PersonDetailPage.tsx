@@ -96,7 +96,7 @@ export function PersonDetailPage() {
   )
 
   return (
-    <div className="p-8 overflow-y-auto flex-1">
+    <div className="p-8">
       {/* Back button */}
       <button
         onClick={() => navigate(-1)}
