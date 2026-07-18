@@ -47,15 +47,29 @@ export function AddressFormModal({ personId, personName, address, onClose }: Pro
       ...form,
     }
 
-    if (isEdit && address) {
-      await updateAddress.mutateAsync({ id: address.id, data: payload })
-    } else {
-      await createAddress.mutateAsync(payload)
+    try {
+      if (isEdit && address) {
+        await updateAddress.mutateAsync({ id: address.id, data: payload })
+      } else {
+        await createAddress.mutateAsync(payload)
+      }
+      onClose()
+    } catch {
+      // error shown below
     }
-    onClose()
   }
 
   const isPending = createAddress.isPending || updateAddress.isPending
+  const isError   = createAddress.isError   || updateAddress.isError
+  const errorMsg  = (() => {
+    const err: unknown = createAddress.error ?? updateAddress.error
+    if (!err) return null
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const data = (err as any)?.response?.data
+    if (data?.detail) return data.detail
+    if (data?.['hydra:description']) return data['hydra:description']
+    return 'Failed to save address. Please try again.'
+  })()
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
@@ -230,6 +244,14 @@ export function AddressFormModal({ personId, personName, address, onClose }: Pro
               className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 resize-none"
             />
           </div>
+
+          {/* Error */}
+          {isError && (
+            <div className="flex items-start gap-2 p-3 bg-red-50 border border-red-200 rounded-lg">
+              <AlertCircle className="w-4 h-4 text-red-500 flex-shrink-0 mt-0.5" />
+              <p className="text-sm text-red-700">{errorMsg}</p>
+            </div>
+          )}
 
           {/* Actions */}
           <div className="flex justify-end gap-3 pt-2 border-t">
