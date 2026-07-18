@@ -1,6 +1,7 @@
 import { create } from 'zustand'
 import { authService } from '@/services/auth.service'
-import { getAccessToken, getRefreshToken, setAccessToken } from '@/services/api'
+import { getAccessToken, getRefreshToken, setAccessToken, setRefreshToken } from '@/services/api'
+import axios from 'axios'
 import type { AuthUser, LoginCredentials } from '@/types/auth'
 
 interface AuthState {
@@ -54,19 +55,40 @@ export const useAuthStore = create<AuthState>((set) => ({
     }
 
     if (token) {
-      // Restore the token into the axios instance
-      setAccessToken(token)
-      const user = authService.decodeToken(token)
-      if (user) {
-        set({ user, token, isInitializing: false })
-        return
+      // Check token is not expired before restoring it
+      const isExpired = (() => {
+        try {
+          const payload = JSON.parse(atob(token.split('.')[1]))
+          return payload.exp && payload.exp * 1000 < Date.now()
+        } catch {
+          return true
+        }
+      })()
+
+      if (!isExpired) {
+        setAccessToken(token)
+        const user = authService.decodeToken(token)
+        if (user) {
+          set({ user, token, isInitializing: false })
+          return
+        }
       }
     }
 
-    // No valid access token — fall back to marking authenticated so the
-    // 401→refresh interceptor can kick in on the first request.
+    // No valid access token — try to silently refresh using the refresh token
     if (refreshToken) {
-      set({ user: { email: '', roles: [] }, isInitializing: false })
+      axios.post('/api/auth/refresh', { refresh_token: refreshToken })
+        .then(({ data }) => {
+          setAccessToken(data.token)
+          setRefreshToken(data.refresh_token)
+          const user = authService.decodeToken(data.token)
+          set({ user: user ?? { email: '', roles: [] }, token: data.token, isInitializing: false })
+        })
+        .catch(() => {
+          setAccessToken(null)
+          setRefreshToken(null)
+          set({ user: null, token: null, isInitializing: false })
+        })
     } else {
       set({ isInitializing: false })
     }
