@@ -107,12 +107,22 @@ export function PersonDetailPage() {
 
       {/* Hero */}
       <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6 mb-6 flex items-start gap-5">
-        <div className={`flex h-16 w-16 items-center justify-center rounded-2xl text-2xl font-bold flex-shrink-0 ${
-          person.gender === 'male' ? 'bg-blue-100 text-blue-700' :
-          person.gender === 'female' ? 'bg-pink-100 text-pink-700' :
-          'bg-gray-100 text-gray-500'
+        <div className={`flex h-16 w-16 items-center justify-center rounded-2xl overflow-hidden text-2xl font-bold flex-shrink-0 ${
+          !person.profilePictureUrl
+            ? person.gender === 'male' ? 'bg-blue-100 text-blue-700' :
+              person.gender === 'female' ? 'bg-pink-100 text-pink-700' :
+              'bg-gray-100 text-gray-500'
+            : ''
         }`}>
-          {person.firstName.charAt(0)}
+          {person.profilePictureUrl ? (
+            <img
+              src={`http://localhost:8000${person.profilePictureUrl}`}
+              alt={person.fullName}
+              className="h-full w-full object-cover"
+            />
+          ) : (
+            person.firstName.charAt(0)
+          )}
         </div>
         <div className="flex-1 min-w-0">
           <h1 className="text-2xl font-bold text-gray-900">{person.fullName}</h1>
@@ -153,7 +163,11 @@ export function PersonDetailPage() {
         <Section title="Life Events" icon={Calendar}>
           <InfoRow label="Born" value={
             person.birthDate
-              ? new Date(person.birthDate).toLocaleDateString('en-GB', { year: 'numeric', month: 'long', day: 'numeric' })
+              ? person.birthDatePrecision === 'year'
+                ? new Date(person.birthDate).getFullYear().toString()
+                : person.birthDatePrecision === 'approximate'
+                  ? `~${new Date(person.birthDate).toLocaleDateString('en-GB', { year: 'numeric', month: 'long', day: 'numeric' })}`
+                  : new Date(person.birthDate).toLocaleDateString('en-GB', { year: 'numeric', month: 'long', day: 'numeric' })
               : null
           } />
           {person.birthPlace && (
@@ -165,7 +179,11 @@ export function PersonDetailPage() {
             <>
               <InfoRow label="Died" value={
                 person.deathDate
-                  ? new Date(person.deathDate).toLocaleDateString('en-GB', { year: 'numeric', month: 'long', day: 'numeric' })
+                  ? person.deathDatePrecision === 'year'
+                    ? new Date(person.deathDate).getFullYear().toString()
+                    : person.deathDatePrecision === 'approximate'
+                      ? `~${new Date(person.deathDate).toLocaleDateString('en-GB', { year: 'numeric', month: 'long', day: 'numeric' })}`
+                      : new Date(person.deathDate).toLocaleDateString('en-GB', { year: 'numeric', month: 'long', day: 'numeric' })
                   : 'Unknown'
               } />
               {person.deathPlace && (

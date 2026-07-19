@@ -1,7 +1,7 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useNavigate } from 'react-router-dom'
-import { X, User, Calendar, MapPin, BookOpen, Eye, Save, Loader2, AlertCircle, Phone } from 'lucide-react'
+import { X, User, Calendar, MapPin, BookOpen, Eye, Save, Loader2, AlertCircle, Phone, Camera, Trash2 } from 'lucide-react'
 import { personsService } from '@/services/persons.service'
 import type { Person, CreatePersonDto, Gender, DatePrecision, Visibility } from '@/types/person'
 
@@ -38,11 +38,21 @@ const VISIBILITY_OPTIONS: { value: Visibility; label: string; desc: string }[] =
   { value: 'private', label: '🔒 Private', desc: 'Only you' },
 ]
 
+/** Extract the year part from a YYYY-MM-DD string */
+function dateToYear(date: string): string {
+  return date ? date.substring(0, 4) : ''
+}
+
+/** Convert a 4-digit year to a full date string (Jan 1 of that year) */
+function yearToDate(year: string): string {
+  const y = year.trim()
+  if (!y || !/^\d{4}$/.test(y)) return ''
+  return `${y}-01-01`
+}
+
 const empty: CreatePersonDto = {
   firstName: '',
-  middleName: '',
   lastName: '',
-  maidenName: '',
   gender: 'unknown',
   isLiving: true,
   phone: '',
@@ -59,9 +69,7 @@ const empty: CreatePersonDto = {
 function dtoFromPerson(p: Person): CreatePersonDto {
   return {
     firstName:          p.firstName,
-    middleName:         p.middleName ?? '',
     lastName:           p.lastName,
-    maidenName:         p.maidenName ?? '',
     gender:             p.gender,
     isLiving:           p.isLiving,
     phone:              p.phone ?? '',
@@ -86,8 +94,6 @@ function cleanDto(dto: CreatePersonDto): CreatePersonDto {
     deathDatePrecision: dto.deathDatePrecision,
     visibility: dto.visibility,
   }
-  if (dto.middleName?.trim()) clean.middleName = dto.middleName.trim()
-  if (dto.maidenName?.trim()) clean.maidenName = dto.maidenName.trim()
   if (dto.phone?.trim())      clean.phone      = dto.phone.trim()
   if (dto.birthDate?.trim())  clean.birthDate  = dto.birthDate.trim()
   if (dto.birthPlace?.trim()) clean.birthPlace = dto.birthPlace.trim()
@@ -132,21 +138,95 @@ function Field({ label, required, children, hint }: {
 const inputCls = 'w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:border-transparent transition-colors'
 const errorCls = 'border-red-300 focus:ring-red-400'
 
+// ── Smart Date Input ──────────────────────────────────────────────────────────
+// Shows different inputs depending on the selected precision.
+
+function SmartDateInput({
+  precision,
+  value,
+  onChange,
+  label,
+}: {
+  precision: DatePrecision
+  value: string
+  onChange: (v: string) => void
+  label: string
+}) {
+  if (precision === 'unknown') {
+    return (
+      <Field label={label} hint="Set precision to enter a date">
+        <input type="text" disabled placeholder="— unknown —" className={`${inputCls} bg-gray-50 text-gray-400`} />
+      </Field>
+    )
+  }
+
+  if (precision === 'year') {
+    const yearVal = value ? dateToYear(value) : ''
+    return (
+      <Field label={label} hint="Enter 4-digit year (e.g. 1945)">
+        <input
+          type="number"
+          min={1000}
+          max={new Date().getFullYear() + 5}
+          value={yearVal}
+          onChange={e => onChange(yearToDate(e.target.value))}
+          placeholder="e.g. 1945"
+          className={inputCls}
+        />
+      </Field>
+    )
+  }
+
+  // exact or approximate — show date picker AND a manual text fallback
+  return (
+    <Field label={label} hint={precision === 'approximate' ? 'Best estimate date' : undefined}>
+      <div className="space-y-1">
+        <input
+          type="date"
+          value={value ?? ''}
+          onChange={e => onChange(e.target.value)}
+          className={inputCls}
+        />
+        <input
+          type="text"
+          value={value ?? ''}
+          onChange={e => onChange(e.target.value)}
+          placeholder="Or type manually: YYYY-MM-DD"
+          className={`${inputCls} text-xs text-gray-500`}
+        />
+      </div>
+    </Field>
+  )
+}
+
 // ── Main component ────────────────────────────────────────────────────────────
 
 export function PersonFormModal({ person, onClose, onSaved }: PersonFormModalProps) {
   const queryClient = useQueryClient()
   const navigate    = useNavigate()
   const isEdit      = !!person
+  const fileInputRef = useRef<HTMLInputElement>(null)
 
   const [form, setForm]     = useState<CreatePersonDto>(isEdit ? dtoFromPerson(person) : empty)
   const [errors, setErrors] = useState<Partial<Record<keyof CreatePersonDto, string>>>({})
+  const [photoFile, setPhotoFile]       = useState<File | null>(null)
+  const [photoPreview, setPhotoPreview] = useState<string | null>(
+    isEdit && person.profilePictureUrl ? person.profilePictureUrl : null
+  )
+  const [photoRemoved, setPhotoRemoved] = useState(false)
 
-  // Keep form in sync if person prop changes (e.g. navigating between edit pages)
+  // Keep form in sync if person prop changes
   useEffect(() => {
-    if (person) setForm(dtoFromPerson(person))
-    else        setForm(empty)
+    if (person) {
+      setForm(dtoFromPerson(person))
+      setPhotoPreview(person.profilePictureUrl ?? null)
+    } else {
+      setForm(empty)
+      setPhotoPreview(null)
+    }
     setErrors({})
+    setPhotoFile(null)
+    setPhotoRemoved(false)
   }, [person?.id]) // eslint-disable-line react-hooks/exhaustive-deps
 
   function set<K extends keyof CreatePersonDto>(key: K, value: CreatePersonDto[K]) {
@@ -162,10 +242,38 @@ export function PersonFormModal({ person, onClose, onSaved }: PersonFormModalPro
     return Object.keys(e).length === 0
   }
 
+  function handlePhotoSelect(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0]
+    if (!file) return
+    setPhotoFile(file)
+    setPhotoRemoved(false)
+    const reader = new FileReader()
+    reader.onload = ev => setPhotoPreview(ev.target?.result as string)
+    reader.readAsDataURL(file)
+  }
+
+  function handleRemovePhoto() {
+    setPhotoFile(null)
+    setPhotoPreview(null)
+    setPhotoRemoved(true)
+    if (fileInputRef.current) fileInputRef.current.value = ''
+  }
+
   const saveMutation = useMutation({
-    mutationFn: () => {
+    mutationFn: async () => {
       const dto = cleanDto(form)
-      return isEdit ? personsService.update(person!.id, dto) : personsService.create(dto)
+      const saved = isEdit
+        ? await personsService.update(person!.id, dto)
+        : await personsService.create(dto)
+
+      // Handle profile picture
+      if (photoFile) {
+        await personsService.uploadPhoto(saved.id, photoFile)
+      } else if (photoRemoved && isEdit && person!.profilePictureUrl) {
+        await personsService.deletePhoto(saved.id)
+      }
+
+      return saved
     },
     onSuccess: (saved) => {
       queryClient.invalidateQueries({ queryKey: ['persons'] })
@@ -209,6 +317,56 @@ export function PersonFormModal({ person, onClose, onSaved }: PersonFormModalPro
         {/* ── Body ───────────────────────────────────────────────── */}
         <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto px-6 py-5 space-y-6">
 
+          {/* Profile Photo */}
+          <FormSection icon={Camera} title="Profile Photo">
+            <div className="flex items-center gap-4">
+              {/* Avatar preview */}
+              <div className="relative flex-shrink-0">
+                <div className="h-20 w-20 rounded-full overflow-hidden bg-gray-100 border-2 border-gray-200 flex items-center justify-center">
+                  {photoPreview ? (
+                    <img
+                      src={photoPreview.startsWith('data:') ? photoPreview : `http://localhost:8000${photoPreview}`}
+                      alt="Preview"
+                      className="h-full w-full object-cover"
+                    />
+                  ) : (
+                    <User className="h-8 w-8 text-gray-300" />
+                  )}
+                </div>
+                {photoPreview && (
+                  <button
+                    type="button"
+                    onClick={handleRemovePhoto}
+                    className="absolute -top-1 -right-1 h-5 w-5 rounded-full bg-red-500 text-white flex items-center justify-center hover:bg-red-600 transition-colors"
+                    title="Remove photo"
+                  >
+                    <Trash2 className="h-3 w-3" />
+                  </button>
+                )}
+              </div>
+
+              {/* Upload button */}
+              <div className="flex-1">
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/jpeg,image/png,image/webp,image/gif"
+                  className="hidden"
+                  onChange={handlePhotoSelect}
+                />
+                <button
+                  type="button"
+                  onClick={() => fileInputRef.current?.click()}
+                  className="flex items-center gap-2 px-4 py-2 border-2 border-dashed border-gray-300 rounded-lg text-sm text-gray-600 hover:border-indigo-400 hover:text-indigo-600 transition-colors"
+                >
+                  <Camera className="h-4 w-4" />
+                  {photoPreview ? 'Change Photo' : 'Upload Photo'}
+                </button>
+                <p className="mt-1 text-xs text-gray-400">JPEG, PNG or WebP · max 5 MB</p>
+              </div>
+            </div>
+          </FormSection>
+
           {/* Basic info */}
           <FormSection icon={User} title="Basic Information">
             <div className="grid grid-cols-2 gap-3">
@@ -223,18 +381,6 @@ export function PersonFormModal({ person, onClose, onSaved }: PersonFormModalPro
                 />
                 {errors.firstName && <p className="mt-1 text-xs text-red-500">{errors.firstName}</p>}
               </Field>
-              <Field label="Middle Name">
-                <input
-                  type="text"
-                  value={form.middleName ?? ''}
-                  onChange={e => set('middleName', e.target.value)}
-                  placeholder="Optional"
-                  className={inputCls}
-                />
-              </Field>
-            </div>
-
-            <div className="grid grid-cols-2 gap-3">
               <Field label="Last Name" required>
                 <input
                   type="text"
@@ -245,16 +391,21 @@ export function PersonFormModal({ person, onClose, onSaved }: PersonFormModalPro
                 />
                 {errors.lastName && <p className="mt-1 text-xs text-red-500">{errors.lastName}</p>}
               </Field>
-              <Field label="Maiden Name" hint="For women — name before marriage">
-                <input
-                  type="text"
-                  value={form.maidenName ?? ''}
-                  onChange={e => set('maidenName', e.target.value)}
-                  placeholder="Optional"
-                  className={inputCls}
-                />
-              </Field>
             </div>
+
+            {/* Phone */}
+            <Field label="Phone / Mobile">
+              <div className="relative">
+                <Phone className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                <input
+                  type="tel"
+                  value={form.phone ?? ''}
+                  onChange={e => set('phone', e.target.value)}
+                  placeholder="e.g. +880 1700-000000"
+                  className={`${inputCls} pl-9`}
+                />
+              </div>
+            </Field>
 
             {/* Gender */}
             <Field label="Gender">
@@ -307,27 +458,30 @@ export function PersonFormModal({ person, onClose, onSaved }: PersonFormModalPro
 
           {/* Birth */}
           <FormSection icon={Calendar} title="Birth">
-            <div className="grid grid-cols-2 gap-3">
-              <Field label="Birth Date">
-                <input
-                  type="date"
-                  value={form.birthDate ?? ''}
-                  onChange={e => set('birthDate', e.target.value)}
-                  className={inputCls}
-                />
-              </Field>
-              <Field label="Date Precision">
-                <select
-                  value={form.birthDatePrecision ?? 'unknown'}
-                  onChange={e => set('birthDatePrecision', e.target.value as DatePrecision)}
-                  className={inputCls}
-                >
-                  {DATE_PRECISIONS.map(d => (
-                    <option key={d.value} value={d.value}>{d.label}</option>
-                  ))}
-                </select>
-              </Field>
-            </div>
+            <Field label="Date Precision">
+              <select
+                value={form.birthDatePrecision ?? 'unknown'}
+                onChange={e => {
+                  const prec = e.target.value as DatePrecision
+                  set('birthDatePrecision', prec)
+                  // Clear date when switching to unknown
+                  if (prec === 'unknown') set('birthDate', '')
+                }}
+                className={inputCls}
+              >
+                {DATE_PRECISIONS.map(d => (
+                  <option key={d.value} value={d.value}>{d.label}</option>
+                ))}
+              </select>
+            </Field>
+
+            <SmartDateInput
+              precision={form.birthDatePrecision ?? 'unknown'}
+              value={form.birthDate ?? ''}
+              onChange={v => set('birthDate', v)}
+              label="Birth Date"
+            />
+
             <Field label="Birth Place">
               <div className="relative">
                 <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
@@ -345,27 +499,29 @@ export function PersonFormModal({ person, onClose, onSaved }: PersonFormModalPro
           {/* Death — only if deceased */}
           {!form.isLiving && (
             <FormSection icon={Calendar} title="Death">
-              <div className="grid grid-cols-2 gap-3">
-                <Field label="Death Date">
-                  <input
-                    type="date"
-                    value={form.deathDate ?? ''}
-                    onChange={e => set('deathDate', e.target.value)}
-                    className={inputCls}
-                  />
-                </Field>
-                <Field label="Date Precision">
-                  <select
-                    value={form.deathDatePrecision ?? 'unknown'}
-                    onChange={e => set('deathDatePrecision', e.target.value as DatePrecision)}
-                    className={inputCls}
-                  >
-                    {DATE_PRECISIONS.map(d => (
-                      <option key={d.value} value={d.value}>{d.label}</option>
-                    ))}
-                  </select>
-                </Field>
-              </div>
+              <Field label="Date Precision">
+                <select
+                  value={form.deathDatePrecision ?? 'unknown'}
+                  onChange={e => {
+                    const prec = e.target.value as DatePrecision
+                    set('deathDatePrecision', prec)
+                    if (prec === 'unknown') set('deathDate', '')
+                  }}
+                  className={inputCls}
+                >
+                  {DATE_PRECISIONS.map(d => (
+                    <option key={d.value} value={d.value}>{d.label}</option>
+                  ))}
+                </select>
+              </Field>
+
+              <SmartDateInput
+                precision={form.deathDatePrecision ?? 'unknown'}
+                value={form.deathDate ?? ''}
+                onChange={v => set('deathDate', v)}
+                label="Death Date"
+              />
+
               <Field label="Death Place">
                 <div className="relative">
                   <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />

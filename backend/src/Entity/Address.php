@@ -48,7 +48,7 @@ use Symfony\Component\Validator\Constraints as Assert;
     denormalizationContext: ['groups' => ['address:write']],
     order: ['country' => 'ASC', 'city' => 'ASC'],
 )]
-#[ApiFilter(SearchFilter::class, properties: ['person' => 'exact', 'addressType' => 'exact', 'country' => 'partial'])]
+#[ApiFilter(SearchFilter::class, properties: ['person' => 'exact', 'person.id' => 'exact', 'addressType' => 'exact', 'country' => 'partial'])]
 #[ORM\Entity(repositoryClass: AddressRepository::class)]
 #[ORM\Table(name: 'addresses')]
 #[ORM\HasLifecycleCallbacks]

@@ -74,5 +74,20 @@ export const personsService = {
     )
     return data
   },
+
+  async uploadPhoto(id: string, file: File): Promise<{ profilePictureUrl: string }> {
+    const formData = new FormData()
+    formData.append('photo', file)
+    const { data } = await api.post<{ profilePictureUrl: string }>(
+      `/persons/${id}/photo`,
+      formData,
+      { headers: { 'Content-Type': 'multipart/form-data' } },
+    )
+    return data
+  },
+
+  async deletePhoto(id: string): Promise<void> {
+    await api.delete(`/persons/${id}/photo`)
+  },
 }
 

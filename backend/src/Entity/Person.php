@@ -134,6 +134,10 @@ class Person
     #[Groups(['person:read', 'person:write'])]
     private ?string $biography = null;
 
+    #[ORM\Column(type: 'string', length: 255, nullable: true)]
+    #[Groups(['person:read'])]
+    private ?string $profilePicturePath = null;
+
     #[ORM\Column(type: 'string', enumType: Visibility::class)]
     #[Groups(['person:read', 'person:write'])]
     private Visibility $visibility = Visibility::Family;
@@ -344,6 +348,23 @@ class Person
     {
         $this->biography = $biography;
         return $this;
+    }
+
+    public function getProfilePicturePath(): ?string
+    {
+        return $this->profilePicturePath;
+    }
+
+    public function setProfilePicturePath(?string $path): static
+    {
+        $this->profilePicturePath = $path;
+        return $this;
+    }
+
+    #[Groups(['person:read'])]
+    public function getProfilePictureUrl(): ?string
+    {
+        return $this->profilePicturePath;
     }
 
     public function getVisibility(): Visibility

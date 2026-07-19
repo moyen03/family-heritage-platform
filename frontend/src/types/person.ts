@@ -35,6 +35,7 @@ export interface Person {
   phone: string | null
   biography: string | null
   visibility: Visibility
+  profilePictureUrl: string | null
   createdBy: PersonCreatedBy
   personNames: PersonName[]
   createdAtIso: string
