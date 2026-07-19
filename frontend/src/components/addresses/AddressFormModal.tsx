@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { X, MapPin, Loader2 } from 'lucide-react'
+import { X, MapPin, Loader2, AlertCircle } from 'lucide-react'
 import { useCreateAddress, useUpdateAddress, type Address, type AddressFormData } from '../../hooks/useAddresses'
 
 interface Props {
@@ -42,9 +42,16 @@ export function AddressFormModal({ personId, personName, address, onClose }: Pro
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+
+    // Convert every empty string to null so the backend DateTimeNormalizer
+    // doesn't reject empty fromDate / toDate strings.
+    const cleanedForm = Object.fromEntries(
+      Object.entries(form).map(([k, v]) => [k, v === '' ? null : v])
+    ) as Omit<AddressFormData, 'person'>
+
     const payload: AddressFormData = {
       person: `/api/persons/${personId}`,
-      ...form,
+      ...cleanedForm,
     }
 
     try {
