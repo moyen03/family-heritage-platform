@@ -11,4 +11,3 @@ enum AddressType: string
     case Birth      = 'birth';
     case Childhood  = 'childhood';
 }
-

@@ -17,7 +17,8 @@ class PersonPhotoController extends AbstractController
     public function __construct(
         private PersonRepository $personRepository,
         private EntityManagerInterface $em,
-    ) {}
+    ) {
+    }
 
     #[Route('/api/persons/{id}/photo', name: 'api_person_photo_upload', methods: ['POST'])]
     #[IsGranted('ROLE_MEMBER')]
@@ -44,19 +45,22 @@ class PersonPhotoController extends AbstractController
             return $this->json(['error' => 'Image must be smaller than 5 MB.'], 400);
         }
 
+        $projectDir = $this->getParameter('kernel.project_dir');
+        assert(is_string($projectDir));
+
         // Delete old file if exists
         $oldPath = $person->getProfilePicturePath();
         if ($oldPath) {
-            $fullOldPath = $this->getParameter('kernel.project_dir') . '/public' . $oldPath;
+            $fullOldPath = $projectDir . '/public' . $oldPath;
             if (file_exists($fullOldPath)) {
                 @unlink($fullOldPath);
             }
         }
 
         // Ensure upload directory exists
-        $uploadDir = $this->getParameter('kernel.project_dir') . '/public/uploads/persons';
+        $uploadDir = $projectDir . '/public/uploads/persons';
         if (!is_dir($uploadDir)) {
-            mkdir($uploadDir, 0755, true);
+            mkdir($uploadDir, 0o755, true);
         }
 
         // Generate unique filename
@@ -83,9 +87,12 @@ class PersonPhotoController extends AbstractController
             return $this->json(['error' => 'Person not found'], 404);
         }
 
+        $projectDir = $this->getParameter('kernel.project_dir');
+        assert(is_string($projectDir));
+
         $oldPath = $person->getProfilePicturePath();
         if ($oldPath) {
-            $fullPath = $this->getParameter('kernel.project_dir') . '/public' . $oldPath;
+            $fullPath = $projectDir . '/public' . $oldPath;
             if (file_exists($fullPath)) {
                 @unlink($fullPath);
             }
@@ -96,4 +103,3 @@ class PersonPhotoController extends AbstractController
         return $this->json(['message' => 'Profile picture removed.']);
     }
 }
-

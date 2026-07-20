@@ -18,4 +18,3 @@ class MediaTagRepository extends ServiceEntityRepository
         parent::__construct($registry, MediaTag::class);
     }
 }
-

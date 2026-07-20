@@ -7,8 +7,8 @@ namespace App\Entity;
 use ApiPlatform\Metadata\ApiResource;
 use ApiPlatform\Metadata\Delete;
 use ApiPlatform\Metadata\GetCollection;
-use ApiPlatform\Metadata\Post;
 use ApiPlatform\Metadata\Link;
+use ApiPlatform\Metadata\Post;
 use App\Repository\MediaTagRepository;
 use Doctrine\ORM\Mapping as ORM;
 use Ramsey\Uuid\Uuid;
@@ -77,17 +77,43 @@ class MediaTag
         $this->taggedAt = new \DateTimeImmutable();
     }
 
-    public function getId(): string { return $this->id; }
+    public function getId(): string
+    {
+        return $this->id;
+    }
 
-    public function getMedia(): Media { return $this->media; }
-    public function setMedia(Media $media): self { $this->media = $media; return $this; }
+    public function getMedia(): Media
+    {
+        return $this->media;
+    }
+    public function setMedia(Media $media): self
+    {
+        $this->media = $media;
+        return $this;
+    }
 
-    public function getPerson(): Person { return $this->person; }
-    public function setPerson(Person $person): self { $this->person = $person; return $this; }
+    public function getPerson(): Person
+    {
+        return $this->person;
+    }
+    public function setPerson(Person $person): self
+    {
+        $this->person = $person;
+        return $this;
+    }
 
-    public function getTaggedAt(): \DateTimeImmutable { return $this->taggedAt; }
+    public function getTaggedAt(): \DateTimeImmutable
+    {
+        return $this->taggedAt;
+    }
 
-    public function getTaggedBy(): ?User { return $this->taggedBy; }
-    public function setTaggedBy(?User $taggedBy): self { $this->taggedBy = $taggedBy; return $this; }
+    public function getTaggedBy(): ?User
+    {
+        return $this->taggedBy;
+    }
+    public function setTaggedBy(?User $taggedBy): self
+    {
+        $this->taggedBy = $taggedBy;
+        return $this;
+    }
 }
-

@@ -75,14 +75,16 @@ final class SeedMoyenFamilyCommand extends Command
         }
         if ($jsonPath === null) {
             $io->error('JSON data file not found. Tried:');
-            foreach ($candidates as $c) { $io->text("  · {$c}"); }
+            foreach ($candidates as $c) {
+                $io->text("  · {$c}");
+            }
             return Command::FAILURE;
         }
 
         // Strip // comments before decoding (JSON doesn't support them natively)
         $raw  = file_get_contents($jsonPath);
-        $raw  = preg_replace('#//[^\n]*#', '', $raw);
-        $data = json_decode($raw, true);
+        $raw  = preg_replace('#//[^\n]*#', '', (string) $raw);
+        $data = json_decode((string) $raw, true);
         if (!is_array($data)) {
             $io->error('Failed to parse JSON: ' . json_last_error_msg());
             return Command::FAILURE;
@@ -285,6 +287,7 @@ final class SeedMoyenFamilyCommand extends Command
 
     // ── Helpers ───────────────────────────────────────────────────────────────
 
+    /** @param array<string, mixed> $pd */
     private function buildPerson(array $pd, User $admin): Person
     {
         $p = new Person();
@@ -329,4 +332,3 @@ final class SeedMoyenFamilyCommand extends Command
         return $p;
     }
 }
-

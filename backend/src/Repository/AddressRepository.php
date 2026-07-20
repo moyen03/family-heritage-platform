@@ -44,4 +44,3 @@ class AddressRepository extends ServiceEntityRepository
             ->getResult();
     }
 }
-

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Entity;
 
+use ApiPlatform\Doctrine\Orm\Filter\SearchFilter;
 use ApiPlatform\Metadata\ApiFilter;
 use ApiPlatform\Metadata\ApiResource;
 use ApiPlatform\Metadata\Delete;
@@ -11,7 +12,6 @@ use ApiPlatform\Metadata\Get;
 use ApiPlatform\Metadata\GetCollection;
 use ApiPlatform\Metadata\Patch;
 use ApiPlatform\Metadata\Post;
-use ApiPlatform\Doctrine\Orm\Filter\SearchFilter;
 use App\Enum\AddressType;
 use App\Repository\AddressRepository;
 use App\Trait\TimestampableTrait;
@@ -132,49 +132,150 @@ class Address
         $this->id = Uuid::uuid4()->toString();
     }
 
-    public function getId(): string { return $this->id; }
+    public function getId(): string
+    {
+        return $this->id;
+    }
 
-    public function getPerson(): Person { return $this->person; }
-    public function setPerson(Person $person): static { $this->person = $person; return $this; }
+    public function getPerson(): Person
+    {
+        return $this->person;
+    }
+    public function setPerson(Person $person): static
+    {
+        $this->person = $person;
+        return $this;
+    }
 
-    public function getAddressType(): AddressType { return $this->addressType; }
-    public function setAddressType(AddressType $addressType): static { $this->addressType = $addressType; return $this; }
+    public function getAddressType(): AddressType
+    {
+        return $this->addressType;
+    }
+    public function setAddressType(AddressType $addressType): static
+    {
+        $this->addressType = $addressType;
+        return $this;
+    }
 
-    public function getCountry(): string { return $this->country; }
-    public function setCountry(string $country): static { $this->country = $country; return $this; }
+    public function getCountry(): string
+    {
+        return $this->country;
+    }
+    public function setCountry(string $country): static
+    {
+        $this->country = $country;
+        return $this;
+    }
 
-    public function getStateProvince(): ?string { return $this->stateProvince; }
-    public function setStateProvince(?string $stateProvince): static { $this->stateProvince = $stateProvince; return $this; }
+    public function getStateProvince(): ?string
+    {
+        return $this->stateProvince;
+    }
+    public function setStateProvince(?string $stateProvince): static
+    {
+        $this->stateProvince = $stateProvince;
+        return $this;
+    }
 
-    public function getDistrict(): ?string { return $this->district; }
-    public function setDistrict(?string $district): static { $this->district = $district; return $this; }
+    public function getDistrict(): ?string
+    {
+        return $this->district;
+    }
+    public function setDistrict(?string $district): static
+    {
+        $this->district = $district;
+        return $this;
+    }
 
-    public function getCity(): ?string { return $this->city; }
-    public function setCity(?string $city): static { $this->city = $city; return $this; }
+    public function getCity(): ?string
+    {
+        return $this->city;
+    }
+    public function setCity(?string $city): static
+    {
+        $this->city = $city;
+        return $this;
+    }
 
-    public function getVillage(): ?string { return $this->village; }
-    public function setVillage(?string $village): static { $this->village = $village; return $this; }
+    public function getVillage(): ?string
+    {
+        return $this->village;
+    }
+    public function setVillage(?string $village): static
+    {
+        $this->village = $village;
+        return $this;
+    }
 
-    public function getStreet(): ?string { return $this->street; }
-    public function setStreet(?string $street): static { $this->street = $street; return $this; }
+    public function getStreet(): ?string
+    {
+        return $this->street;
+    }
+    public function setStreet(?string $street): static
+    {
+        $this->street = $street;
+        return $this;
+    }
 
-    public function getPostalCode(): ?string { return $this->postalCode; }
-    public function setPostalCode(?string $postalCode): static { $this->postalCode = $postalCode; return $this; }
+    public function getPostalCode(): ?string
+    {
+        return $this->postalCode;
+    }
+    public function setPostalCode(?string $postalCode): static
+    {
+        $this->postalCode = $postalCode;
+        return $this;
+    }
 
-    public function getLatitude(): ?string { return $this->latitude; }
-    public function setLatitude(?string $latitude): static { $this->latitude = $latitude; return $this; }
+    public function getLatitude(): ?string
+    {
+        return $this->latitude;
+    }
+    public function setLatitude(?string $latitude): static
+    {
+        $this->latitude = $latitude;
+        return $this;
+    }
 
-    public function getLongitude(): ?string { return $this->longitude; }
-    public function setLongitude(?string $longitude): static { $this->longitude = $longitude; return $this; }
+    public function getLongitude(): ?string
+    {
+        return $this->longitude;
+    }
+    public function setLongitude(?string $longitude): static
+    {
+        $this->longitude = $longitude;
+        return $this;
+    }
 
-    public function getFromDate(): ?\DateTimeInterface { return $this->fromDate; }
-    public function setFromDate(?\DateTimeInterface $fromDate): static { $this->fromDate = $fromDate; return $this; }
+    public function getFromDate(): ?\DateTimeInterface
+    {
+        return $this->fromDate;
+    }
+    public function setFromDate(?\DateTimeInterface $fromDate): static
+    {
+        $this->fromDate = $fromDate;
+        return $this;
+    }
 
-    public function getToDate(): ?\DateTimeInterface { return $this->toDate; }
-    public function setToDate(?\DateTimeInterface $toDate): static { $this->toDate = $toDate; return $this; }
+    public function getToDate(): ?\DateTimeInterface
+    {
+        return $this->toDate;
+    }
+    public function setToDate(?\DateTimeInterface $toDate): static
+    {
+        $this->toDate = $toDate;
+        return $this;
+    }
 
-    public function getNotes(): ?string { return $this->notes; }
-    public function setNotes(?string $notes): static { $this->notes = $notes; return $this; }
+    public function getNotes(): ?string
+    {
+        return $this->notes;
+    }
+    public function setNotes(?string $notes): static
+    {
+        $this->notes = $notes;
+        return $this;
+    }
 
     #[Groups(['address:read'])]
     public function getDisplayLabel(): string
@@ -199,4 +300,3 @@ class Address
         return $this->updatedAt->format(\DateTimeInterface::ATOM);
     }
 }
-

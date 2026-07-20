@@ -134,12 +134,25 @@ class Media
         $this->tags = new ArrayCollection();
     }
 
-    public function getId(): string { return $this->id; }
+    public function getId(): string
+    {
+        return $this->id;
+    }
 
-    public function getMediaType(): MediaType { return $this->mediaType; }
-    public function setMediaType(MediaType $mediaType): self { $this->mediaType = $mediaType; return $this; }
+    public function getMediaType(): MediaType
+    {
+        return $this->mediaType;
+    }
+    public function setMediaType(MediaType $mediaType): self
+    {
+        $this->mediaType = $mediaType;
+        return $this;
+    }
 
-    public function getFile(): ?File { return $this->file; }
+    public function getFile(): ?File
+    {
+        return $this->file;
+    }
     public function setFile(?File $file): self
     {
         $this->file = $file;
@@ -149,40 +162,119 @@ class Media
         return $this;
     }
 
-    public function getOriginalFilename(): ?string { return $this->originalFilename; }
-    public function setOriginalFilename(?string $originalFilename): self { $this->originalFilename = $originalFilename; return $this; }
+    public function getOriginalFilename(): ?string
+    {
+        return $this->originalFilename;
+    }
+    public function setOriginalFilename(?string $originalFilename): self
+    {
+        $this->originalFilename = $originalFilename;
+        return $this;
+    }
 
-    public function getStoredFilename(): ?string { return $this->storedFilename; }
-    public function setStoredFilename(?string $storedFilename): self { $this->storedFilename = $storedFilename; return $this; }
+    public function getStoredFilename(): ?string
+    {
+        return $this->storedFilename;
+    }
+    public function setStoredFilename(?string $storedFilename): self
+    {
+        $this->storedFilename = $storedFilename;
+        return $this;
+    }
 
-    public function getMimeType(): ?string { return $this->mimeType; }
-    public function setMimeType(?string $mimeType): self { $this->mimeType = $mimeType; return $this; }
+    public function getMimeType(): ?string
+    {
+        return $this->mimeType;
+    }
+    public function setMimeType(?string $mimeType): self
+    {
+        $this->mimeType = $mimeType;
+        return $this;
+    }
 
-    public function getFileSize(): ?int { return $this->fileSize; }
-    public function setFileSize(?int $fileSize): self { $this->fileSize = $fileSize; return $this; }
+    public function getFileSize(): ?int
+    {
+        return $this->fileSize;
+    }
+    public function setFileSize(?int $fileSize): self
+    {
+        $this->fileSize = $fileSize;
+        return $this;
+    }
 
-    public function getTitle(): ?string { return $this->title; }
-    public function setTitle(?string $title): self { $this->title = $title; return $this; }
+    public function getTitle(): ?string
+    {
+        return $this->title;
+    }
+    public function setTitle(?string $title): self
+    {
+        $this->title = $title;
+        return $this;
+    }
 
-    public function getDescription(): ?string { return $this->description; }
-    public function setDescription(?string $description): self { $this->description = $description; return $this; }
+    public function getDescription(): ?string
+    {
+        return $this->description;
+    }
+    public function setDescription(?string $description): self
+    {
+        $this->description = $description;
+        return $this;
+    }
 
-    public function getDateTaken(): ?\DateTimeInterface { return $this->dateTaken; }
-    public function setDateTaken(?\DateTimeInterface $dateTaken): self { $this->dateTaken = $dateTaken; return $this; }
+    public function getDateTaken(): ?\DateTimeInterface
+    {
+        return $this->dateTaken;
+    }
+    public function setDateTaken(?\DateTimeInterface $dateTaken): self
+    {
+        $this->dateTaken = $dateTaken;
+        return $this;
+    }
 
-    public function getPlaceTaken(): ?string { return $this->placeTaken; }
-    public function setPlaceTaken(?string $placeTaken): self { $this->placeTaken = $placeTaken; return $this; }
+    public function getPlaceTaken(): ?string
+    {
+        return $this->placeTaken;
+    }
+    public function setPlaceTaken(?string $placeTaken): self
+    {
+        $this->placeTaken = $placeTaken;
+        return $this;
+    }
 
-    public function getSource(): ?string { return $this->source; }
-    public function setSource(?string $source): self { $this->source = $source; return $this; }
+    public function getSource(): ?string
+    {
+        return $this->source;
+    }
+    public function setSource(?string $source): self
+    {
+        $this->source = $source;
+        return $this;
+    }
 
-    public function getPrivacyLevel(): PrivacyLevel { return $this->privacyLevel; }
-    public function setPrivacyLevel(PrivacyLevel $privacyLevel): self { $this->privacyLevel = $privacyLevel; return $this; }
+    public function getPrivacyLevel(): PrivacyLevel
+    {
+        return $this->privacyLevel;
+    }
+    public function setPrivacyLevel(PrivacyLevel $privacyLevel): self
+    {
+        $this->privacyLevel = $privacyLevel;
+        return $this;
+    }
 
-    public function getUploadedBy(): ?User { return $this->uploadedBy; }
-    public function setUploadedBy(?User $uploadedBy): self { $this->uploadedBy = $uploadedBy; return $this; }
+    public function getUploadedBy(): ?User
+    {
+        return $this->uploadedBy;
+    }
+    public function setUploadedBy(?User $uploadedBy): self
+    {
+        $this->uploadedBy = $uploadedBy;
+        return $this;
+    }
 
     /** @return Collection<int, MediaTag> */
-    public function getTags(): Collection { return $this->tags; }
+    public function getTags(): Collection
+    {
+        return $this->tags;
+    }
 }
-

@@ -10,4 +10,3 @@ enum PrivacyLevel: string
     case Family  = 'family';
     case Private = 'private';
 }
-

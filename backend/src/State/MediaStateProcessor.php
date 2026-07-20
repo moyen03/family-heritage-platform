@@ -18,7 +18,8 @@ class MediaStateProcessor implements ProcessorInterface
     public function __construct(
         private readonly EntityManagerInterface $em,
         private readonly Security $security,
-    ) {}
+    ) {
+    }
 
     public function process(mixed $data, Operation $operation, array $uriVariables = [], array $context = []): Media
     {
@@ -36,4 +37,3 @@ class MediaStateProcessor implements ProcessorInterface
         return $data;
     }
 }
-

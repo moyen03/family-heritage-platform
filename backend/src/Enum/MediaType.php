@@ -11,4 +11,3 @@ enum MediaType: string
     case Document = 'document';
     case Audio    = 'audio';
 }
-
