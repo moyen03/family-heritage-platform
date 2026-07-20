@@ -1,5 +1,6 @@
 import { useState, useMemo } from 'react'
 import { MapContainer, TileLayer, Marker, Popup, Polyline, CircleMarker } from 'react-leaflet'
+import MarkerClusterGroup from 'react-leaflet-cluster'
 import { Icon } from 'leaflet'
 import 'leaflet/dist/leaflet.css'
 import { MapPin, Route, Flame, Loader2, Filter } from 'lucide-react'
@@ -74,9 +75,9 @@ export default function MapPage() {
   const countryCount = useMemo(() => countByCountry(allAddresses), [allAddresses])
   const maxCount = useMemo(() => Math.max(1, ...countryCount.values()), [countryCount])
 
-  // Center of map: average of all coords, or default
+  // Center of map: average of all coords, or default to Bangladesh
   const center = useMemo<[number, number]>(() => {
-    if (filtered.length === 0) return [20, 0]
+    if (filtered.length === 0) return [24.7936, 88.9312]
     const lat = filtered.reduce((s, a) => s + parseFloat(a.latitude!), 0) / filtered.length
     const lng = filtered.reduce((s, a) => s + parseFloat(a.longitude!), 0) / filtered.length
     return [lat, lng]
@@ -156,7 +157,7 @@ export default function MapPage() {
           ) : (
             <MapContainer
               center={center}
-              zoom={filtered.length > 0 ? 5 : 2}
+              zoom={filtered.length > 0 ? 7 : 7}
               className="h-full w-full"
               key={`${center[0]}-${center[1]}`}
             >
@@ -165,26 +166,30 @@ export default function MapPage() {
                 url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
               />
 
-              {/* PINS MODE */}
-              {viewMode === 'pins' && filtered.map((addr) => (
-                <Marker
-                  key={addr.id}
-                  position={[parseFloat(addr.latitude!), parseFloat(addr.longitude!)]}
-                >
-                  <Popup>
-                    <div className="text-sm min-w-[160px]">
-                      <p className="font-semibold text-gray-900">{addr.person.fullName}</p>
-                      <p className="text-xs text-gray-500 capitalize mb-1">{TYPE_LABELS[addr.addressType]}</p>
-                      <p className="text-gray-700">{addr.displayLabel}</p>
-                      {(addr.fromDate || addr.toDate) && (
-                        <p className="text-xs text-gray-400 mt-1">
-                          {formatDate(addr.fromDate) ?? '?'} – {formatDate(addr.toDate) ?? 'present'}
-                        </p>
-                      )}
-                    </div>
-                  </Popup>
-                </Marker>
-              ))}
+              {/* PINS MODE — clustered so stacked pins don't pile up */}
+              {viewMode === 'pins' && (
+                <MarkerClusterGroup chunkedLoading>
+                  {filtered.map((addr) => (
+                    <Marker
+                      key={addr.id}
+                      position={[parseFloat(addr.latitude!), parseFloat(addr.longitude!)]}
+                    >
+                      <Popup>
+                        <div className="text-sm min-w-[160px]">
+                          <p className="font-semibold text-gray-900">{addr.person.fullName}</p>
+                          <p className="text-xs text-gray-500 capitalize mb-1">{TYPE_LABELS[addr.addressType]}</p>
+                          <p className="text-gray-700">{addr.displayLabel}</p>
+                          {(addr.fromDate || addr.toDate) && (
+                            <p className="text-xs text-gray-400 mt-1">
+                              {formatDate(addr.fromDate) ?? '?'} – {formatDate(addr.toDate) ?? 'present'}
+                            </p>
+                          )}
+                        </div>
+                      </Popup>
+                    </Marker>
+                  ))}
+                </MarkerClusterGroup>
+              )}
 
               {/* MIGRATION MODE: line per person connecting chronological addresses */}
               {viewMode === 'migration' && Array.from(byPerson.entries()).map(([personId, addrs]) => {
