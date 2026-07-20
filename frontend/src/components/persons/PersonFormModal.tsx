@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useNavigate } from 'react-router-dom'
 import { X, User, Calendar, MapPin, BookOpen, Eye, Save, Loader2, AlertCircle, Phone, Camera, Trash2 } from 'lucide-react'
@@ -152,34 +152,52 @@ function SmartDateInput({
   onChange: (v: string) => void
   label: string
 }) {
+  // Local state for year text so partial typing (1, 19, 194) doesn't reset the field
+  const [yearText, setYearText] = useState(() => (value ? dateToYear(value) : ''))
+
+  // Sync yearText when the stored value changes externally (e.g. form reset)
+  useEffect(() => {
+    setYearText(value ? dateToYear(value) : '')
+  }, [value]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  const handleYearChange = useCallback((raw: string) => {
+    // Strip non-digits, cap at 4 chars
+    const digits = raw.replace(/\D/g, '').slice(0, 4)
+    setYearText(digits)
+    if (digits.length === 4) {
+      onChange(`${digits}-01-01`)
+    } else {
+      // Don't persist partial input to parent — keep previous stored value
+    }
+  }, [onChange])
+
   if (precision === 'unknown') {
     return (
-      <Field label={label} hint="Set precision to enter a date">
+      <Field label={label} hint="Set precision above to enter a date">
         <input type="text" disabled placeholder="— unknown —" className={`${inputCls} bg-gray-50 text-gray-400`} />
       </Field>
     )
   }
 
   if (precision === 'year') {
-    const yearVal = value ? dateToYear(value) : ''
     return (
-      <Field label={label} hint="Enter 4-digit year (e.g. 1945)">
+      <Field label={label} hint="Type a 4-digit year (e.g. 1945)">
         <input
-          type="number"
-          min={1000}
-          max={new Date().getFullYear() + 5}
-          value={yearVal}
-          onChange={e => onChange(yearToDate(e.target.value))}
+          type="text"
+          inputMode="numeric"
+          value={yearText}
+          onChange={e => handleYearChange(e.target.value)}
           placeholder="e.g. 1945"
+          maxLength={4}
           className={inputCls}
         />
       </Field>
     )
   }
 
-  // exact or approximate — show date picker AND a manual text fallback
+  // exact or approximate — date picker + manual text fallback
   return (
-    <Field label={label} hint={precision === 'approximate' ? 'Best estimate date' : undefined}>
+    <Field label={label} hint={precision === 'approximate' ? 'Best estimate — pick or type YYYY-MM-DD' : undefined}>
       <div className="space-y-1">
         <input
           type="date"
