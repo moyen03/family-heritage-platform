@@ -10,9 +10,10 @@ import { LoadingSpinner } from '@/components/ui/LoadingSpinner'
 // ── Inner tree component (must be inside ReactFlowProvider) ────────────────────
 
 function BranchTreeInner({ branchId }: { branchId: string }) {
-  const { persons, relationships, marriages, isLoading, isError, totalPersons } =
+  const { persons, relationships, marriages, isLoading, isError, totalPersons, sharedMemberIds } =
     useBranchTreeData(branchId)
 
+  const sharedCount = sharedMemberIds.size
 
   return (
     <div className="flex flex-col h-full overflow-hidden">
@@ -21,6 +22,14 @@ function BranchTreeInner({ branchId }: { branchId: string }) {
         <span className="text-xs text-gray-400 font-medium">
           {totalPersons} {totalPersons === 1 ? 'person' : 'people'} in this branch
         </span>
+        {sharedCount > 0 && (
+          <>
+            <div className="h-4 w-px bg-gray-200" />
+            <span className="text-xs text-amber-600 font-medium">
+              + {sharedCount} shared ancestors
+            </span>
+          </>
+        )}
         {totalPersons > 0 && (
           <>
             <div className="h-4 w-px bg-gray-200" />

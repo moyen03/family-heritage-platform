@@ -1,4 +1,4 @@
-import { useQuery } from '@tanstack/react-query'
+import { useQuery, useQueries } from '@tanstack/react-query'
 import { useMemo } from 'react'
 import type { Node, Edge } from '@xyflow/react'
 import { MarkerType } from '@xyflow/react'
@@ -159,15 +159,38 @@ export function useTreeData() {
 
 /**
  * Like useTreeData but scoped to a single branch.
- * Persons, relationships, and marriages are filtered to branch members only.
+ * Automatically includes persons from Shared (isShared=true) branches
+ * so common ancestors (great-grandparents) always appear at the top of every branch tree.
  */
 export function useBranchTreeData(branchId: string) {
+  // This branch's persons
   const { data: branchData, isLoading: branchLoading } = useQuery({
     queryKey: ['branch-persons', branchId],
     queryFn: () => branchesService.getPersons(branchId),
     enabled: !!branchId,
   })
 
+  // All branches — need the shared ones
+  const { data: allBranches = [] } = useQuery({
+    queryKey: ['branches'],
+    queryFn: () => branchesService.getAll(),
+  })
+
+  // IDs of shared branches (exclude self in case this IS a shared branch)
+  const sharedBranches = useMemo(
+    () => allBranches.filter((b) => b.isShared && b.id !== branchId),
+    [allBranches, branchId],
+  )
+
+  // Fetch persons for every shared branch in parallel
+  const sharedBranchResults = useQueries({
+    queries: sharedBranches.map((b) => ({
+      queryKey: ['branch-persons', b.id] as const,
+      queryFn: () => branchesService.getPersons(b.id),
+    })),
+  })
+
+  // All persons + relationships + marriages (full dataset for user's visibility)
   const { data: personsData, isLoading: personsLoading, isError } = useQuery({
     queryKey: ['persons'],
     queryFn: () => personsService.getAll(),
@@ -185,38 +208,62 @@ export function useBranchTreeData(branchId: string) {
 
   const allPersons: Person[] = personsData?.['member'] ?? personsData?.['hydra:member'] ?? []
 
+  // IDs belonging to THIS branch
   const branchPersonIds = useMemo(
     () => new Set((branchData?.members ?? []).map((m) => m.id)),
     [branchData],
   )
 
+  // IDs from ALL shared branches combined
+  const sharedMemberIds = useMemo(() => {
+    const ids = new Set<string>()
+    sharedBranchResults.forEach((result) => {
+      result.data?.members?.forEach((m) => ids.add(m.id))
+    })
+    return ids
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [sharedBranchResults])
+
+  // Combined set: branch members + shared/common ancestors
+  const combinedIds = useMemo(() => {
+    const ids = new Set(branchPersonIds)
+    sharedMemberIds.forEach((id) => ids.add(id))
+    return ids
+  }, [branchPersonIds, sharedMemberIds])
+
   const persons = useMemo(
-    () => (branchPersonIds.size > 0 ? allPersons.filter((p) => branchPersonIds.has(p.id)) : []),
-    [allPersons, branchPersonIds],
+    () => (combinedIds.size > 0 ? allPersons.filter((p) => combinedIds.has(p.id)) : []),
+    [allPersons, combinedIds],
   )
 
+  // Relationships where BOTH persons are in the combined set
   const relationships = useMemo(
     () => allRelationships.filter(
-      (r) => branchPersonIds.has(r.person1.id) && branchPersonIds.has(r.person2.id),
+      (r) => combinedIds.has(r.person1.id) && combinedIds.has(r.person2.id),
     ),
-    [allRelationships, branchPersonIds],
+    [allRelationships, combinedIds],
   )
 
   const marriages = useMemo(
     () => allMarriages.filter(
-      (m) => branchPersonIds.has(m.spouse1.id) && branchPersonIds.has(m.spouse2.id),
+      (m) => combinedIds.has(m.spouse1.id) && combinedIds.has(m.spouse2.id),
     ),
-    [allMarriages, branchPersonIds],
+    [allMarriages, combinedIds],
   )
+
+  const sharedLoading = sharedBranchResults.some((r) => r.isLoading)
+  const isLoading = branchLoading || personsLoading || relsLoading || marriagesLoading || sharedLoading
 
   return {
     persons,
     relationships,
     marriages,
-    isLoading: branchLoading || personsLoading || relsLoading || marriagesLoading,
+    isLoading,
     isError,
-    totalPersons: persons.length,
+    /** Person count in THIS branch only (excluding shared ancestors) */
+    totalPersons: branchPersonIds.size,
     branchPersonIds,
+    sharedMemberIds,
   }
 }
 
