@@ -57,8 +57,18 @@ function edgeStyle(type: string): Pick<Edge, 'style' | 'label' | 'labelStyle' | 
 
 /**
  * Build a Dagre-layouted React Flow graph from persons + relationships + marriages.
- * Marriages are added to Dagre as lightweight edges so spouses are placed close together,
- * then a post-layout pass aligns same-generation spouses to the same Y coordinate.
+ *
+ * For each married couple that has shared children, we insert a tiny invisible
+ * "family connector" node between the couple and their children.  This gives the
+ * classic genealogy bracket layout:
+ *
+ *   [Parent1] ——♦—— [Parent2]          (marriage edge, unchanged)
+ *                ↓
+ *          [connector •]
+ *          /     |     \
+ *      [C1]   [C2]   [C3]
+ *
+ * Single parents (no marriage, or no shared children) keep direct edges.
  */
 export function buildTreeLayout(
   persons: Person[],
@@ -68,16 +78,20 @@ export function buildTreeLayout(
 ): { nodes: Node<PersonNodeData>[]; edges: Edge[] } {
   if (!persons.length) return { nodes: [], edges: [] }
 
-  // Build parent→children map from all parent-type relationships
+  // ── 1. Build parent→children and child→parents maps ────────────────────────
   const childrenOf = new Map<string, Set<string>>()
+  const parentsOf  = new Map<string, Set<string>>()
   relationships
     .filter((r) => PARENT_TYPES.has(r.type))
     .forEach((r) => {
       if (!childrenOf.has(r.person1.id)) childrenOf.set(r.person1.id, new Set())
       childrenOf.get(r.person1.id)!.add(r.person2.id)
+
+      if (!parentsOf.has(r.person2.id)) parentsOf.set(r.person2.id, new Set())
+      parentsOf.get(r.person2.id)!.add(r.person1.id)
     })
 
-  // BFS to compute all hidden IDs (descendants of collapsed nodes)
+  // ── 2. Compute collapsed / hidden subtrees ──────────────────────────────────
   const hiddenIds = new Set<string>()
   for (const cId of collapsedIds) {
     const queue = [...(childrenOf.get(cId) ?? [])]
@@ -91,46 +105,24 @@ export function buildTreeLayout(
   }
 
   const visiblePersons = persons.filter((p) => !hiddenIds.has(p.id))
-  const visibleRels = relationships.filter(
+  const visibleRels    = relationships.filter(
     (r) => PARENT_TYPES.has(r.type) && !hiddenIds.has(r.person1.id) && !hiddenIds.has(r.person2.id),
   )
   const visibleIdSet = new Set(visiblePersons.map((p) => p.id))
 
-  // Visible marriages (both spouses present and not hidden)
   const visibleMarriages = marriages.filter(
     (m) => visibleIdSet.has(m.spouse1.id) && visibleIdSet.has(m.spouse2.id),
   )
 
-  // Dagre layout — main tree structure only (marriage edges are NOT added here
-  // because they can create cycles; spouses are aligned in a post-layout pass instead)
+  // ── 3. Dagre layout (parent→child DAG only — no marriage edges to avoid cycles)
   const graph = new dagre.graphlib.Graph()
   graph.setDefaultEdgeLabel(() => ({}))
   graph.setGraph({ rankdir: 'TB', ranksep: 180, nodesep: 60, marginx: 40, marginy: 40 })
   visiblePersons.forEach((p) => graph.setNode(p.id, { width: NODE_WIDTH, height: NODE_HEIGHT }))
-
-  // Parent → child edges only (always a DAG — no cycles possible)
   visibleRels.forEach((r) => graph.setEdge(r.person1.id, r.person2.id, { weight: 2, minlen: 1 }))
-
-
   dagre.layout(graph)
 
-  // ── Post-layout pass: force ALL married couples to the same Y and close X ────
-  //
-  // Problem: spouses with no recorded parents end up at Y≈0 (top of tree) while
-  // their partner is several rows down.  We solve this in two steps:
-  //
-  //  1. Y-snap  – always pull both spouses to the SAME row.
-  //     We pick the LARGER Y (= the spouse who is deeper / has more ancestors),
-  //     because a spouse who married INTO the family should sit at their partner's
-  //     generation level, not float at the top.
-  //
-  //  2. X-clamp – if the two spouses are more than 2 node-widths apart after the
-  //     Y snap, slide the "floating" spouse (the one whose Dagre X was further away)
-  //     to sit just beside their partner.  We only move a spouse when they have NO
-  //     parent edge in the visible tree (an "orphan" w.r.t. the hierarchy), so we
-  //     don't disturb well-placed nodes.
-
-  // Which nodes appear as children in at least one parent→child edge?
+  // ── 4. Post-layout: Y-snap + X-clamp for married couples ───────────────────
   const hasParentEdge = new Set<string>()
   visibleRels.forEach((r) => hasParentEdge.add(r.person2.id))
 
@@ -142,45 +134,94 @@ export function buildTreeLayout(
     const n2 = graph.node(m.spouse2.id)
     if (!n1 || !n2) return
 
-    // ── Step 1: Y-snap ────────────────────────────────────────────────────────
-    // Use the deeper Y (larger value = lower row in the tree).
+    // Y-snap: pull both to the deeper (larger Y) position
     const targetY = Math.max(n1.y, n2.y)
     if (!yOverride.has(m.spouse1.id)) yOverride.set(m.spouse1.id, targetY)
     if (!yOverride.has(m.spouse2.id)) yOverride.set(m.spouse2.id, targetY)
 
-    // ── Step 2: X-clamp (only for orphan spouses) ─────────────────────────────
-    const COUPLE_GAP = NODE_WIDTH + 20          // ideal side-by-side gap
+    // X-clamp: if far apart and one is an orphan, move them together
+    const COUPLE_GAP = NODE_WIDTH + 20
     const xDiff = Math.abs(n1.x - n2.x)
     if (xDiff > COUPLE_GAP * 1.5) {
-      // Determine which spouse is "anchored" (has a parent edge) vs "floating"
       const s1anchored = hasParentEdge.has(m.spouse1.id)
       const s2anchored = hasParentEdge.has(m.spouse2.id)
-
-      if (s1anchored && !s2anchored) {
-        // Move spouse2 next to spouse1
-        if (!xOverride.has(m.spouse2.id)) {
-          xOverride.set(m.spouse2.id, n1.x + (n1.x <= n2.x ? COUPLE_GAP : -COUPLE_GAP))
-        }
-      } else if (s2anchored && !s1anchored) {
-        // Move spouse1 next to spouse2
-        if (!xOverride.has(m.spouse1.id)) {
-          xOverride.set(m.spouse1.id, n2.x + (n2.x <= n1.x ? COUPLE_GAP : -COUPLE_GAP))
-        }
+      if (s1anchored && !s2anchored && !xOverride.has(m.spouse2.id)) {
+        xOverride.set(m.spouse2.id, n1.x + (n1.x <= n2.x ? COUPLE_GAP : -COUPLE_GAP))
+      } else if (s2anchored && !s1anchored && !xOverride.has(m.spouse1.id)) {
+        xOverride.set(m.spouse1.id, n2.x + (n2.x <= n1.x ? COUPLE_GAP : -COUPLE_GAP))
       }
-      // If both anchored (or both orphans) leave X as-is to avoid disrupting
-      // the parent-child structure — only Y matters in that case.
     }
   })
 
-  const nodes: Node<PersonNodeData>[] = visiblePersons.map((p) => {
-    const pos = graph.node(p.id)
+  // Helper: resolved position for a person after overrides
+  const posX = (id: string) => xOverride.get(id) ?? graph.node(id).x
+  const posY = (id: string) => yOverride.get(id) ?? graph.node(id).y
+
+  // ── 5. Family connector nodes ───────────────────────────────────────────────
+  // For each marriage where BOTH parents share at least one child in the tree,
+  // create a tiny invisible connector node and route children through it.
+  //
+  // routedPairs tracks "parentId|childId" pairs that are handled by a connector
+  // so we can skip those when building the direct parent→child edges later.
+
+  const routedPairs = new Set<string>()
+
+  type ConnectorNode = { id: string; x: number; y: number; childIds: string[] }
+  const connectors: ConnectorNode[] = []
+
+  visibleMarriages.forEach((m) => {
+    if (!graph.node(m.spouse1.id) || !graph.node(m.spouse2.id)) return
+
+    const s1Kids = childrenOf.get(m.spouse1.id) ?? new Set<string>()
+    const s2Kids = childrenOf.get(m.spouse2.id) ?? new Set<string>()
+
+    // Children that appear under BOTH parents (the couple's shared children)
+    const sharedKids = [...s1Kids].filter((id) => visibleIdSet.has(id) && s2Kids.has(id))
+    if (sharedKids.length === 0) return
+
+    // Connector sits midway between the two parents on X, 50 px below on Y
+    const cx = (posX(m.spouse1.id) + posX(m.spouse2.id)) / 2
+    const cy = Math.max(posY(m.spouse1.id), posY(m.spouse2.id)) + 50
+
+    connectors.push({ id: `fc-${m.id}`, x: cx, y: cy, childIds: sharedKids })
+
+    sharedKids.forEach((childId) => {
+      if (s1Kids.has(childId)) routedPairs.add(`${m.spouse1.id}|${childId}`)
+      if (s2Kids.has(childId)) routedPairs.add(`${m.spouse2.id}|${childId}`)
+    })
+  })
+
+  // Also create connectors for parents with 2+ children who are NOT married
+  // (single parent with multiple kids → give them a connector too)
+  const coveredParents = new Set(
+    visibleMarriages
+      .filter((m) => connectors.some((c) => c.id === `fc-${m.id}`))
+      .flatMap((m) => [m.spouse1.id, m.spouse2.id]),
+  )
+
+  childrenOf.forEach((kids, parentId) => {
+    if (coveredParents.has(parentId) || !visibleIdSet.has(parentId)) return
+    const myKids = [...kids].filter((id) => visibleIdSet.has(id) && !hiddenIds.has(id))
+    if (myKids.length < 2) return  // Only need connector for 2+ kids
+
+    // Check that none of these kids are already routed
+    const unroutedKids = myKids.filter((k) => !routedPairs.has(`${parentId}|${k}`))
+    if (unroutedKids.length < 2) return
+
+    const cx = posX(parentId)
+    const cy = posY(parentId) + 50
+
+    connectors.push({ id: `sfc-${parentId}`, x: cx, y: cy, childIds: unroutedKids })
+    unroutedKids.forEach((childId) => routedPairs.add(`${parentId}|${childId}`))
+  })
+
+  // ── 6. Build React Flow nodes ───────────────────────────────────────────────
+  const personNodes: Node<PersonNodeData>[] = visiblePersons.map((p) => {
     const children = childrenOf.get(p.id) ?? new Set()
-    const y = yOverride.get(p.id) ?? pos.y
-    const x = xOverride.get(p.id) ?? pos.x
     return {
       id: p.id,
       type: 'person',
-      position: { x: x - NODE_WIDTH / 2, y: y - NODE_HEIGHT / 2 },
+      position: { x: posX(p.id) - NODE_WIDTH / 2, y: posY(p.id) - NODE_HEIGHT / 2 },
       data: {
         person: p,
         hasChildren: children.size > 0,
@@ -190,16 +231,83 @@ export function buildTreeLayout(
     }
   })
 
-  const edges: Edge[] = visibleRels.map((r) => ({
-    id: `e-${r.id}`,
-    source: r.person1.id,
-    target: r.person2.id,
-    type: 'smoothstep',
-    animated: false,
-    ...edgeStyle(r.type),
+  // Connector nodes (tiny invisible branching points)
+  const connectorNodes: Node<Record<string, never>>[] = connectors.map((c) => ({
+    id: c.id,
+    type: 'familyConnector',
+    position: { x: c.x - 1, y: c.y - 1 },
+    data: {},
+    selectable: false,
+    draggable: false,
+    connectable: false,
   }))
 
-  return { nodes, edges }
+  // ── 7. Build React Flow edges ───────────────────────────────────────────────
+  const EDGE_STYLE = { stroke: '#94a3b8', strokeWidth: 2 }
+  const EDGE_ARROW = { type: MarkerType.ArrowClosed, width: 12, height: 12, color: '#94a3b8' } as const
+
+  // Direct parent→child edges (those NOT routed through a connector)
+  const directEdges: Edge[] = visibleRels
+    .filter((r) => !routedPairs.has(`${r.person1.id}|${r.person2.id}`))
+    .map((r) => ({
+      id: `e-${r.id}`,
+      source: r.person1.id,
+      target: r.person2.id,
+      type: 'smoothstep',
+      animated: false,
+      ...edgeStyle(r.type),
+    }))
+
+  // Connector edges
+  const connectorEdges: Edge[] = []
+  connectors.forEach((c) => {
+    // Determine which parents feed into this connector
+    // For marriage connectors: both spouses
+    // For single-parent connectors: just the one parent
+    const isMarriageConnector = c.id.startsWith('fc-')
+    if (isMarriageConnector) {
+      const marriageId = c.id.replace('fc-', '')
+      const marriage = visibleMarriages.find((m) => m.id === marriageId)
+      if (marriage) {
+        ;[marriage.spouse1.id, marriage.spouse2.id].forEach((spouseId) => {
+          connectorEdges.push({
+            id: `fce-p-${c.id}-${spouseId}`,
+            source: spouseId,
+            target: c.id,
+            type: 'smoothstep',
+            style: EDGE_STYLE,
+          })
+        })
+      }
+    } else {
+      // Single parent connector: "sfc-{parentId}"
+      const parentId = c.id.replace('sfc-', '')
+      connectorEdges.push({
+        id: `fce-p-${c.id}`,
+        source: parentId,
+        target: c.id,
+        type: 'smoothstep',
+        style: EDGE_STYLE,
+      })
+    }
+
+    // Connector → children
+    c.childIds.forEach((childId) => {
+      connectorEdges.push({
+        id: `fce-c-${c.id}-${childId}`,
+        source: c.id,
+        target: childId,
+        type: 'smoothstep',
+        style: EDGE_STYLE,
+        markerEnd: EDGE_ARROW,
+      })
+    })
+  })
+
+  return {
+    nodes: [...personNodes, ...connectorNodes] as Node<PersonNodeData>[],
+    edges: [...directEdges, ...connectorEdges],
+  }
 }
 
 export function useTreeData() {

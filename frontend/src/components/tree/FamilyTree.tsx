@@ -15,13 +15,14 @@ import '@xyflow/react/dist/style.css'
 import { useQuery } from '@tanstack/react-query'
 import { PersonNode } from './PersonNode'
 import { MarriageEdge } from './MarriageEdge'
+import { FamilyConnectorNode } from './FamilyConnectorNode'
 import { PersonDetailPanel } from './PersonDetailPanel'
 import { useTreeData, buildTreeLayout } from '@/hooks/useTreeData'
 import { personsService } from '@/services/persons.service'
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner'
 import type { PersonNodeData } from '@/hooks/useTreeData'
 
-const NODE_TYPES = { person: PersonNode }
+const NODE_TYPES = { person: PersonNode, familyConnector: FamilyConnectorNode }
 const EDGE_TYPES = { marriage: MarriageEdge }
 
 type HighlightMode = 'ancestor' | 'descendant' | null
@@ -304,6 +305,7 @@ export const FamilyTree = forwardRef<FamilyTreeHandle, FamilyTreeProps>(function
               const gender = (n.data as PersonNodeData)?.person?.gender
               if (gender === 'male') return '#93c5fd'
               if (gender === 'female') return '#f9a8d4'
+              if (n.type === 'familyConnector') return '#cbd5e1'
               return '#d1d5db'
             }}
             className="!shadow-md !rounded-xl !border !border-gray-100"
