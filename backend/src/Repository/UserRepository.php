@@ -47,4 +47,31 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
             ->getQuery()
             ->getResult();
     }
+
+    /**
+     * Find active users, optionally filtered by a name/email search string.
+     *
+     * @return array<int, User>
+     */
+    public function findActiveUsers(string $search = ''): array
+    {
+        $qb = $this->createQueryBuilder('u')
+            ->where('u.isActive = :active')
+            ->andWhere('u.deletedAt IS NULL')
+            ->setParameter('active', true)
+            ->orderBy('u.lastName', 'ASC')
+            ->addOrderBy('u.firstName', 'ASC');
+
+        if ($search !== '') {
+            $qb->andWhere(
+                $qb->expr()->orX(
+                    'LOWER(u.firstName) LIKE :q',
+                    'LOWER(u.lastName)  LIKE :q',
+                    'LOWER(u.email)     LIKE :q'
+                )
+            )->setParameter('q', '%' . mb_strtolower($search) . '%');
+        }
+
+        return $qb->getQuery()->getResult();
+    }
 }

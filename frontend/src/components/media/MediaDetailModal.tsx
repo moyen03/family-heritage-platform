@@ -1,4 +1,3 @@
-import { useState } from 'react'
 import { Image, Film, FileText, Music, Calendar, MapPin, Lock, Globe, Users, X, Download } from 'lucide-react'
 import type { MediaItem } from '../../hooks/useMedia'
 

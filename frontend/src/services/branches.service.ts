@@ -20,6 +20,17 @@ export interface BranchMember {
   isPrimary: boolean
 }
 
+export interface BranchUserMember {
+  id: string
+  fullName: string
+  firstName: string
+  lastName: string
+  email: string
+  role: 'viewer' | 'member'
+  joinedAt: string
+  invitedBy: string
+}
+
 export interface CreateBranchDto {
   name: string
   description?: string
@@ -53,6 +64,8 @@ export const branchesService = {
     await api.delete(`/branches/${id}`)
   },
 
+  // ── Person membership ───────────────────────────────────────────────────────
+
   async getPersons(branchId: string): Promise<{ members: BranchMember[]; count: number }> {
     const { data } = await api.get(`/branches/${branchId}/persons`)
     return data
@@ -65,5 +78,26 @@ export const branchesService = {
   async removePerson(branchId: string, personId: string): Promise<void> {
     await api.delete(`/branches/${branchId}/persons/${personId}`)
   },
+
+  // ── User membership ─────────────────────────────────────────────────────────
+
+  async getUsers(branchId: string): Promise<{ members: BranchUserMember[]; count: number }> {
+    const { data } = await api.get(`/branches/${branchId}/users`)
+    return data
+  },
+
+  async addUser(branchId: string, userId: string, role: 'viewer' | 'member' = 'member'): Promise<void> {
+    await api.post(`/branches/${branchId}/users`, { userId, role })
+  },
+
+  async removeUser(branchId: string, userId: string): Promise<void> {
+    await api.delete(`/branches/${branchId}/users/${userId}`)
+  },
+
+  async updateUserRole(branchId: string, userId: string, role: 'viewer' | 'member'): Promise<void> {
+    await api.patch(`/branches/${branchId}/users/${userId}`, { role })
+  },
 }
+
+
 

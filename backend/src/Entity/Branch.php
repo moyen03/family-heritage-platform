@@ -89,11 +89,16 @@ class Branch
     #[ORM\OneToMany(targetEntity: PersonBranch::class, mappedBy: 'branch', cascade: ['persist', 'remove'])]
     private Collection $personBranches;
 
+    /** @var Collection<int, BranchMembership> */
+    #[ORM\OneToMany(targetEntity: BranchMembership::class, mappedBy: 'branch', cascade: ['persist', 'remove'])]
+    private Collection $memberships;
+
     public function __construct(string $id = '')
     {
         $this->id             = $id ?: Uuid::uuid4()->toString();
         $this->admins         = new ArrayCollection();
         $this->personBranches = new ArrayCollection();
+        $this->memberships    = new ArrayCollection();
     }
 
     public function getId(): string
@@ -176,5 +181,21 @@ class Branch
     public function getMemberCount(): int
     {
         return $this->personBranches->count();
+    }
+
+    /** @return Collection<int, BranchMembership> */
+    public function getMemberships(): Collection
+    {
+        return $this->memberships;
+    }
+
+    public function hasMembership(User $user): bool
+    {
+        foreach ($this->memberships as $m) {
+            if ($m->getUser()->getId() === $user->getId()) {
+                return true;
+            }
+        }
+        return false;
     }
 }

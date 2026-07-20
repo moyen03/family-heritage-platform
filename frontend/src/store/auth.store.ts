@@ -1,6 +1,6 @@
 import { create } from 'zustand'
 import { authService } from '@/services/auth.service'
-import { getAccessToken, getRefreshToken, setAccessToken, setRefreshToken } from '@/services/api'
+import { getAccessToken, getRefreshToken, setAccessToken } from '@/services/api'
 import type { AuthUser, LoginCredentials } from '@/types/auth'
 
 interface AuthState {
@@ -89,4 +89,6 @@ export const useAuthStore = create<AuthState>((set) => ({
 export const selectIsAuthenticated = (s: AuthState) => s.user !== null
 export const selectIsAdmin = (s: AuthState) =>
   s.user?.roles.some((r) => ['ROLE_SUPER_ADMIN', 'ROLE_BRANCH_ADMIN'].includes(r)) ?? false
+export const selectIsSuperAdmin = (s: AuthState) =>
+  s.user?.roles.includes('ROLE_SUPER_ADMIN') ?? false
 

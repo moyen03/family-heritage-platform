@@ -43,12 +43,6 @@ function dateToYear(date: string): string {
   return date ? date.substring(0, 4) : ''
 }
 
-/** Convert a 4-digit year to a full date string (Jan 1 of that year) */
-function yearToDate(year: string): string {
-  const y = year.trim()
-  if (!y || !/^\d{4}$/.test(y)) return ''
-  return `${y}-01-01`
-}
 
 const empty: CreatePersonDto = {
   firstName: '',

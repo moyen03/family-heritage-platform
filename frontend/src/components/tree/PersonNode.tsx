@@ -25,7 +25,7 @@ const genderColors = {
 export const PersonNode = memo(({ data }: PersonNodeProps) => {
   const {
     person, isSelected, highlightState,
-    onSelect, onHighlightAncestors, onHighlightDescendants, onToggleCollapse,
+    onSelect, onHighlightAncestors: _onHighlightAncestors, onHighlightDescendants: _onHighlightDescendants, onToggleCollapse,
     hasChildren, isCollapsed, collapsedChildCount,
   } = data
   const colors = genderColors[person.gender] ?? genderColors.unknown

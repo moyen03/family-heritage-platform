@@ -8,6 +8,8 @@ use App\Entity\Person;
 use App\Entity\User;
 use App\Enum\UserRole;
 use App\Enum\Visibility;
+use App\Repository\BranchAdminRepository;
+use App\Repository\BranchMembershipRepository;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use Symfony\Component\Security\Core\Authorization\Voter\Voter;
 
@@ -19,6 +21,12 @@ final class PersonVoter extends Voter
     public const VIEW   = 'PERSON_VIEW';
     public const EDIT   = 'PERSON_EDIT';
     public const DELETE = 'PERSON_DELETE';
+
+    public function __construct(
+        private readonly BranchMembershipRepository $membershipRepo,
+        private readonly BranchAdminRepository $branchAdminRepo,
+    ) {
+    }
 
     protected function supports(string $attribute, mixed $subject): bool
     {
@@ -55,10 +63,39 @@ final class PersonVoter extends Voter
 
         return match ($person->getVisibility()) {
             Visibility::Public  => true,
-            Visibility::Family  => true,  // all authenticated family members
-            Visibility::Branch  => true,  // simplify: all members for now (branch check Phase 5)
-            Visibility::Private => false, // only SuperAdmin can see private (already returned true above)
+            Visibility::Family  => true,
+            Visibility::Branch  => $this->canViewBranchPerson($person, $user),
+            Visibility::Private => false,
         };
+    }
+
+    /**
+     * Branch visibility: person must be in a shared branch,
+     * OR the user must belong to at least one of the person's branches.
+     */
+    private function canViewBranchPerson(Person $person, User $user): bool
+    {
+        $personBranchIds = [];
+        foreach ($person->getPersonBranches() as $pb) {
+            $branch = $pb->getBranch();
+            // A shared branch is visible to everyone
+            if ($branch->isShared() && $branch->getDeletedAt() === null) {
+                return true;
+            }
+            if ($branch->getDeletedAt() === null) {
+                $personBranchIds[] = $branch->getId();
+            }
+        }
+
+        if (empty($personBranchIds)) {
+            return false;
+        }
+
+        $memberBranchIds = $this->membershipRepo->getBranchIdsForUser($user->getId());
+        $adminBranchIds  = $this->branchAdminRepo->getBranchIdsForUser($user->getId());
+        $accessibleIds   = array_unique(array_merge($memberBranchIds, $adminBranchIds));
+
+        return !empty(array_intersect($personBranchIds, $accessibleIds));
     }
 
     private function canEdit(Person $person, User $user): bool

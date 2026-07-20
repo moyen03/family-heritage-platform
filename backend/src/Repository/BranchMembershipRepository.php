@@ -4,30 +4,30 @@ declare(strict_types=1);
 
 namespace App\Repository;
 
-use App\Entity\BranchAdmin;
+use App\Entity\BranchMembership;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**
- * @extends ServiceEntityRepository<BranchAdmin>
+ * @extends ServiceEntityRepository<BranchMembership>
  */
-class BranchAdminRepository extends ServiceEntityRepository
+class BranchMembershipRepository extends ServiceEntityRepository
 {
     public function __construct(ManagerRegistry $registry)
     {
-        parent::__construct($registry, BranchAdmin::class);
+        parent::__construct($registry, BranchMembership::class);
     }
 
     /**
-     * Returns the IDs of all branches this user administers.
+     * Returns the IDs of all branches this user is a member of.
      *
      * @return string[]
      */
     public function getBranchIdsForUser(string $userId): array
     {
-        $rows = $this->createQueryBuilder('ba')
-            ->select('IDENTITY(ba.branch) AS branchId')
-            ->where('IDENTITY(ba.user) = :userId')
+        $rows = $this->createQueryBuilder('bm')
+            ->select('IDENTITY(bm.branch) AS branchId')
+            ->where('IDENTITY(bm.user) = :userId')
             ->setParameter('userId', $userId)
             ->getQuery()
             ->getScalarResult();

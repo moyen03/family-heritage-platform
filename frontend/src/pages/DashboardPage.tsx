@@ -4,7 +4,6 @@ import { Link } from 'react-router-dom'
 import { personsService } from '@/services/persons.service'
 import { relationshipsService } from '@/services/relationships.service'
 import { useAuthStore } from '@/store/auth.store'
-import { LoadingSpinner } from '@/components/ui/LoadingSpinner'
 import api from '@/services/api'
 import type { ApiCollection } from '@/types/api'
 

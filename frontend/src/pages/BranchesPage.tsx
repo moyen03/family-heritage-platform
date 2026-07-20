@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { Link } from 'react-router-dom'
-import { GitBranch, Plus, Pencil, Trash2, Users, Globe, Lock, Loader2, X, Save, AlertCircle, Share2 } from 'lucide-react'
+import { GitBranch, Plus, Pencil, Trash2, Users, Loader2, X, Save, AlertCircle, Share2 } from 'lucide-react'
 import { branchesService } from '@/services/branches.service'
 import type { Branch, CreateBranchDto } from '@/services/branches.service'
 

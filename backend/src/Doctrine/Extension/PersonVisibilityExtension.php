@@ -9,14 +9,20 @@ use ApiPlatform\Doctrine\Orm\Extension\QueryItemExtensionInterface;
 use ApiPlatform\Doctrine\Orm\Util\QueryNameGeneratorInterface;
 use ApiPlatform\Metadata\Operation;
 use App\Entity\Person;
+use App\Entity\User;
 use App\Enum\Visibility;
+use App\Repository\BranchAdminRepository;
+use App\Repository\BranchMembershipRepository;
 use Doctrine\ORM\QueryBuilder;
 use Symfony\Bundle\SecurityBundle\Security;
 
 final class PersonVisibilityExtension implements QueryCollectionExtensionInterface, QueryItemExtensionInterface
 {
-    public function __construct(private readonly Security $security)
-    {
+    public function __construct(
+        private readonly Security $security,
+        private readonly BranchMembershipRepository $membershipRepo,
+        private readonly BranchAdminRepository $branchAdminRepo,
+    ) {
     }
 
     public function applyToCollection(
@@ -29,7 +35,6 @@ final class PersonVisibilityExtension implements QueryCollectionExtensionInterfa
         if ($resourceClass !== Person::class) {
             return;
         }
-
         $this->addFilters($queryBuilder);
     }
 
@@ -44,7 +49,6 @@ final class PersonVisibilityExtension implements QueryCollectionExtensionInterfa
         if ($resourceClass !== Person::class) {
             return;
         }
-
         $this->addFilters($queryBuilder);
     }
 
@@ -62,20 +66,49 @@ final class PersonVisibilityExtension implements QueryCollectionExtensionInterfa
 
         $user = $this->security->getUser();
 
-        if ($user === null) {
-            // Unauthenticated: only public persons (shouldn't happen with our firewall, but defensive)
+        if ($user === null || !$user instanceof User) {
+            // Unauthenticated: only public persons
             $qb->andWhere("$alias.visibility = :vis")
                ->setParameter('vis', Visibility::Public->value);
             return;
         }
 
-        // Branch Admins and Members can see public + family level
-        // Private: only Super Admins (already returned above)
-        $qb->andWhere("$alias.visibility IN (:allowed_vis)")
-           ->setParameter('allowed_vis', [
-               Visibility::Public->value,
-               Visibility::Family->value,
-               Visibility::Branch->value,
-           ]);
+        // Collect branch IDs accessible by this user (via membership or branch admin role)
+        $memberBranchIds     = $this->membershipRepo->getBranchIdsForUser($user->getId());
+        $adminBranchIds      = $this->branchAdminRepo->getBranchIdsForUser($user->getId());
+        $accessibleBranchIds = array_values(array_unique(array_merge($memberBranchIds, $adminBranchIds)));
+
+        // Public/Family: always visible to authenticated users
+        // Branch: visible if person is in a shared branch OR a branch the user belongs to
+        // Private: never visible to non-super-admins
+
+        if (empty($accessibleBranchIds)) {
+            // User has no explicit branch access → branch-visible persons only if in a shared branch
+            $qb->andWhere(
+                $qb->expr()->orX(
+                    "$alias.visibility IN (:public_family_vis)",
+                    $qb->expr()->andX(
+                        "$alias.visibility = :branch_vis",
+                        "EXISTS (SELECT 1 FROM App\\Entity\\PersonBranch pb_chk JOIN pb_chk.branch b_chk WHERE pb_chk.person = $alias AND b_chk.deletedAt IS NULL AND b_chk.isShared = true)"
+                    )
+                )
+            )
+            ->setParameter('public_family_vis', [Visibility::Public->value, Visibility::Family->value])
+            ->setParameter('branch_vis', Visibility::Branch->value);
+        } else {
+            // User has branch access → branch-visible if in shared OR in user's accessible branches
+            $qb->andWhere(
+                $qb->expr()->orX(
+                    "$alias.visibility IN (:public_family_vis)",
+                    $qb->expr()->andX(
+                        "$alias.visibility = :branch_vis",
+                        "EXISTS (SELECT 1 FROM App\\Entity\\PersonBranch pb_chk JOIN pb_chk.branch b_chk WHERE pb_chk.person = $alias AND b_chk.deletedAt IS NULL AND (b_chk.isShared = true OR b_chk.id IN (:accessible_branches)))"
+                    )
+                )
+            )
+            ->setParameter('public_family_vis', [Visibility::Public->value, Visibility::Family->value])
+            ->setParameter('branch_vis', Visibility::Branch->value)
+            ->setParameter('accessible_branches', $accessibleBranchIds);
+        }
     }
 }

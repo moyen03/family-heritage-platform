@@ -1,5 +1,5 @@
 import { useParams, Link, useNavigate } from 'react-router-dom'
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { useState } from 'react'
 import {
   ArrowLeft, Calendar, MapPin, User,
@@ -309,7 +309,7 @@ export function PersonDetailPage() {
                   <div key={b.id} className="flex items-center gap-1.5 bg-indigo-50 border border-indigo-200 rounded-lg px-3 py-1.5">
                     {b.isShared ? <Share2 className="h-3 w-3 text-amber-500" /> : <GitBranch className="h-3 w-3 text-indigo-500" />}
                     <span className="text-sm font-medium text-indigo-700">{b.name}</span>
-                    {pb?.isPrimary && <Star className="h-3 w-3 text-amber-500 fill-amber-500" title="Primary branch" />}
+                    {pb?.isPrimary && <span title="Primary branch"><Star className="h-3 w-3 text-amber-500 fill-amber-500" /></span>}
                     <button
                       onClick={async () => {
                         await branchesService.removePerson(b.id, person.id)

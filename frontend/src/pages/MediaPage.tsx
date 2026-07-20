@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Upload, Image, Film, FileText, Music, Search, Filter, Loader2 } from 'lucide-react'
+import { Upload, Image, Film, FileText, Music, Search, Loader2 } from 'lucide-react'
 import { useMedia } from '../hooks/useMedia'
 import type { MediaItem } from '../hooks/useMedia'
 import UploadModal from '../components/media/UploadModal'

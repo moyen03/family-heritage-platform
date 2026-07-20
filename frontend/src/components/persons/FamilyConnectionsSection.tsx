@@ -400,7 +400,7 @@ export function FamilyConnectionsSection({
         {parents.length === 0 ? empty : parents.map(r => (
           <ConnectionRow
             key={r.id}
-            label={`${r.person1.firstName} ${r.person1.lastName}`}
+            label={r.person1.fullName}
             to={`/persons/${r.person1.id}`}
             onRemove={() => removeRelationship(r.id)}
             removing={removing === r.id}
@@ -415,7 +415,7 @@ export function FamilyConnectionsSection({
           return (
             <ConnectionRow
               key={r.id}
-              label={`${other.firstName} ${other.lastName}`}
+              label={other.fullName}
               to={`/persons/${other.id}`}
               onRemove={() => removeRelationship(r.id)}
               removing={removing === r.id}
@@ -431,7 +431,7 @@ export function FamilyConnectionsSection({
           return (
             <ConnectionRow
               key={m.id}
-              label={`${spouse.firstName} ${spouse.lastName}`}
+              label={spouse.fullName}
               to={`/persons/${spouse.id}`}
               badge={m.isDivorced ? 'Divorced' : undefined}
               onRemove={() => removeMarriage(m.id)}
@@ -446,7 +446,7 @@ export function FamilyConnectionsSection({
         {children.length === 0 ? empty : children.map(r => (
           <ConnectionRow
             key={r.id}
-            label={`${r.person2.firstName} ${r.person2.lastName}`}
+            label={r.person2.fullName}
             to={`/persons/${r.person2.id}`}
             onRemove={() => removeRelationship(r.id)}
             removing={removing === r.id}
