@@ -1,6 +1,8 @@
 # 12 – Development Roadmap
 
-## Phase 1 – Foundation ✅ (Current)
+> **Last updated:** July 2026
+
+## Phase 1 – Foundation ✅
 
 **Goal:** Working project skeleton that can be opened in PhpStorm and run locally.
 
@@ -17,12 +19,11 @@
 | PHPUnit | ✅ Done |
 | PHPStan | ✅ Done |
 | PHP-CS-Fixer | ✅ Done |
+| GitHub Actions CI pipeline | ✅ Done |
 | Git initialized | ✅ Done |
-| Claude Code prompts | ✅ Done |
-| DECISIONS.md | ✅ Done |
 | User entity + authentication | ✅ Done |
 | Role system | ✅ Done |
-| Branch entity + branch ownership | ✅ Done |
+| Branch entity + PersonBranch + BranchAdmin entities | ✅ Done |
 
 ---
 
@@ -33,14 +34,13 @@
 | Task | Status |
 |------|--------|
 | Person entity + CRUD API | ✅ Done |
-| Person names (multiple names) | ✅ Done |
-| Relationship entity (graph model) | ✅ Done |
+| Person names (multiple names / nicknames) | ✅ Done |
+| Relationship entity (directed graph model) | ✅ Done |
 | Marriage entity | ✅ Done |
 | Ancestor traversal algorithm | ✅ Done |
 | Descendant traversal algorithm | ✅ Done |
-| Relationship finder (A to B path) | ✅ Done |
-| Approval workflow for Member edits | ✅ Done |
-| Audit log for all person/relationship changes | ✅ Done |
+| Relationship path finder (A → B) | ✅ Done |
+| Data seeder (Moyen family JSON import) | ✅ Done |
 
 ---
 
@@ -50,23 +50,26 @@
 
 | Task | Status |
 |------|--------|
-| React project setup | ✅ Done |
-| Authentication (login/logout) | ✅ Done |
+| React + TypeScript + Vite project setup | ✅ Done |
+| JWT Authentication (login/logout/refresh) | ✅ Done |
 | Tree visualization (React Flow + Dagre layout) | ✅ Done |
-| Zoom and pan | ✅ Done |
-| Expand/collapse branches | ✅ Done |
-| Highlight ancestors | ✅ Done |
-| Highlight descendants | ✅ Done |
+| Zoom, pan, expand/collapse | ✅ Done |
+| Highlight ancestors / descendants | ✅ Done |
 | Search by name | ✅ Done |
 | Person profile drawer | ✅ Done |
 | Relationship path finder (A→B) | ✅ Done |
-| Add/Edit person form (modal) | ✅ Done |
-| Adoption/step display (dashed purple/orange edges) | ✅ Done |
-| Edge legend overlay | ✅ Done |
+| Add / Edit person form (modal) | ✅ Done |
+| Profile photo upload | ✅ Done |
+| Phone / mobile number field | ✅ Done |
+| Smart date precision input (year-only, exact, approximate) | ✅ Done |
+| Removed Middle Name / Maiden Name from form | ✅ Done |
+| Adoption / step display (dashed edges + legend) | ✅ Done |
 | Person detail page | ✅ Done |
+| All Persons list page (paginated) | ✅ Done |
 | Relationships page (searchable table) | ✅ Done |
 | Marriages page (card grid, filter active/divorced) | ✅ Done |
-| All Persons list page | ✅ Done |
+| Address panel per person (CRUD) | ✅ Done |
+| Visibility extension (public / family / branch / private) | ✅ Done |
 
 ---
 
@@ -76,16 +79,13 @@
 
 | Task | Status |
 |------|--------|
-| Photo upload | ✅ Done |
-| Video upload | ✅ Done |
-| Document upload (PDF) | ✅ Done |
-| Audio upload | ✅ Done |
+| Photo / Video / Document / Audio upload | ✅ Done |
 | Media metadata (date, place, source, title, description) | ✅ Done |
 | Tag people in photos (MediaTag entity + API) | ✅ Done |
-| Privacy levels per media item (public/family/private) | ✅ Done |
+| Privacy levels per media item | ✅ Done |
 | Media gallery UI (responsive grid, type filter, search) | ✅ Done |
 | Upload modal (drag & drop, all metadata fields) | ✅ Done |
-| Media detail modal (inline preview, download link) | ✅ Done |
+| Media detail modal (inline preview, download) | ✅ Done |
 
 ---
 
@@ -95,16 +95,65 @@
 
 | Task | Status |
 |------|--------|
-| Address entity + CRUD | ✅ Done |
-| Current address per person | ✅ Done |
-| Historical addresses | ✅ Done |
+| Address entity + CRUD API | ✅ Done |
+| Current / historical / birth / childhood address types | ✅ Done |
+| Address panel on person detail page | ✅ Done |
 | Map view (Leaflet + OpenStreetMap) | ✅ Done |
+| Marker clustering (react-leaflet-cluster) | ✅ Done |
 | Migration path visualization | ✅ Done |
 | Family heat map by region | ✅ Done |
+| Sidebar: family by country stats + missing-coords list | ✅ Done |
+| Bulk address defaults (Naogaon, Bangladesh) | ✅ Done |
 
 ---
 
-## Phase 6 – Reports ⏳
+## Phase 6 – Branch Management 🚧 In Progress
+
+**Goal:** Multi-branch family support — each grandparent line is its own branch with controlled access.
+
+### Branch Structure Design
+
+```
+Great-Grandparent (common ancestor → visible to ALL branches)
+├── Grandparent A → "Branch A"  (e.g. Aziz Uddin family)
+└── Grandparent B → "Branch B"  (e.g. Azim Uddin family)
+    ├── Son 1 → belongs to Branch B
+    ├── Son 2 → belongs to Branch B
+    └── ...
+```
+
+### Phase 6a – Branch Management UI (Option B, Step 1) 🚧
+
+| Task | Status |
+|------|--------|
+| Branch API resource (CRUD with API Platform) | ⏳ |
+| Branch management page (super admin: create/edit/delete branches) | ⏳ |
+| Assign persons to branches (UI + API) | ⏳ |
+| Mark common ancestors as shared (visible to all descendent branches) | ⏳ |
+| Branch listing with member count | ⏳ |
+
+### Phase 6b – Branch Visibility Enforcement (Step 2) ⏳
+
+| Task | Status |
+|------|--------|
+| Update PersonVisibilityExtension to filter by actual branch membership | ⏳ |
+| Common ancestors visible to all branches they appear in | ⏳ |
+| Branch Admin scope enforcement (edit only own branch) | ⏳ |
+| Family tree respects branch visibility | ⏳ |
+
+### Phase 6c – Invitation & Edit Approval (Step 3) ⏳
+
+| Task | Status |
+|------|--------|
+| Invite user by email to a branch (Super Admin or Branch Admin) | ⏳ |
+| Invited members get read-only access by default | ⏳ |
+| Member edit request workflow | ⏳ |
+| Branch Admin approval UI (approve / reject edits) | ⏳ |
+| Email notification on invitation and approval | ⏳ |
+
+---
+
+## Phase 7 – Reports ⏳
 
 **Goal:** Generate PDF reports for printing and archiving.
 
@@ -121,7 +170,7 @@
 
 ---
 
-## Phase 7 – Mobile App ⏳
+## Phase 8 – Mobile App ⏳
 
 **Goal:** iOS and Android app for family members.
 
@@ -136,7 +185,7 @@
 
 ---
 
-## Phase 8 – AI Features ⏳
+## Phase 9 – AI Features ⏳
 
 **Goal:** AI-assisted data entry and discovery.
 
@@ -148,3 +197,18 @@
 | Auto-biography generation | ⏳ |
 | Name spelling normalization | ⏳ |
 
+---
+
+## Current Progress Summary
+
+| Phase | Status |
+|-------|--------|
+| Phase 1 – Foundation | ✅ Complete |
+| Phase 2 – Core Genealogy | ✅ Complete |
+| Phase 3 – Family Tree UI | ✅ Complete |
+| Phase 4 – Media | ✅ Complete |
+| Phase 5 – Addresses & Maps | ✅ Complete |
+| Phase 6 – Branch Management | 🚧 In Progress |
+| Phase 7 – Reports | ⏳ Planned |
+| Phase 8 – Mobile App | ⏳ Planned |
+| Phase 9 – AI Features | ⏳ Planned |

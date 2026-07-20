@@ -199,13 +199,13 @@ Use React 18 + TypeScript with React Flow for tree visualization.
 
 ## ADR-011: Docker for Local Development
 
-**Date:** 2026-07-15  
+**Date:** 2026-07-15
 **Status:** Accepted
 
-**Context:**  
+**Context:**
 Developers need a consistent local environment without manual PHP/MySQL setup.
 
-**Decision:**  
+**Decision:**
 Docker Compose with PHP-FPM, Nginx, MySQL, and phpMyAdmin.
 
 **Reasons:**
@@ -213,3 +213,82 @@ Docker Compose with PHP-FPM, Nginx, MySQL, and phpMyAdmin.
 - No "works on my machine" issues
 - Easy onboarding for new contributors
 
+---
+
+## ADR-012: Branch Structure by Grandparent Lineage
+
+**Date:** 2026-07-20
+**Status:** Accepted
+
+**Context:**
+The family has multiple grandparent lines descending from common great-grandparents. Different cousins and their families need separate access scopes so each sub-family only sees their own branch.
+
+**Decision:**
+Each **grandparent** defines one branch. Common great-grandparents and above are shared ancestors visible to all descendent branches.
+
+**Rules:**
+- Person's primary branch = father's branch
+- Common ancestors belong to all descendent branches
+- A person may belong to multiple branches (e.g. when parents come from different branches)
+- Super Admin sees everything; Branch Admin sees their branch only; Members read their branch only by default
+
+**Alternatives considered:**
+- One flat branch per family: Too coarse — doesn't support sub-family privacy
+- Branch per generation: Too granular — hard to manage
+
+---
+
+## ADR-013: Invite-Only Branch Membership
+
+**Date:** 2026-07-20
+**Status:** Accepted
+
+**Context:**
+Branch members should only be able to join by invitation, not by self-registering and selecting a branch.
+
+**Decision:**
+Branch membership is created only via an invitation link sent by Super Admin or Branch Admin. New invitees default to Viewer (read-only). Branch Admin can upgrade them to Member (edit with approval).
+
+**Reasons:**
+- Prevents unauthorized access to family data
+- Keeps branch membership controlled
+- Aligns with the invite-only registration principle (ADR-008)
+
+---
+
+## ADR-014: Profile Photo Upload via Custom Endpoint
+
+**Date:** 2026-07-20
+**Status:** Accepted
+
+**Context:**
+API Platform uses JSON for all CRUD operations, but profile photos require multipart/form-data upload which doesn't fit the standard API Platform resource model.
+
+**Decision:**
+Use a custom Symfony controller (`PersonPhotoController`) for `POST /api/persons/{id}/photo` and `DELETE /api/persons/{id}/photo`, storing files in `public/uploads/persons/`.
+
+**Reasons:**
+- Clean separation of JSON API and file upload
+- Avoids VichUploader complexity for a simple use case
+- Files served directly by Nginx with no PHP overhead
+
+---
+
+## ADR-015: Smart Date Precision Input
+
+**Date:** 2026-07-20
+**Status:** Accepted
+
+**Context:**
+Many historical birth/death dates in the family are only known by year (e.g. "born around 1945"). The standard HTML date picker requires a full YYYY-MM-DD, making it unusable for year-only data.
+
+**Decision:**
+The `SmartDateInput` component adapts its UI based on the selected `DatePrecision`:
+- `unknown` → disabled placeholder input
+- `year` → plain text input (4 digits), stored as `YYYY-01-01` internally
+- `exact` / `approximate` → date picker + manual text fallback
+
+**Reasons:**
+- Matches real-world genealogy data quality
+- Prevents forcing fake "Jan 1" dates when only year is known
+- Consistent with GEDCOM date precision model

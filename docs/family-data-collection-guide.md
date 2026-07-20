@@ -4,8 +4,10 @@
 > **How to use this guide**
 > 1. Fill in the missing data in the tables below
 > 2. Open `database/seed/moyen_family_data.json` and update the matching entry (find by `id`)
-> 3. Re-run the import: `docker compose exec php bin/console app:seed-moyen-family --force`
+> 3. Re-run the import: `docker compose -f docker/docker-compose.yml exec php bin/console app:seed-moyen-family --force`
 > 4. Refresh the tree at http://localhost:3000/tree
+>
+> **Or use the UI:** Go to any person's profile → click **Edit** to update data directly without re-importing.
 
 ---
 
@@ -19,13 +21,36 @@
 
 ---
 
-## Summary
+## Current Database Summary
 | | Count |
 |--|-------|
 | Total persons in database | **94** |
 | Marriages recorded | **25** |
 | Parent-child links | **113** |
 | Placeholders (real name unknown) | **40** |
+| Default birth place (Mohadebpur) | **95 persons** |
+| Default address (Naogaon, Bangladesh) | **98 addresses** |
+
+---
+
+## Branch Planning
+
+Branches are being set up based on grandparent lineage. Once Branch Management is built (Phase 6), each branch below will become a separate access scope:
+
+| Branch ID | Branch Name | Root Person | Sub-branches |
+|-----------|-------------|-------------|--------------|
+| `branch-hafez` | Hafez Uddin Branch | Md Hafez Uddin Molla (1.1.1) | Mota, Mono, Alom, Lily, Sultana, Zahurul families |
+| `branch-hazar` | Hazar Uddin Branch | Md Hazar Uddin Molla (1.1.2) | Pochi, Akbar families |
+| `branch-zillur` | Zillur Rahman Branch | Md Zillur Rahman Molla (1.1.3) | Zinna, Rina, Aktar, Shiuly, Sweet families |
+| `branch-siraz` | Siraz Uddin Branch | Md Siraz Uddin Molla (1.1.4) | Shahanaz, Monir, Sabina, Moyen families |
+| `branch-royes` | Royes Uddin Branch | Md Royes Uddin Molla (1.1.5) | Muminul, Rehena families |
+| `branch-fuppis` | Fuppis Branch | Md Hafez Uddin Molla daughters (1.1.6-8) | Fuppi Katihar, Debipur, Pagha families |
+
+**Common ancestors** (visible to all branches):
+- Md Damulla Uddin Molla (great-grandfather)
+- Maryum Begum (great-grandmother)
+- Md Azim Uddin Molla (grandfather)
+- Mrs Rahima Begum (grandmother)
 
 ---
 

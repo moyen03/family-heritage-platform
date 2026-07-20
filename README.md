@@ -1,6 +1,6 @@
 # Family Heritage Platform
 
-A comprehensive, enterprise-grade family history and genealogy platform built with Symfony 7, React, and React Native.
+A secure, multi-branch family history and genealogy platform built with Symfony 7, React, and React Native. Families can collaboratively build, manage, and explore their heritage across generations — with branch-level access control so each grandparent's family line has its own private scope.
 
 ## Technology Stack
 
@@ -11,11 +11,13 @@ A comprehensive, enterprise-grade family history and genealogy platform built wi
 | ORM | Doctrine ORM |
 | API | API Platform (REST + OpenAPI) |
 | Authentication | Symfony Security + JWT |
-| Web Frontend | React + TypeScript |
-| Mobile App | React Native |
+| Web Frontend | React 18 + TypeScript + Vite |
+| Tree Visualization | React Flow + Dagre |
+| Maps | OpenStreetMap + Leaflet + Clustering |
+| Mobile App | React Native *(planned)* |
 | File Storage | Local (S3-compatible later) |
-| Maps | OpenStreetMap + Leaflet |
 | Local Dev | Docker + Docker Compose |
+| CI | GitHub Actions (PHP CS Fixer + PHPStan + PHPUnit) |
 
 ## Quick Start
 
@@ -23,6 +25,7 @@ A comprehensive, enterprise-grade family history and genealogy platform built wi
 
 - Docker Desktop
 - Docker Compose v2+
+- Node.js 18+
 - Git
 
 ### Local Development Setup
@@ -32,86 +35,120 @@ A comprehensive, enterprise-grade family history and genealogy platform built wi
 git clone <your-repo-url> family-heritage-platform
 cd family-heritage-platform
 
-# Start Docker containers
+# Start Docker containers (backend + MySQL)
 docker compose -f docker/docker-compose.yml up -d
 
 # Install backend dependencies
-docker exec fhp-php composer install
+docker compose -f docker/docker-compose.yml exec php composer install
 
 # Run database migrations
-docker exec fhp-php php bin/console doctrine:migrations:migrate --no-interaction
+docker compose -f docker/docker-compose.yml exec php bin/console doctrine:migrations:migrate --no-interaction
 
-# Seed initial data (optional)
-docker exec fhp-php php bin/console doctrine:fixtures:load --no-interaction
+# Seed Moyen family data
+docker compose -f docker/docker-compose.yml exec php bin/console app:seed-moyen-family
+
+# Install frontend dependencies and start dev server
+cd frontend && npm install && npm run dev
 ```
 
 ### Access Points
 
 | Service | URL |
 |---------|-----|
+| Web App (React) | http://localhost:3000 |
 | API (Symfony) | http://localhost:8000 |
 | API Docs (Swagger) | http://localhost:8000/api/docs |
 | phpMyAdmin | http://localhost:8080 |
-| Frontend (React) | http://localhost:3000 |
+
+### Default Login
+
+| Account | Email | Password |
+|---------|-------|----------|
+| Super Admin | admin@family.local | Admin1234! |
+| Family Member | moyen@family.local | Member1234! |
 
 ## Development Roadmap
 
 | Phase | Description | Status |
 |-------|-------------|--------|
-| Phase 1 | Foundation (Docker, Symfony, Auth, Roles, Branches) | 🚧 In Progress |
-| Phase 2 | Core Genealogy (Persons, Relationships, Ancestors, Descendants) | ⏳ Planned |
-| Phase 3 | Interactive Family Tree UI | ⏳ Planned |
-| Phase 4 | Media (Photos, Videos, Documents) | ⏳ Planned |
-| Phase 5 | Addresses and Maps | ⏳ Planned |
-| Phase 6 | Reports (PDF Family Book, Printable Tree) | ⏳ Planned |
-| Phase 7 | Mobile App | ⏳ Planned |
-| Phase 8 | AI Features (OCR, Duplicate Detection, Suggestions) | ⏳ Planned |
+| Phase 1 | Foundation (Docker, Symfony, Auth, Roles, Branches) | ✅ Complete |
+| Phase 2 | Core Genealogy (Persons, Relationships, Ancestors) | ✅ Complete |
+| Phase 3 | Interactive Family Tree UI | ✅ Complete |
+| Phase 4 | Media (Photos, Videos, Documents, Audio) | ✅ Complete |
+| Phase 5 | Addresses and Maps | ✅ Complete |
+| Phase 6 | Branch Management (multi-branch access control) | 🚧 In Progress |
+| Phase 7 | Reports (PDF Family Book, Printable Tree) | ⏳ Planned |
+| Phase 8 | Mobile App | ⏳ Planned |
+| Phase 9 | AI Features (OCR, Duplicate Detection, Suggestions) | ⏳ Planned |
+
+See [`docs/12_Development_Roadmap.md`](./docs/12_Development_Roadmap.md) for detailed task breakdown.
+
+## Branch System
+
+The platform supports multi-branch family trees. Each **grandparent line** is its own branch:
+
+```
+Great-Grandparent (common ancestor — visible to everyone)
+├── Grandparent A → "Branch A" (their descendants only see Branch A)
+└── Grandparent B → "Branch B" (their descendants only see Branch B)
+```
+
+- **Super Admin** — sees everything across all branches
+- **Branch Admin** — manages their branch, approves edits, invites members
+- **Member** — views their branch, can suggest edits (requires approval)
+- **Viewer** — read-only access to their branch
 
 ## Project Structure
 
 ```
 family-heritage-platform/
 ├── README.md
-├── LICENSE
-├── .gitignore
+├── .github/
+│   └── workflows/ci.yml        # GitHub Actions CI
 ├── docker/
 │   ├── nginx/
 │   ├── php/
 │   ├── mysql/
 │   └── docker-compose.yml
-├── docs/
+├── docs/                        # Full documentation
 │   ├── 00_Project_Overview.md
-│   ├── 01_Project_Vision.md
-│   ├── 02_Product_Requirements.md
-│   ├── 03_Architecture.md
-│   ├── 04_Coding_Standards.md
-│   ├── 05_Database_Design.md
-│   ├── 06_API_Design.md
-│   ├── 07_UI_UX.md
-│   ├── 08_Security.md
 │   ├── 09_User_Roles.md
 │   ├── 10_Business_Rules.md
-│   ├── 11_AI_Guidelines.md
 │   ├── 12_Development_Roadmap.md
-│   └── DECISIONS.md
-├── backend/          # Symfony 7 application
-├── frontend/         # React + TypeScript
-├── mobile/           # React Native
+│   ├── DECISIONS.md
+│   └── family-data-collection-guide.md
+├── backend/                     # Symfony 7 application
+│   ├── src/
+│   │   ├── Entity/              # Person, Branch, Address, Media, etc.
+│   │   ├── Controller/Api/      # Custom endpoints (photo upload, etc.)
+│   │   ├── Doctrine/Extension/  # Visibility filters
+│   │   └── State/               # API Platform state processors
+│   └── migrations/
+├── frontend/                    # React + TypeScript
+│   └── src/
+│       ├── components/          # PersonFormModal, AddressFormModal, etc.
+│       ├── pages/               # Tree, Persons, Map, Media, etc.
+│       ├── services/            # API service layer
+│       └── types/               # TypeScript types
+├── mobile/                      # React Native (planned)
 ├── database/
-│   ├── schema/
-│   ├── seed/
-│   ├── migrations/
-│   └── diagrams/
-├── prompts/
-│   ├── claude/
-│   ├── cursor/
-│   └── github-copilot/
-└── scripts/
+│   ├── seed/                    # moyen_family_data.json
+│   └── schema/
+└── prompts/                     # AI coding prompts
 ```
 
 ## Documentation
 
 All detailed documentation lives in the [`docs/`](./docs/) folder.
+
+| Doc | Contents |
+|-----|---------|
+| [00_Project_Overview](./docs/00_Project_Overview.md) | Goals, capabilities, principles |
+| [09_User_Roles](./docs/09_User_Roles.md) | Roles, permissions, branch structure |
+| [10_Business_Rules](./docs/10_Business_Rules.md) | All business rules |
+| [12_Development_Roadmap](./docs/12_Development_Roadmap.md) | Phase-by-phase task list |
+| [DECISIONS](./docs/DECISIONS.md) | Architecture decision records |
+| [family-data-collection-guide](./docs/family-data-collection-guide.md) | How to add family data |
 
 ## Contributing
 
@@ -120,4 +157,3 @@ See [docs/04_Coding_Standards.md](./docs/04_Coding_Standards.md) for coding stan
 ## License
 
 See [LICENSE](./LICENSE).
-

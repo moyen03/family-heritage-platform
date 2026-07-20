@@ -4,10 +4,25 @@
 
 | Role | Code | Description |
 |------|------|-------------|
-| Super Admin | `ROLE_SUPER_ADMIN` | Owns the entire platform |
-| Branch Admin | `ROLE_BRANCH_ADMIN` | Manages one or more family branches |
-| Member | `ROLE_MEMBER` | Standard family member |
-| Viewer | `ROLE_VIEWER` | Read-only guest access |
+| Super Admin | `ROLE_SUPER_ADMIN` | Owns the entire platform — sees everything across all branches |
+| Branch Admin | `ROLE_BRANCH_ADMIN` | Manages one family branch — can approve edits, invite members |
+| Member | `ROLE_MEMBER` | Standard family member — can view their branch, suggest edits |
+| Viewer | `ROLE_VIEWER` | Read-only access — can only see public / family records |
+
+---
+
+## Visibility Levels
+
+Each person record has a `visibility` field that controls who can see it:
+
+| Visibility | Who can see |
+|-----------|-------------|
+| `public` | All logged-in users (and unauthenticated if firewall allows) |
+| `family` | All logged-in users on the platform *(default)* |
+| `branch` | Only members of the same branch the person belongs to |
+| `private` | Super Admin only |
+
+**Common ancestors** (e.g. great-grandparents shared by multiple branches) are visible to all branches they belong to, regardless of `branch` visibility.
 
 ---
 
@@ -15,23 +30,46 @@
 
 | Permission | Super Admin | Branch Admin | Member | Viewer |
 |-----------|:-----------:|:------------:|:------:|:------:|
-| View any person | ✅ | ✅ (branch) | ✅ (family) | ✅ (public) |
+| View `public` persons | ✅ | ✅ | ✅ | ✅ |
+| View `family` persons | ✅ | ✅ | ✅ | ❌ |
+| View `branch` persons | ✅ | ✅ (own branch) | ✅ (own branch) | ❌ |
+| View `private` persons | ✅ | ❌ | ❌ | ❌ |
 | Create person | ✅ | ✅ | 🔄 (needs approval) | ❌ |
-| Edit person | ✅ | ✅ (branch) | 🔄 (needs approval) | ❌ |
-| Delete person | ✅ | ✅ (branch) | ❌ | ❌ |
-| View private persons | ✅ | ✅ (branch) | ❌ | ❌ |
+| Edit person | ✅ | ✅ (own branch) | 🔄 (needs approval) | ❌ |
+| Delete person | ✅ | ✅ (own branch) | ❌ | ❌ |
+| Upload profile photo | ✅ | ✅ | ✅ | ❌ |
 | Create branch | ✅ | ❌ | ❌ | ❌ |
 | Manage branch admins | ✅ | ❌ | ❌ | ❌ |
-| Invite members | ✅ | ✅ (branch) | ❌ | ❌ |
+| Assign persons to branches | ✅ | ✅ (own branch) | ❌ | ❌ |
+| Invite members | ✅ | ✅ (own branch) | ❌ | ❌ |
 | Upload media | ✅ | ✅ | ✅ | ❌ |
 | Delete media | ✅ | ✅ (own branch) | ✅ (own uploads) | ❌ |
-| Create story | ✅ | ✅ | ✅ | ❌ |
-| Approve changes | ✅ | ✅ (branch) | ❌ | ❌ |
-| View audit logs | ✅ | ✅ (branch) | ❌ | ❌ |
+| Approve member edits | ✅ | ✅ (own branch) | ❌ | ❌ |
+| View audit logs | ✅ | ✅ (own branch) | ❌ | ❌ |
 | Generate reports | ✅ | ✅ | ✅ | ❌ |
 | Manage system settings | ✅ | ❌ | ❌ | ❌ |
 
-🔄 = Submitted as approval request
+🔄 = Submitted as approval request, applied after Branch Admin or Super Admin approves
+
+---
+
+## Branch Structure
+
+Branches are organized by **grandparent lineage**:
+
+```
+Great-Grandparent (common ancestor → visible to all descendent branches)
+├── Grandparent A → "Branch A"
+│       ├── their children → Branch A members
+│       └── their grandchildren → Branch A members
+└── Grandparent B → "Branch B"
+        ├── their children → Branch B members
+        └── their grandchildren → Branch B members
+```
+
+- A person **primarily belongs to their father's branch**
+- A person can belong to **multiple branches** (e.g. if parents are from different branches)
+- **Common ancestors** belong to all descendent branches
 
 ---
 
@@ -40,15 +78,16 @@
 A Branch Admin can only manage:
 - Persons that belong to **their branch**
 - Media uploaded within **their branch**
-- Approval requests for **their branch**
+- Approval requests from members of **their branch**
 - Members who belong to **their branch**
+- Cannot create new branches (Super Admin only)
 
 ---
 
 ## Invitation Flow
 
-1. Super Admin or Branch Admin creates an invitation (email + role)
-2. System sends invitation email with one-time link
+1. Super Admin or Branch Admin sends an invitation (email + branch assignment)
+2. System sends invitation email with a one-time secure link
 3. Invitee clicks link, sets password, account is created
-4. New member is automatically assigned to the branch
-
+4. New member is automatically assigned to the branch as **read-only (Viewer)**
+5. Branch Admin can upgrade them to **Member** (edit with approval) at any time

@@ -21,10 +21,15 @@
 ## Branch Rules
 
 - BR-BRANCH-01: Every person must belong to at least one branch
-- BR-BRANCH-02: A person can belong to multiple branches (e.g., exists in both maternal and paternal branches)
-- BR-BRANCH-03: One branch per person is marked as primary
+- BR-BRANCH-02: A person can belong to multiple branches (e.g., both paternal and maternal)
+- BR-BRANCH-03: One branch per person is marked as primary (father's branch by default)
 - BR-BRANCH-04: A branch must have at least one admin at all times
 - BR-BRANCH-05: Branch Admins can only act within their branch scope
+- BR-BRANCH-06: Branches are organised by grandparent lineage — each grandparent's family line is one branch
+- BR-BRANCH-07: Common ancestors (great-grandparents and above shared by all branches) are visible to all descendent branches regardless of visibility setting
+- BR-BRANCH-08: Only Super Admin can create or delete branches
+- BR-BRANCH-09: Branch Admin can invite new members to their branch (read-only by default)
+- BR-BRANCH-10: A Viewer invited to a branch can be upgraded to Member by the Branch Admin
 
 ## Approval Rules
 
