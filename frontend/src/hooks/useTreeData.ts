@@ -101,20 +101,16 @@ export function buildTreeLayout(
     (m) => visibleIdSet.has(m.spouse1.id) && visibleIdSet.has(m.spouse2.id),
   )
 
-  // Dagre layout — main tree structure
+  // Dagre layout — main tree structure only (marriage edges are NOT added here
+  // because they can create cycles; spouses are aligned in a post-layout pass instead)
   const graph = new dagre.graphlib.Graph()
   graph.setDefaultEdgeLabel(() => ({}))
   graph.setGraph({ rankdir: 'TB', ranksep: 180, nodesep: 60, marginx: 40, marginy: 40 })
   visiblePersons.forEach((p) => graph.setNode(p.id, { width: NODE_WIDTH, height: NODE_HEIGHT }))
 
-  // Primary edges: parent → child (drive the hierarchical structure)
+  // Parent → child edges only (always a DAG — no cycles possible)
   visibleRels.forEach((r) => graph.setEdge(r.person1.id, r.person2.id, { weight: 2, minlen: 1 }))
 
-  // Marriage edges: lightweight nudge so spouses land on the same rank / close columns
-  // weight=1 (lower than parent edges), minlen=0 (no rank separation required)
-  visibleMarriages.forEach((m) => {
-    graph.setEdge(m.spouse1.id, m.spouse2.id, { weight: 1, minlen: 0 })
-  })
 
   dagre.layout(graph)
 
