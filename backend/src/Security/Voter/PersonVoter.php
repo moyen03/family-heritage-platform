@@ -79,7 +79,7 @@ final class PersonVoter extends Voter
         foreach ($person->getPersonBranches() as $pb) {
             $branch = $pb->getBranch();
             // A shared branch is visible to everyone
-            if ($branch->isShared() && $branch->getDeletedAt() === null) {
+            if ($branch->getIsShared() && $branch->getDeletedAt() === null) {
                 return true;
             }
             if ($branch->getDeletedAt() === null) {

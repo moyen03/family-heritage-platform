@@ -130,7 +130,7 @@ class Branch
         return $this;
     }
 
-    public function isShared(): bool
+    public function getIsShared(): bool
     {
         return $this->isShared;
     }
