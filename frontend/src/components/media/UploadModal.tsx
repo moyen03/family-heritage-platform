@@ -46,7 +46,7 @@ export default function UploadModal({ onClose }: UploadModalProps) {
       if (dateTaken)   form.append('dateTaken',   dateTaken)
       if (placeTaken)  form.append('placeTaken',  placeTaken)
       if (source)      form.append('source',      source)
-      await api.post('/media', form, {
+      await api.post('/media/upload', form, {
         headers: { 'Content-Type': 'multipart/form-data' },
       })
     },
