@@ -30,8 +30,25 @@ export interface FamilyTreeHandle {
   focusPerson: (id: string) => void
 }
 
-export const FamilyTree = forwardRef<FamilyTreeHandle>(function FamilyTree(_props, ref) {
-  const { persons, relationships, marriages, isLoading, isError } = useTreeData()
+export interface FamilyTreeProps {
+  /** When provided, these are used instead of fetching from useTreeData */
+  persons?: import('@/types/person').Person[]
+  relationships?: import('@/types/relationship').Relationship[]
+  marriages?: import('@/types/relationship').Marriage[]
+  isLoading?: boolean
+  isError?: boolean
+}
+
+export const FamilyTree = forwardRef<FamilyTreeHandle, FamilyTreeProps>(function FamilyTree(
+  { persons: propPersons, relationships: propRelationships, marriages: propMarriages, isLoading: propLoading, isError: propError },
+  ref,
+) {
+  const treeData = useTreeData()
+  const persons       = propPersons       ?? treeData.persons
+  const relationships = propRelationships ?? treeData.relationships
+  const marriages     = propMarriages     ?? treeData.marriages
+  const isLoading     = propLoading       ?? treeData.isLoading
+  const isError       = propError         ?? treeData.isError
   const { fitView, setCenter } = useReactFlow()
 
   // ── Collapse state ───────────────────────────────────────────────────────────

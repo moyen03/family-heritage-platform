@@ -3,7 +3,7 @@ import { useParams, useNavigate, Link } from 'react-router-dom'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import {
   ArrowLeft, GitBranch, Users, Search, UserPlus, Trash2, Loader2, Share2, Star,
-  ShieldCheck, Eye, UserCog,
+  ShieldCheck, Eye, UserCog, TreePine,
 } from 'lucide-react'
 import { branchesService } from '@/services/branches.service'
 import type { BranchMember, BranchUserMember } from '@/services/branches.service'
@@ -397,6 +397,13 @@ export function BranchDetailPage() {
           <div className="text-right flex-shrink-0">
             <p className="text-2xl font-bold text-indigo-600">{branch.memberCount}</p>
             <p className="text-xs text-gray-400">persons</p>
+            <Link
+              to={`/branches/${id}/tree`}
+              className="mt-2 inline-flex items-center gap-1.5 text-xs font-medium text-indigo-600 hover:text-indigo-800 bg-indigo-50 hover:bg-indigo-100 px-3 py-1.5 rounded-lg transition-colors"
+            >
+              <TreePine className="h-3.5 w-3.5" />
+              View Tree
+            </Link>
           </div>
         </div>
       </div>

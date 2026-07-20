@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { Link } from 'react-router-dom'
-import { GitBranch, Plus, Pencil, Trash2, Users, Loader2, X, Save, AlertCircle, Share2 } from 'lucide-react'
+import { GitBranch, Plus, Pencil, Trash2, Users, Loader2, X, Save, AlertCircle, Share2, TreePine } from 'lucide-react'
 import { branchesService } from '@/services/branches.service'
 import type { Branch, CreateBranchDto } from '@/services/branches.service'
 
@@ -131,12 +131,21 @@ function BranchCard({ branch, onEdit, onDelete }: { branch: Branch; onEdit: () =
           <Users className="h-4 w-4" />
           <span>{branch.memberCount} {branch.memberCount === 1 ? 'person' : 'persons'}</span>
         </div>
-        <Link
-          to={`/branches/${branch.id}`}
-          className="text-xs font-medium text-indigo-600 hover:text-indigo-800 flex items-center gap-1"
-        >
-          Manage →
-        </Link>
+        <div className="flex items-center gap-2">
+          <Link
+            to={`/branches/${branch.id}/tree`}
+            className="text-xs font-medium text-green-600 hover:text-green-800 flex items-center gap-1"
+            title="View branch family tree"
+          >
+            <TreePine className="h-3.5 w-3.5" /> Tree
+          </Link>
+          <Link
+            to={`/branches/${branch.id}`}
+            className="text-xs font-medium text-indigo-600 hover:text-indigo-800 flex items-center gap-1"
+          >
+            Manage →
+          </Link>
+        </div>
       </div>
     </div>
   )

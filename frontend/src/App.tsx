@@ -13,6 +13,7 @@ import MediaPage from '@/pages/MediaPage'
 import MapPage from '@/pages/MapPage'
 import { BranchesPage } from '@/pages/BranchesPage'
 import { BranchDetailPage } from '@/pages/BranchDetailPage'
+import { BranchTreePage } from '@/pages/BranchTreePage'
 import { NotFoundPage } from '@/pages/NotFoundPage'
 import { useAuthStore } from '@/store/auth.store'
 
@@ -46,6 +47,7 @@ export default function App() {
                 <Route path="map" element={<MapPage />} />
                 <Route path="branches" element={<BranchesPage />} />
                 <Route path="branches/:id" element={<BranchDetailPage />} />
+                <Route path="branches/:id/tree" element={<BranchTreePage />} />
                 <Route path="*" element={<NotFoundPage />} />
               </Routes>
             </Layout>

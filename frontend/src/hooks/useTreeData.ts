@@ -1,9 +1,11 @@
 import { useQuery } from '@tanstack/react-query'
+import { useMemo } from 'react'
 import type { Node, Edge } from '@xyflow/react'
 import { MarkerType } from '@xyflow/react'
 import dagre from '@dagrejs/dagre'
 import { personsService } from '@/services/persons.service'
 import { relationshipsService } from '@/services/relationships.service'
+import { branchesService } from '@/services/branches.service'
 import type { Person } from '@/types/person'
 import type { Relationship } from '@/types/relationship'
 
@@ -154,3 +156,67 @@ export function useTreeData() {
     totalPersons: personsData?.['totalItems'] ?? personsData?.['hydra:totalItems'] ?? 0,
   }
 }
+
+/**
+ * Like useTreeData but scoped to a single branch.
+ * Persons, relationships, and marriages are filtered to branch members only.
+ */
+export function useBranchTreeData(branchId: string) {
+  const { data: branchData, isLoading: branchLoading } = useQuery({
+    queryKey: ['branch-persons', branchId],
+    queryFn: () => branchesService.getPersons(branchId),
+    enabled: !!branchId,
+  })
+
+  const { data: personsData, isLoading: personsLoading, isError } = useQuery({
+    queryKey: ['persons'],
+    queryFn: () => personsService.getAll(),
+  })
+
+  const { data: allRelationships = [], isLoading: relsLoading } = useQuery({
+    queryKey: ['relationships'],
+    queryFn: () => relationshipsService.getAll(),
+  })
+
+  const { data: allMarriages = [], isLoading: marriagesLoading } = useQuery({
+    queryKey: ['marriages'],
+    queryFn: () => relationshipsService.getAllMarriages(),
+  })
+
+  const allPersons: Person[] = personsData?.['member'] ?? personsData?.['hydra:member'] ?? []
+
+  const branchPersonIds = useMemo(
+    () => new Set((branchData?.members ?? []).map((m) => m.id)),
+    [branchData],
+  )
+
+  const persons = useMemo(
+    () => (branchPersonIds.size > 0 ? allPersons.filter((p) => branchPersonIds.has(p.id)) : []),
+    [allPersons, branchPersonIds],
+  )
+
+  const relationships = useMemo(
+    () => allRelationships.filter(
+      (r) => branchPersonIds.has(r.person1.id) && branchPersonIds.has(r.person2.id),
+    ),
+    [allRelationships, branchPersonIds],
+  )
+
+  const marriages = useMemo(
+    () => allMarriages.filter(
+      (m) => branchPersonIds.has(m.spouse1.id) && branchPersonIds.has(m.spouse2.id),
+    ),
+    [allMarriages, branchPersonIds],
+  )
+
+  return {
+    persons,
+    relationships,
+    marriages,
+    isLoading: branchLoading || personsLoading || relsLoading || marriagesLoading,
+    isError,
+    totalPersons: persons.length,
+    branchPersonIds,
+  }
+}
+
