@@ -7,7 +7,7 @@ import { personsService } from '@/services/persons.service'
 import { relationshipsService } from '@/services/relationships.service'
 import { branchesService } from '@/services/branches.service'
 import type { Person } from '@/types/person'
-import type { Relationship } from '@/types/relationship'
+import type { Relationship, Marriage } from '@/types/relationship'
 
 const NODE_WIDTH = 210
 const NODE_HEIGHT = 100
@@ -56,12 +56,14 @@ function edgeStyle(type: string): Pick<Edge, 'style' | 'label' | 'labelStyle' | 
 }
 
 /**
- * Build a Dagre-layouted React Flow graph from persons + relationships,
- * respecting collapsed nodes (their entire subtrees are hidden).
+ * Build a Dagre-layouted React Flow graph from persons + relationships + marriages.
+ * Marriages are added to Dagre as lightweight edges so spouses are placed close together,
+ * then a post-layout pass aligns same-generation spouses to the same Y coordinate.
  */
 export function buildTreeLayout(
   persons: Person[],
   relationships: Relationship[],
+  marriages: Marriage[],
   collapsedIds: Set<string>,
 ): { nodes: Node<PersonNodeData>[]; edges: Edge[] } {
   if (!persons.length) return { nodes: [], edges: [] }
@@ -92,22 +94,56 @@ export function buildTreeLayout(
   const visibleRels = relationships.filter(
     (r) => PARENT_TYPES.has(r.type) && !hiddenIds.has(r.person1.id) && !hiddenIds.has(r.person2.id),
   )
+  const visibleIdSet = new Set(visiblePersons.map((p) => p.id))
 
-  // Dagre layout
+  // Visible marriages (both spouses present and not hidden)
+  const visibleMarriages = marriages.filter(
+    (m) => visibleIdSet.has(m.spouse1.id) && visibleIdSet.has(m.spouse2.id),
+  )
+
+  // Dagre layout — main tree structure
   const graph = new dagre.graphlib.Graph()
   graph.setDefaultEdgeLabel(() => ({}))
-  graph.setGraph({ rankdir: 'TB', ranksep: 180, nodesep: 80, marginx: 40, marginy: 40 })
+  graph.setGraph({ rankdir: 'TB', ranksep: 180, nodesep: 60, marginx: 40, marginy: 40 })
   visiblePersons.forEach((p) => graph.setNode(p.id, { width: NODE_WIDTH, height: NODE_HEIGHT }))
-  visibleRels.forEach((r) => graph.setEdge(r.person1.id, r.person2.id))
+
+  // Primary edges: parent → child (drive the hierarchical structure)
+  visibleRels.forEach((r) => graph.setEdge(r.person1.id, r.person2.id, { weight: 2, minlen: 1 }))
+
+  // Marriage edges: lightweight nudge so spouses land on the same rank / close columns
+  // weight=1 (lower than parent edges), minlen=0 (no rank separation required)
+  visibleMarriages.forEach((m) => {
+    graph.setEdge(m.spouse1.id, m.spouse2.id, { weight: 1, minlen: 0 })
+  })
+
   dagre.layout(graph)
+
+  // ── Post-layout pass: Y-align married couples in the same generation ──────────
+  // If the two spouses ended up within 1.5 row heights of each other,
+  // snap them to the same Y so the marriage edge is horizontal.
+  const yOverride = new Map<string, number>()
+  visibleMarriages.forEach((m) => {
+    const n1 = graph.node(m.spouse1.id)
+    const n2 = graph.node(m.spouse2.id)
+    if (!n1 || !n2) return
+    const yDiff = Math.abs(n1.y - n2.y)
+    if (yDiff > 0 && yDiff <= NODE_HEIGHT * 2.5) {
+      // Same generation — average their Y
+      const targetY = (n1.y + n2.y) / 2
+      // Only override if we haven't pinned this node by a different marriage
+      if (!yOverride.has(m.spouse1.id)) yOverride.set(m.spouse1.id, targetY)
+      if (!yOverride.has(m.spouse2.id)) yOverride.set(m.spouse2.id, targetY)
+    }
+  })
 
   const nodes: Node<PersonNodeData>[] = visiblePersons.map((p) => {
     const pos = graph.node(p.id)
     const children = childrenOf.get(p.id) ?? new Set()
+    const y = yOverride.get(p.id) ?? pos.y
     return {
       id: p.id,
       type: 'person',
-      position: { x: pos.x - NODE_WIDTH / 2, y: pos.y - NODE_HEIGHT / 2 },
+      position: { x: pos.x - NODE_WIDTH / 2, y: y - NODE_HEIGHT / 2 },
       data: {
         person: p,
         hasChildren: children.size > 0,

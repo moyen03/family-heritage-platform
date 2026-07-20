@@ -65,7 +65,7 @@ export const FamilyTree = forwardRef<FamilyTreeHandle, FamilyTreeProps>(function
 
   // ── Layout — re-computed when data or collapse changes ──────────────────────
   const { layoutNodes, layoutEdges } = useMemo(() => {
-    const { nodes, edges } = buildTreeLayout(persons, relationships, collapsedIds)
+    const { nodes, edges } = buildTreeLayout(persons, relationships, marriages, collapsedIds)
 
     // Overlay marriage edges (only between visible nodes)
     const visibleIds = new Set(nodes.map((n) => n.id))
