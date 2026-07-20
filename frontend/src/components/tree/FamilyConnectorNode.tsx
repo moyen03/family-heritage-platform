@@ -1,33 +1,57 @@
 import { Handle, Position } from '@xyflow/react'
 
 /**
- * Invisible branching-point node placed between a married couple and their children.
- * Creates the classic genealogy bracket look:
+ * Small branching-point node placed between a married couple and their children.
  *
- *   [Parent1] ————●———— [Parent2]
- *                 |
- *       ——————————|——————————
- *       |         |         |
- *    [Child1]  [Child2]  [Child3]
+ *   [Parent1] ————♥———— [Parent2]   (marriage edge)
+ *                  ↓  (smoothstep from parents)
+ *               [  ●  ]              (this node — visible dot)
+ *                  ↓  (step edges — orthogonal, one per child)
+ *         ┌────────┼────────┐
+ *      [Child1] [Child2] [Child3]
  */
 export function FamilyConnectorNode() {
   return (
-    <div style={{ width: 1, height: 1, position: 'relative' }}>
-      {/* Receives edges from both parents */}
+    <div style={{ position: 'relative', width: 10, height: 10 }}>
+      {/* Parents feed in from the top */}
       <Handle
         type="target"
         position={Position.Top}
         id="in"
-        style={{ background: '#94a3b8', width: 6, height: 6, border: '1px solid white' }}
+        style={{
+          background: '#94a3b8',
+          width: 8,
+          height: 8,
+          border: '2px solid white',
+          top: -4,
+          left: 1,
+        }}
       />
-      {/* Sends edges to all children */}
+      {/* Children fan out from the bottom */}
       <Handle
         type="source"
         position={Position.Bottom}
         id="out"
-        style={{ background: '#94a3b8', width: 6, height: 6, border: '1px solid white' }}
+        style={{
+          background: '#64748b',
+          width: 8,
+          height: 8,
+          border: '2px solid white',
+          bottom: -4,
+          left: 1,
+        }}
+      />
+      {/* Visible dot */}
+      <div
+        style={{
+          width: 10,
+          height: 10,
+          borderRadius: '50%',
+          backgroundColor: '#94a3b8',
+          border: '2px solid white',
+          boxShadow: '0 0 0 1.5px #94a3b8',
+        }}
       />
     </div>
   )
 }
-

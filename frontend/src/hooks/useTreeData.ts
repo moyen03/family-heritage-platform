@@ -117,7 +117,9 @@ export function buildTreeLayout(
   // ── 3. Dagre layout (parent→child DAG only — no marriage edges to avoid cycles)
   const graph = new dagre.graphlib.Graph()
   graph.setDefaultEdgeLabel(() => ({}))
-  graph.setGraph({ rankdir: 'TB', ranksep: 180, nodesep: 60, marginx: 40, marginy: 40 })
+  // ranksep: vertical gap between generations (larger = more breathing room per row)
+  // nodesep: horizontal gap between sibling subtrees (larger = clearer lane separation)
+  graph.setGraph({ rankdir: 'TB', ranksep: 220, nodesep: 100, marginx: 60, marginy: 60 })
   visiblePersons.forEach((p) => graph.setNode(p.id, { width: NODE_WIDTH, height: NODE_HEIGHT }))
   visibleRels.forEach((r) => graph.setEdge(r.person1.id, r.person2.id, { weight: 2, minlen: 1 }))
   dagre.layout(graph)
@@ -235,7 +237,7 @@ export function buildTreeLayout(
   const connectorNodes: Node<Record<string, never>>[] = connectors.map((c) => ({
     id: c.id,
     type: 'familyConnector',
-    position: { x: c.x - 1, y: c.y - 1 },
+    position: { x: c.x - 5, y: c.y - 5 },
     data: {},
     selectable: false,
     draggable: false,
@@ -291,14 +293,15 @@ export function buildTreeLayout(
       })
     }
 
-    // Connector → children
+    // Connector → each child: orthogonal 'step' edges so every child gets
+    // its own right-angle lane and subtrees don't visually bleed into each other.
     c.childIds.forEach((childId) => {
       connectorEdges.push({
         id: `fce-c-${c.id}-${childId}`,
         source: c.id,
         target: childId,
-        type: 'smoothstep',
-        style: EDGE_STYLE,
+        type: 'step',
+        style: { stroke: '#64748b', strokeWidth: 2 },
         markerEnd: EDGE_ARROW,
       })
     })
