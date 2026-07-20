@@ -23,7 +23,7 @@ export function useMedia() {
   return useQuery<MediaItem[]>({
     queryKey: ['media'],
     queryFn: async () => {
-      const res = await api.get<ApiCollection<MediaItem>>('/api/media')
+      const res = await api.get<ApiCollection<MediaItem>>('/media')
       return res.data?.['member'] ?? res.data?.['hydra:member'] ?? []
     },
   })
@@ -33,7 +33,7 @@ export function useMediaItem(id: string) {
   return useQuery<MediaItem>({
     queryKey: ['media', id],
     queryFn: async () => {
-      const res = await api.get<MediaItem>(`/api/media/${id}`)
+      const res = await api.get<MediaItem>(`/media/${id}`)
       return res.data
     },
     enabled: !!id,
