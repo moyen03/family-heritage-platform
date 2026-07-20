@@ -194,14 +194,13 @@ export function BranchesPage() {
             <GitBranch className="h-5 w-5 text-blue-500" />
           </div>
           <div className="text-sm text-blue-700 space-y-1">
-            <p className="font-semibold">Branch rules</p>
+            <p className="font-semibold">Full bloodline tracking — how to assign branches</p>
             <ul className="list-disc list-inside space-y-0.5 text-blue-600">
-              <li>Each branch = one grandparent's family line (e.g. "Siraz Uddin Family")</li>
-              <li><strong>Primary branch = father's branch</strong> — applies to both sons and daughters</li>
-              <li>Daughters stay in their birth (father's) branch as primary, even after marriage</li>
-              <li>A woman can optionally also be added to her husband's branch as a secondary membership</li>
-              <li>Children always follow their father's branch as primary</li>
-              <li>Create a <strong>Shared</strong> branch for great-grandparents — they'll be visible to everyone</li>
+              <li><strong>Sons &amp; Daughters</strong> → primary branch = their <strong>father's branch</strong> ⭐</li>
+              <li><strong>Husbands (in-laws)</strong> → add to wife's birth branch as <strong>secondary</strong> (so the family unit is visible)</li>
+              <li><strong>Grandchildren</strong> → primary = father's branch; if father's family not tracked → mother's birth branch</li>
+              <li>Create a <strong>Shared</strong> branch for great-grandparents — visible to all branches</li>
+              <li>This tracks the <strong>full Azim Uddin bloodline</strong> through all sons and daughters</li>
             </ul>
           </div>
         </div>

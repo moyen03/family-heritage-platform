@@ -21,20 +21,24 @@
 ## Branch Rules
 
 - BR-BRANCH-01: Every person must belong to at least one branch
-- BR-BRANCH-02: A person can belong to multiple branches (e.g., both paternal and maternal)
-- BR-BRANCH-03: One branch per person is marked as primary (father's branch by default)
+- BR-BRANCH-02: A person can belong to multiple branches (secondary memberships are allowed)
+- BR-BRANCH-03: One branch per person is marked as primary
 - BR-BRANCH-04: A branch must have at least one admin at all times
 - BR-BRANCH-05: Branch Admins can only act within their branch scope
 - BR-BRANCH-06: Branches are organised by grandparent lineage — each grandparent's family line is one branch
-- BR-BRANCH-07: Common ancestors (great-grandparents and above shared by all branches) are visible to all descendent branches regardless of visibility setting
+- BR-BRANCH-07: Common ancestors (great-grandparents and above) belong to a Shared branch visible to all
 - BR-BRANCH-08: Only Super Admin can create or delete branches
 - BR-BRANCH-09: Branch Admin can invite new members to their branch (read-only by default)
 - BR-BRANCH-10: A Viewer invited to a branch can be upgraded to Member by the Branch Admin
-- BR-BRANCH-11: **A person's primary branch is their father's (paternal) branch** — this applies to both sons and daughters
-- BR-BRANCH-12: Daughters remain in their birth/father's branch as primary, even after marriage
-- BR-BRANCH-13: A married woman may optionally also be added to her husband's branch as a secondary branch membership
-- BR-BRANCH-14: A woman's children belong to their father's branch as primary (not their mother's birth branch)
-- BR-BRANCH-15: Shared branches (marked `isShared = true`) contain common ancestors visible to all branch members regardless of their own branch
+
+**Full bloodline tracking rules (Option B):**
+
+- BR-BRANCH-11: **Daughters → primary branch = their father's (birth) branch** ⭐
+- BR-BRANCH-12: **Daughter's husband (in-law) → added to wife's birth branch as secondary member** so the full family unit appears in that branch's tree
+- BR-BRANCH-13: **Daughter's children → primary branch = their father's side** (if father's family is tracked in the system); otherwise fall back to mother's birth branch
+- BR-BRANCH-14: Sons → primary branch = their father's branch (same as daughters)
+- BR-BRANCH-15: Shared branches (`isShared = true`) contain common ancestors visible to ALL branch members
+- BR-BRANCH-16: This approach tracks the **full bloodline of Azim Uddin through all descendants** — including daughters' families — in a single connected tree
 
 ## Approval Rules
 
