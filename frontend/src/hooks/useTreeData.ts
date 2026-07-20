@@ -114,21 +114,61 @@ export function buildTreeLayout(
 
   dagre.layout(graph)
 
-  // ── Post-layout pass: Y-align married couples in the same generation ──────────
-  // If the two spouses ended up within 1.5 row heights of each other,
-  // snap them to the same Y so the marriage edge is horizontal.
+  // ── Post-layout pass: force ALL married couples to the same Y and close X ────
+  //
+  // Problem: spouses with no recorded parents end up at Y≈0 (top of tree) while
+  // their partner is several rows down.  We solve this in two steps:
+  //
+  //  1. Y-snap  – always pull both spouses to the SAME row.
+  //     We pick the LARGER Y (= the spouse who is deeper / has more ancestors),
+  //     because a spouse who married INTO the family should sit at their partner's
+  //     generation level, not float at the top.
+  //
+  //  2. X-clamp – if the two spouses are more than 2 node-widths apart after the
+  //     Y snap, slide the "floating" spouse (the one whose Dagre X was further away)
+  //     to sit just beside their partner.  We only move a spouse when they have NO
+  //     parent edge in the visible tree (an "orphan" w.r.t. the hierarchy), so we
+  //     don't disturb well-placed nodes.
+
+  // Which nodes appear as children in at least one parent→child edge?
+  const hasParentEdge = new Set<string>()
+  visibleRels.forEach((r) => hasParentEdge.add(r.person2.id))
+
   const yOverride = new Map<string, number>()
+  const xOverride = new Map<string, number>()
+
   visibleMarriages.forEach((m) => {
     const n1 = graph.node(m.spouse1.id)
     const n2 = graph.node(m.spouse2.id)
     if (!n1 || !n2) return
-    const yDiff = Math.abs(n1.y - n2.y)
-    if (yDiff > 0 && yDiff <= NODE_HEIGHT * 2.5) {
-      // Same generation — average their Y
-      const targetY = (n1.y + n2.y) / 2
-      // Only override if we haven't pinned this node by a different marriage
-      if (!yOverride.has(m.spouse1.id)) yOverride.set(m.spouse1.id, targetY)
-      if (!yOverride.has(m.spouse2.id)) yOverride.set(m.spouse2.id, targetY)
+
+    // ── Step 1: Y-snap ────────────────────────────────────────────────────────
+    // Use the deeper Y (larger value = lower row in the tree).
+    const targetY = Math.max(n1.y, n2.y)
+    if (!yOverride.has(m.spouse1.id)) yOverride.set(m.spouse1.id, targetY)
+    if (!yOverride.has(m.spouse2.id)) yOverride.set(m.spouse2.id, targetY)
+
+    // ── Step 2: X-clamp (only for orphan spouses) ─────────────────────────────
+    const COUPLE_GAP = NODE_WIDTH + 20          // ideal side-by-side gap
+    const xDiff = Math.abs(n1.x - n2.x)
+    if (xDiff > COUPLE_GAP * 1.5) {
+      // Determine which spouse is "anchored" (has a parent edge) vs "floating"
+      const s1anchored = hasParentEdge.has(m.spouse1.id)
+      const s2anchored = hasParentEdge.has(m.spouse2.id)
+
+      if (s1anchored && !s2anchored) {
+        // Move spouse2 next to spouse1
+        if (!xOverride.has(m.spouse2.id)) {
+          xOverride.set(m.spouse2.id, n1.x + (n1.x <= n2.x ? COUPLE_GAP : -COUPLE_GAP))
+        }
+      } else if (s2anchored && !s1anchored) {
+        // Move spouse1 next to spouse2
+        if (!xOverride.has(m.spouse1.id)) {
+          xOverride.set(m.spouse1.id, n2.x + (n2.x <= n1.x ? COUPLE_GAP : -COUPLE_GAP))
+        }
+      }
+      // If both anchored (or both orphans) leave X as-is to avoid disrupting
+      // the parent-child structure — only Y matters in that case.
     }
   })
 
@@ -136,10 +176,11 @@ export function buildTreeLayout(
     const pos = graph.node(p.id)
     const children = childrenOf.get(p.id) ?? new Set()
     const y = yOverride.get(p.id) ?? pos.y
+    const x = xOverride.get(p.id) ?? pos.x
     return {
       id: p.id,
       type: 'person',
-      position: { x: pos.x - NODE_WIDTH / 2, y: y - NODE_HEIGHT / 2 },
+      position: { x: x - NODE_WIDTH / 2, y: y - NODE_HEIGHT / 2 },
       data: {
         person: p,
         hasChildren: children.size > 0,
