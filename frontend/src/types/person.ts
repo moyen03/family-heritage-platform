@@ -17,6 +17,11 @@ export interface PersonCreatedBy {
   fullName: string
 }
 
+export interface PersonBranchItem {
+  branch: { id: string; name: string }
+  isPrimary: boolean
+}
+
 export interface Person {
   id: string
   firstName: string
@@ -36,6 +41,7 @@ export interface Person {
   biography: string | null
   visibility: Visibility
   profilePictureUrl: string | null
+  personBranches: PersonBranchItem[]
   createdBy: PersonCreatedBy
   personNames: PersonName[]
   createdAtIso: string

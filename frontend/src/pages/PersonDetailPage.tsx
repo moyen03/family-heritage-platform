@@ -1,17 +1,19 @@
 import { useParams, Link, useNavigate } from 'react-router-dom'
-import { useQuery } from '@tanstack/react-query'
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useState } from 'react'
 import {
   ArrowLeft, Calendar, MapPin, User,
-  GitBranch, Dna, BookOpen, Pencil, Network, Phone,
+  GitBranch, Dna, BookOpen, Pencil, Network, Phone, Share2, Star,
 } from 'lucide-react'
 import { personsService } from '@/services/persons.service'
 import { relationshipsService } from '@/services/relationships.service'
+import { branchesService } from '@/services/branches.service'
 import { Badge } from '@/components/ui/Badge'
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner'
 import { PersonFormModal } from '@/components/persons/PersonFormModal'
 import { FamilyConnectionsSection } from '@/components/persons/FamilyConnectionsSection'
 import { PersonAddressPanel } from '@/components/addresses/PersonAddressPanel'
+import { useAuthStore, selectIsAdmin } from '@/store/auth.store'
 
 function Section({ title, icon: Icon, children }: {
   title: string
@@ -42,7 +44,9 @@ function InfoRow({ label, value }: { label: string; value: React.ReactNode }) {
 export function PersonDetailPage() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
+  const qc = useQueryClient()
   const [showEdit, setShowEdit] = useState(false)
+  const isAdmin = useAuthStore(selectIsAdmin)
 
   const { data: person, isLoading, error } = useQuery({
     queryKey: ['person', id],
@@ -65,6 +69,16 @@ export function PersonDetailPage() {
     queryFn: () => personsService.getAll(),
     select: (d) => d?.['member'] ?? d?.['hydra:member'] ?? [],
   })
+
+  const { data: allBranches = [] } = useQuery({
+    queryKey: ['branches'],
+    queryFn: () => branchesService.getAll(),
+  })
+
+  // Branches this person already belongs to (from personBranches on person)
+  const personBranchIds = new Set(
+    (person?.personBranches ?? []).map((pb: { branch: { id: string } }) => pb.branch.id)
+  )
 
   if (isLoading) {
     return (
@@ -277,6 +291,70 @@ export function PersonDetailPage() {
           personName={person.fullName}
         />
       </div>
+
+      {/* Branches — full width, admin only */}
+      {isAdmin && (
+        <div className="mt-6 bg-white rounded-xl border border-gray-100 shadow-sm p-5">
+          <div className="flex items-center gap-2 mb-4">
+            <GitBranch className="h-4 w-4 text-gray-400" />
+            <h2 className="text-sm font-semibold uppercase tracking-wide text-gray-400">Branch Membership</h2>
+          </div>
+
+          {/* Current branches */}
+          {allBranches.filter(b => personBranchIds.has(b.id)).length > 0 ? (
+            <div className="flex flex-wrap gap-2 mb-4">
+              {allBranches.filter(b => personBranchIds.has(b.id)).map(b => {
+                const pb = (person.personBranches ?? []).find((x: { branch: { id: string }; isPrimary: boolean }) => x.branch.id === b.id)
+                return (
+                  <div key={b.id} className="flex items-center gap-1.5 bg-indigo-50 border border-indigo-200 rounded-lg px-3 py-1.5">
+                    {b.isShared ? <Share2 className="h-3 w-3 text-amber-500" /> : <GitBranch className="h-3 w-3 text-indigo-500" />}
+                    <span className="text-sm font-medium text-indigo-700">{b.name}</span>
+                    {pb?.isPrimary && <Star className="h-3 w-3 text-amber-500 fill-amber-500" title="Primary branch" />}
+                    <button
+                      onClick={async () => {
+                        await branchesService.removePerson(b.id, person.id)
+                        qc.invalidateQueries({ queryKey: ['person', id] })
+                        qc.invalidateQueries({ queryKey: ['branches'] })
+                      }}
+                      className="ml-1 text-indigo-400 hover:text-red-500 transition-colors"
+                      title="Remove from this branch"
+                    >×</button>
+                  </div>
+                )
+              })}
+            </div>
+          ) : (
+            <p className="text-sm text-gray-400 mb-4">Not assigned to any branch yet.</p>
+          )}
+
+          {/* Assign to branch */}
+          {allBranches.filter(b => !personBranchIds.has(b.id)).length > 0 && (
+            <div>
+              <p className="text-xs text-gray-500 mb-2">Add to branch:</p>
+              <div className="flex flex-wrap gap-2">
+                {allBranches.filter(b => !personBranchIds.has(b.id)).map(b => (
+                  <button
+                    key={b.id}
+                    onClick={async () => {
+                      await branchesService.assignPerson(b.id, person.id)
+                      qc.invalidateQueries({ queryKey: ['person', id] })
+                      qc.invalidateQueries({ queryKey: ['branches'] })
+                    }}
+                    className="flex items-center gap-1.5 border border-gray-200 rounded-lg px-3 py-1.5 text-sm text-gray-600 hover:border-indigo-400 hover:text-indigo-600 hover:bg-indigo-50 transition-colors"
+                  >
+                    {b.isShared ? <Share2 className="h-3 w-3" /> : <GitBranch className="h-3 w-3" />}
+                    + {b.name}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
+          <div className="mt-3">
+            <Link to="/branches" className="text-xs text-indigo-500 hover:text-indigo-700">Manage all branches →</Link>
+          </div>
+        </div>
+      )}
 
       {/* Edit modal */}
       {showEdit && (

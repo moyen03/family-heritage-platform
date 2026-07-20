@@ -11,6 +11,8 @@ import { RelationshipsPage } from '@/pages/RelationshipsPage'
 import { MarriagesPage } from '@/pages/MarriagesPage'
 import MediaPage from '@/pages/MediaPage'
 import MapPage from '@/pages/MapPage'
+import { BranchesPage } from '@/pages/BranchesPage'
+import { BranchDetailPage } from '@/pages/BranchDetailPage'
 import { NotFoundPage } from '@/pages/NotFoundPage'
 import { useAuthStore } from '@/store/auth.store'
 
@@ -42,6 +44,8 @@ export default function App() {
                 <Route path="marriages" element={<MarriagesPage />} />
                 <Route path="media" element={<MediaPage />} />
                 <Route path="map" element={<MapPage />} />
+                <Route path="branches" element={<BranchesPage />} />
+                <Route path="branches/:id" element={<BranchDetailPage />} />
                 <Route path="*" element={<NotFoundPage />} />
               </Routes>
             </Layout>

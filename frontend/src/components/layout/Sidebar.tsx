@@ -14,6 +14,7 @@ const NAV_ITEMS = [
 ]
 
 const ADMIN_NAV_ITEMS = [
+  { to: '/branches',  icon: GitBranch,    label: 'Branch Management' },
   { to: '/approvals', icon: ClipboardList, label: 'Approval Queue' },
 ]
 
