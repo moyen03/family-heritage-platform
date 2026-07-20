@@ -193,9 +193,16 @@ export function BranchesPage() {
           <div className="flex-shrink-0 mt-0.5">
             <GitBranch className="h-5 w-5 text-blue-500" />
           </div>
-          <div className="text-sm text-blue-700">
-            <p className="font-semibold mb-1">How branches work</p>
-            <p>Each branch represents a grandparent family line. Assign persons to their branch using the <strong>Manage</strong> button. Mark great-grandparents and common ancestors as <strong>Shared</strong> so they appear across all branches.</p>
+          <div className="text-sm text-blue-700 space-y-1">
+            <p className="font-semibold">Branch rules</p>
+            <ul className="list-disc list-inside space-y-0.5 text-blue-600">
+              <li>Each branch = one grandparent's family line (e.g. "Siraz Uddin Family")</li>
+              <li><strong>Primary branch = father's branch</strong> — applies to both sons and daughters</li>
+              <li>Daughters stay in their birth (father's) branch as primary, even after marriage</li>
+              <li>A woman can optionally also be added to her husband's branch as a secondary membership</li>
+              <li>Children always follow their father's branch as primary</li>
+              <li>Create a <strong>Shared</strong> branch for great-grandparents — they'll be visible to everyone</li>
+            </ul>
           </div>
         </div>
       </div>

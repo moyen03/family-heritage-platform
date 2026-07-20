@@ -256,8 +256,10 @@ export function BranchDetailPage() {
 
           {/* Legend */}
           <div className="mt-4 bg-white rounded-xl border border-gray-100 shadow-sm p-4 text-xs text-gray-500 space-y-1.5">
-            <div className="flex items-center gap-2"><Star className="h-3 w-3 text-amber-500 fill-amber-500" /> Primary branch for that person</div>
+            <p className="font-semibold text-gray-600 mb-2">Branch rules</p>
+            <div className="flex items-center gap-2"><Star className="h-3 w-3 text-amber-500 fill-amber-500" /> Primary branch = father's branch (sons &amp; daughters)</div>
             <div className="flex items-center gap-2"><Trash2 className="h-3 w-3 text-gray-400" /> Hover a row to remove from branch</div>
+            <p className="text-gray-400 pt-1">Daughters stay in their birth (father's) branch as primary. They can be added to husband's branch as secondary.</p>
           </div>
         </div>
       </div>

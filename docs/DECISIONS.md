@@ -226,13 +226,16 @@ The family has multiple grandparent lines descending from common great-grandpare
 **Decision:**
 Each **grandparent** defines one branch. Common great-grandparents and above are shared ancestors visible to all descendent branches.
 
-**Rules:**
-- Person's primary branch = father's branch
-- Common ancestors belong to all descendent branches
-- A person may belong to multiple branches (e.g. when parents come from different branches)
-- Super Admin sees everything; Branch Admin sees their branch only; Members read their branch only by default
+**Branch membership rules:**
+- A person's **primary branch = their father's (paternal) branch** — applies to both sons and daughters
+- **Daughters stay in their birth (father's) branch** as primary, even after marriage
+- A married woman **may optionally** be added to her husband's branch as secondary membership
+- A woman's **children belong to their father's branch** (not mother's birth branch)
+- Common ancestors belong to a special **Shared branch** visible to everyone
+- Super Admin sees everything; Branch Admin sees their branch only; Members read their branch only
 
 **Alternatives considered:**
+- Daughters follow husband's branch after marriage: Rejected — daughters are part of their birth family history
 - One flat branch per family: Too coarse — doesn't support sub-family privacy
 - Branch per generation: Too granular — hard to manage
 

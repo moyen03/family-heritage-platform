@@ -30,6 +30,11 @@
 - BR-BRANCH-08: Only Super Admin can create or delete branches
 - BR-BRANCH-09: Branch Admin can invite new members to their branch (read-only by default)
 - BR-BRANCH-10: A Viewer invited to a branch can be upgraded to Member by the Branch Admin
+- BR-BRANCH-11: **A person's primary branch is their father's (paternal) branch** — this applies to both sons and daughters
+- BR-BRANCH-12: Daughters remain in their birth/father's branch as primary, even after marriage
+- BR-BRANCH-13: A married woman may optionally also be added to her husband's branch as a secondary branch membership
+- BR-BRANCH-14: A woman's children belong to their father's branch as primary (not their mother's birth branch)
+- BR-BRANCH-15: Shared branches (marked `isShared = true`) contain common ancestors visible to all branch members regardless of their own branch
 
 ## Approval Rules
 
