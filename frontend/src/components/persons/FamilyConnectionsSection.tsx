@@ -8,7 +8,7 @@ import {
 import { relationshipsService } from '@/services/relationships.service'
 import { PersonSearchPicker } from './PersonSearchPicker'
 import { Badge } from '@/components/ui/Badge'
-import type { Person, NameType } from '@/types/person'
+import type { Person, NameType, PersonName } from '@/types/person'
 import type { Relationship, Marriage } from '@/types/relationship'
 
 // ── shared modal shell ────────────────────────────────────────────────────────
@@ -253,6 +253,12 @@ function AddPersonNameModal({ personId, onClose }: { personId: string; onClose: 
           <label className="block text-sm font-medium text-gray-700 mb-1">Notes <span className="text-gray-400 font-normal">(optional)</span></label>
           <input type="text" value={notes} onChange={e => setNotes(e.target.value)} placeholder="e.g. used from 1980 to 1995" className={inputCls} />
         </div>
+        {mutation.isError && (
+          <div className="flex items-center gap-2 p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-700">
+            <AlertCircle className="h-4 w-4 flex-shrink-0" />
+            Failed to save. Please try again.
+          </div>
+        )}
       </div>
       <ModalFooter
         onCancel={onClose}
@@ -265,7 +271,7 @@ function AddPersonNameModal({ personId, onClose }: { personId: string; onClose: 
   )
 }
 
-// ── Connection Row ────────────────────────────────────────────────────────────
+// ── Connection Row ─────────────────────────────────────────────────────────────
 function ConnectionRow({ label, to, badge, onRemove, removing }: {
   label: string; to: string; badge?: string; onRemove: () => void; removing: boolean
 }) {
@@ -322,12 +328,13 @@ interface FamilyConnectionsSectionProps {
   persons: Person[]
   relationships: Relationship[]
   marriages: Marriage[]
+  personNames: PersonName[]
 }
 
 type ModalType = 'parent' | 'child' | 'sibling' | 'marriage' | 'name' | null
 
 export function FamilyConnectionsSection({
-  personId, persons, relationships, marriages,
+  personId, persons, relationships, marriages, personNames,
 }: FamilyConnectionsSectionProps) {
   const qc = useQueryClient()
   const [modal, setModal]       = useState<ModalType>(null)
@@ -351,9 +358,6 @@ export function FamilyConnectionsSection({
 
   const personMarriages = marriages.filter(m => m.spouse1.id === personId || m.spouse2.id === personId)
 
-  // PersonName records come from the person object — fetch from cache
-  const cachedPerson = qc.getQueryData<Person>(['person', personId])
-  const personNames  = cachedPerson?.personNames ?? []
 
   // IDs to exclude from pickers (avoid self-linking and duplicate links)
   const linkedIds = new Set([

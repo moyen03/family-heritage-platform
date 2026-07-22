@@ -301,6 +301,7 @@ export function PersonDetailPage() {
           persons={allPersons}
           relationships={personRelationships}
           marriages={personMarriages}
+          personNames={person.personNames ?? []}
         />
       </div>
 
