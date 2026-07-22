@@ -392,8 +392,9 @@ export function PersonFormModal({ person, onClose, onSaved }: PersonFormModalPro
             </div>
           </FormSection>
 
-          {/* Basic info */}
-          <FormSection icon={User} title="Basic Information">
+          {/* Main fields — flat, ordered */}
+          <FormSection icon={User} title="Person Details">
+            {/* Row 1: First Name | Last Name */}
             <div className="grid grid-cols-2 gap-3">
               <Field label="First Name" required>
                 <input
@@ -418,130 +419,121 @@ export function PersonFormModal({ person, onClose, onSaved }: PersonFormModalPro
               </Field>
             </div>
 
-            {/* Phone + NID */}
+            {/* Row 2: Phone | NID */}
             <div className="grid grid-cols-2 gap-3">
               <Field label="Phone / Mobile">
                 <div className="relative">
                   <Phone className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-                  <input
-                    type="tel"
-                    value={form.phone ?? ''}
-                    onChange={e => set('phone', e.target.value)}
-                    placeholder="+880 1700-000000"
-                    className={`${inputCls} pl-9`}
-                  />
+                  <input type="tel" value={form.phone ?? ''} onChange={e => set('phone', e.target.value)}
+                    placeholder="+880 1700-000000" className={`${inputCls} pl-9`} />
                 </div>
               </Field>
               <Field label="NID / National ID">
                 <div className="relative">
                   <CreditCard className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-                  <input
-                    type="text"
-                    value={form.nidNumber ?? ''}
-                    onChange={e => set('nidNumber', e.target.value)}
-                    placeholder="e.g. 1234567890123"
-                    className={`${inputCls} pl-9`}
-                  />
+                  <input type="text" value={form.nidNumber ?? ''} onChange={e => set('nidNumber', e.target.value)}
+                    placeholder="e.g. 1234567890123" className={`${inputCls} pl-9`} />
                 </div>
               </Field>
             </div>
 
-            {/* Gender */}
-            <Field label="Gender">
-              <div className="flex gap-2 flex-wrap">
-                {GENDERS.map(g => (
-                  <button
-                    key={g.value}
-                    type="button"
-                    onClick={() => set('gender', g.value)}
-                    className={`px-3 py-1.5 rounded-lg border-2 text-xs font-semibold transition-all ${
-                      form.gender === g.value
-                        ? g.color + ' border-current shadow-sm'
-                        : 'bg-white text-gray-500 border-gray-200 hover:border-gray-300'
-                    }`}
-                  >
-                    {g.label}
-                  </button>
+            {/* Row 3: Birth Date Precision | Birth Date */}
+            <div className="grid grid-cols-2 gap-3">
+              <Field label="Birth Date Precision">
+                <select
+                  value={form.birthDatePrecision ?? 'unknown'}
+                  onChange={e => {
+                    const prec = e.target.value as DatePrecision
+                    set('birthDatePrecision', prec)
+                    if (prec === 'unknown') set('birthDate', '')
+                  }}
+                  className={inputCls}
+                >
+                  {DATE_PRECISIONS.map(d => <option key={d.value} value={d.value}>{d.label}</option>)}
+                </select>
+              </Field>
+              <SmartDateInput
+                precision={form.birthDatePrecision ?? 'unknown'}
+                value={form.birthDate ?? ''}
+                onChange={v => set('birthDate', v)}
+                label="Birth Date"
+              />
+            </div>
+
+            {/* Row 4: Gender | Birth Place */}
+            <div className="grid grid-cols-2 gap-3">
+              <Field label="Gender">
+                <div className="flex gap-2 flex-wrap">
+                  {GENDERS.map(g => (
+                    <button key={g.value} type="button" onClick={() => set('gender', g.value)}
+                      className={`px-3 py-1.5 rounded-lg border-2 text-xs font-semibold transition-all ${
+                        form.gender === g.value ? g.color + ' border-current shadow-sm' : 'bg-white text-gray-500 border-gray-200 hover:border-gray-300'
+                      }`}>{g.label}</button>
+                  ))}
+                </div>
+              </Field>
+              <Field label="Birth Place">
+                <div className="relative">
+                  <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                  <input type="text" value={form.birthPlace ?? ''} onChange={e => set('birthPlace', e.target.value)}
+                    placeholder="e.g. Dhaka, Bangladesh" className={`${inputCls} pl-9`} />
+                </div>
+              </Field>
+            </div>
+
+            {/* Row 5: Profession | Education */}
+            <div className="grid grid-cols-2 gap-3">
+              <Field label="Profession / Occupation">
+                <div className="relative">
+                  <Briefcase className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                  <input type="text" value={form.profession ?? ''} onChange={e => set('profession', e.target.value)}
+                    placeholder="e.g. Farmer, Teacher…" className={`${inputCls} pl-9`} />
+                </div>
+              </Field>
+              <Field label="Highest Education">
+                <div className="relative">
+                  <GraduationCap className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                  <select value={form.highestEducation ?? ''} onChange={e => set('highestEducation', e.target.value || undefined)}
+                    className={`${inputCls} pl-9`}>
+                    <option value="">— Select level —</option>
+                    {EDUCATION_LEVELS.map(lvl => <option key={lvl} value={lvl}>{lvl}</option>)}
+                  </select>
+                </div>
+              </Field>
+            </div>
+
+            {/* Row 6: Blood Group (full width) */}
+            <Field label="Blood Group">
+              <div className="flex flex-wrap gap-2">
+                {BLOOD_GROUPS.map(bg => (
+                  <button key={bg} type="button"
+                    onClick={() => set('bloodGroup', form.bloodGroup === bg ? undefined : bg as BloodGroup)}
+                    className={`px-3 py-1.5 rounded-lg border-2 text-sm font-semibold transition-all ${
+                      form.bloodGroup === bg ? 'border-red-400 bg-red-50 text-red-700' : 'border-gray-200 text-gray-500 hover:border-gray-300'
+                    }`}>{bg}</button>
                 ))}
               </div>
             </Field>
 
-            {/* Living status */}
+            {/* Row 7: Status (full width) */}
             <Field label="Status">
               <div className="flex items-center gap-3">
-                <button
-                  type="button"
-                  onClick={() => set('isLiving', true)}
+                <button type="button" onClick={() => set('isLiving', true)}
                   className={`flex-1 py-2 rounded-lg border-2 text-xs font-semibold transition-all ${
-                    form.isLiving
-                      ? 'border-green-400 bg-green-50 text-green-700'
-                      : 'border-gray-200 bg-white text-gray-500 hover:border-gray-300'
-                  }`}
-                >
-                  ✓ Living
-                </button>
-                <button
-                  type="button"
-                  onClick={() => set('isLiving', false)}
+                    form.isLiving ? 'border-green-400 bg-green-50 text-green-700' : 'border-gray-200 bg-white text-gray-500 hover:border-gray-300'
+                  }`}>✓ Living</button>
+                <button type="button" onClick={() => set('isLiving', false)}
                   className={`flex-1 py-2 rounded-lg border-2 text-xs font-semibold transition-all ${
-                    !form.isLiving
-                      ? 'border-gray-400 bg-gray-100 text-gray-700'
-                      : 'border-gray-200 bg-white text-gray-500 hover:border-gray-300'
-                  }`}
-                >
-                  † Deceased
-                </button>
+                    !form.isLiving ? 'border-gray-400 bg-gray-100 text-gray-700' : 'border-gray-200 bg-white text-gray-500 hover:border-gray-300'
+                  }`}>† Deceased</button>
               </div>
             </Field>
-          </FormSection>
 
-          {/* Birth */}
-          <FormSection icon={Calendar} title="Birth">
-            <div className="grid grid-cols-2 gap-3">
-              <div className="space-y-3">
-                <Field label="Date Precision">
-                  <select
-                    value={form.birthDatePrecision ?? 'unknown'}
-                    onChange={e => {
-                      const prec = e.target.value as DatePrecision
-                      set('birthDatePrecision', prec)
-                      if (prec === 'unknown') set('birthDate', '')
-                    }}
-                    className={inputCls}
-                  >
-                    {DATE_PRECISIONS.map(d => (
-                      <option key={d.value} value={d.value}>{d.label}</option>
-                    ))}
-                  </select>
-                </Field>
-                <SmartDateInput
-                  precision={form.birthDatePrecision ?? 'unknown'}
-                  value={form.birthDate ?? ''}
-                  onChange={v => set('birthDate', v)}
-                  label="Birth Date"
-                />
-              </div>
-              <Field label="Birth Place">
-                <div className="relative">
-                  <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-                  <input
-                    type="text"
-                    value={form.birthPlace ?? ''}
-                    onChange={e => set('birthPlace', e.target.value)}
-                    placeholder="e.g. Dhaka, Bangladesh"
-                    className={`${inputCls} pl-9`}
-                  />
-                </div>
-              </Field>
-            </div>
-          </FormSection>
-
-          {/* Death — only if deceased */}
-          {!form.isLiving && (
-            <FormSection icon={Calendar} title="Death">
-              <div className="grid grid-cols-2 gap-3">
-                <div className="space-y-3">
-                  <Field label="Date Precision">
+            {/* Death fields — only when Deceased */}
+            {!form.isLiving && (
+              <>
+                <div className="grid grid-cols-2 gap-3">
+                  <Field label="Death Date Precision">
                     <select
                       value={form.deathDatePrecision ?? 'unknown'}
                       onChange={e => {
@@ -551,9 +543,7 @@ export function PersonFormModal({ person, onClose, onSaved }: PersonFormModalPro
                       }}
                       className={inputCls}
                     >
-                      {DATE_PRECISIONS.map(d => (
-                        <option key={d.value} value={d.value}>{d.label}</option>
-                      ))}
+                      {DATE_PRECISIONS.map(d => <option key={d.value} value={d.value}>{d.label}</option>)}
                     </select>
                   </Field>
                   <SmartDateInput
@@ -566,21 +556,14 @@ export function PersonFormModal({ person, onClose, onSaved }: PersonFormModalPro
                 <Field label="Death Place">
                   <div className="relative">
                     <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-                    <input
-                      type="text"
-                      value={form.deathPlace ?? ''}
-                      onChange={e => set('deathPlace', e.target.value)}
-                      placeholder="e.g. Dhaka, Bangladesh"
-                      className={`${inputCls} pl-9`}
-                    />
+                    <input type="text" value={form.deathPlace ?? ''} onChange={e => set('deathPlace', e.target.value)}
+                      placeholder="e.g. Dhaka, Bangladesh" className={`${inputCls} pl-9`} />
                   </div>
                 </Field>
-              </div>
-            </FormSection>
-          )}
+              </>
+            )}
 
-          {/* Biography */}
-          <FormSection icon={BookOpen} title="Biography">
+            {/* Row 8: Biography (full width) */}
             <Field label="Biography / Notes">
               <textarea
                 value={form.biography ?? ''}
@@ -590,59 +573,6 @@ export function PersonFormModal({ person, onClose, onSaved }: PersonFormModalPro
                 className={`${inputCls} resize-none`}
               />
             </Field>
-          </FormSection>
-
-          {/* Personal Details */}
-          <FormSection icon={CreditCard} title="Personal Details">
-            <Field label="Blood Group">
-              <div className="flex flex-wrap gap-2">
-                {BLOOD_GROUPS.map(bg => (
-                  <button
-                    key={bg}
-                    type="button"
-                    onClick={() => set('bloodGroup', form.bloodGroup === bg ? undefined : bg as BloodGroup)}
-                    className={`px-3 py-1.5 rounded-lg border-2 text-sm font-semibold transition-all ${
-                      form.bloodGroup === bg
-                        ? 'border-red-400 bg-red-50 text-red-700'
-                        : 'border-gray-200 text-gray-500 hover:border-gray-300'
-                    }`}
-                  >
-                    {bg}
-                  </button>
-                ))}
-              </div>
-            </Field>
-
-            <div className="grid grid-cols-2 gap-3">
-              <Field label="Profession / Occupation">
-                <div className="relative">
-                  <Briefcase className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-                  <input
-                    type="text"
-                    value={form.profession ?? ''}
-                    onChange={e => set('profession', e.target.value)}
-                    placeholder="e.g. Farmer, Teacher…"
-                    className={`${inputCls} pl-9`}
-                  />
-                </div>
-              </Field>
-
-              <Field label="Highest Education">
-                <div className="relative">
-                  <GraduationCap className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-                  <select
-                    value={form.highestEducation ?? ''}
-                    onChange={e => set('highestEducation', e.target.value || undefined)}
-                    className={`${inputCls} pl-9`}
-                  >
-                    <option value="">— Select level —</option>
-                    {EDUCATION_LEVELS.map(lvl => (
-                      <option key={lvl} value={lvl}>{lvl}</option>
-                    ))}
-                  </select>
-                </div>
-              </Field>
-            </div>
           </FormSection>
 
           {/* Visibility */}
