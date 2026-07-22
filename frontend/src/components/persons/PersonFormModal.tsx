@@ -418,19 +418,33 @@ export function PersonFormModal({ person, onClose, onSaved }: PersonFormModalPro
               </Field>
             </div>
 
-            {/* Phone */}
-            <Field label="Phone / Mobile">
-              <div className="relative">
-                <Phone className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-                <input
-                  type="tel"
-                  value={form.phone ?? ''}
-                  onChange={e => set('phone', e.target.value)}
-                  placeholder="e.g. +880 1700-000000"
-                  className={`${inputCls} pl-9`}
-                />
-              </div>
-            </Field>
+            {/* Phone + NID */}
+            <div className="grid grid-cols-2 gap-3">
+              <Field label="Phone / Mobile">
+                <div className="relative">
+                  <Phone className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                  <input
+                    type="tel"
+                    value={form.phone ?? ''}
+                    onChange={e => set('phone', e.target.value)}
+                    placeholder="+880 1700-000000"
+                    className={`${inputCls} pl-9`}
+                  />
+                </div>
+              </Field>
+              <Field label="NID / National ID">
+                <div className="relative">
+                  <CreditCard className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                  <input
+                    type="text"
+                    value={form.nidNumber ?? ''}
+                    onChange={e => set('nidNumber', e.target.value)}
+                    placeholder="e.g. 1234567890123"
+                    className={`${inputCls} pl-9`}
+                  />
+                </div>
+              </Field>
+            </div>
 
             {/* Gender */}
             <Field label="Gender">
@@ -483,82 +497,85 @@ export function PersonFormModal({ person, onClose, onSaved }: PersonFormModalPro
 
           {/* Birth */}
           <FormSection icon={Calendar} title="Birth">
-            <Field label="Date Precision">
-              <select
-                value={form.birthDatePrecision ?? 'unknown'}
-                onChange={e => {
-                  const prec = e.target.value as DatePrecision
-                  set('birthDatePrecision', prec)
-                  // Clear date when switching to unknown
-                  if (prec === 'unknown') set('birthDate', '')
-                }}
-                className={inputCls}
-              >
-                {DATE_PRECISIONS.map(d => (
-                  <option key={d.value} value={d.value}>{d.label}</option>
-                ))}
-              </select>
-            </Field>
-
-            <SmartDateInput
-              precision={form.birthDatePrecision ?? 'unknown'}
-              value={form.birthDate ?? ''}
-              onChange={v => set('birthDate', v)}
-              label="Birth Date"
-            />
-
-            <Field label="Birth Place">
-              <div className="relative">
-                <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-                <input
-                  type="text"
-                  value={form.birthPlace ?? ''}
-                  onChange={e => set('birthPlace', e.target.value)}
-                  placeholder="e.g. Dhaka, Bangladesh"
-                  className={`${inputCls} pl-9`}
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-3">
+                <Field label="Date Precision">
+                  <select
+                    value={form.birthDatePrecision ?? 'unknown'}
+                    onChange={e => {
+                      const prec = e.target.value as DatePrecision
+                      set('birthDatePrecision', prec)
+                      if (prec === 'unknown') set('birthDate', '')
+                    }}
+                    className={inputCls}
+                  >
+                    {DATE_PRECISIONS.map(d => (
+                      <option key={d.value} value={d.value}>{d.label}</option>
+                    ))}
+                  </select>
+                </Field>
+                <SmartDateInput
+                  precision={form.birthDatePrecision ?? 'unknown'}
+                  value={form.birthDate ?? ''}
+                  onChange={v => set('birthDate', v)}
+                  label="Birth Date"
                 />
               </div>
-            </Field>
-          </FormSection>
-
-          {/* Death — only if deceased */}
-          {!form.isLiving && (
-            <FormSection icon={Calendar} title="Death">
-              <Field label="Date Precision">
-                <select
-                  value={form.deathDatePrecision ?? 'unknown'}
-                  onChange={e => {
-                    const prec = e.target.value as DatePrecision
-                    set('deathDatePrecision', prec)
-                    if (prec === 'unknown') set('deathDate', '')
-                  }}
-                  className={inputCls}
-                >
-                  {DATE_PRECISIONS.map(d => (
-                    <option key={d.value} value={d.value}>{d.label}</option>
-                  ))}
-                </select>
-              </Field>
-
-              <SmartDateInput
-                precision={form.deathDatePrecision ?? 'unknown'}
-                value={form.deathDate ?? ''}
-                onChange={v => set('deathDate', v)}
-                label="Death Date"
-              />
-
-              <Field label="Death Place">
+              <Field label="Birth Place">
                 <div className="relative">
                   <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
                   <input
                     type="text"
-                    value={form.deathPlace ?? ''}
-                    onChange={e => set('deathPlace', e.target.value)}
+                    value={form.birthPlace ?? ''}
+                    onChange={e => set('birthPlace', e.target.value)}
                     placeholder="e.g. Dhaka, Bangladesh"
                     className={`${inputCls} pl-9`}
                   />
                 </div>
               </Field>
+            </div>
+          </FormSection>
+
+          {/* Death — only if deceased */}
+          {!form.isLiving && (
+            <FormSection icon={Calendar} title="Death">
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-3">
+                  <Field label="Date Precision">
+                    <select
+                      value={form.deathDatePrecision ?? 'unknown'}
+                      onChange={e => {
+                        const prec = e.target.value as DatePrecision
+                        set('deathDatePrecision', prec)
+                        if (prec === 'unknown') set('deathDate', '')
+                      }}
+                      className={inputCls}
+                    >
+                      {DATE_PRECISIONS.map(d => (
+                        <option key={d.value} value={d.value}>{d.label}</option>
+                      ))}
+                    </select>
+                  </Field>
+                  <SmartDateInput
+                    precision={form.deathDatePrecision ?? 'unknown'}
+                    value={form.deathDate ?? ''}
+                    onChange={v => set('deathDate', v)}
+                    label="Death Date"
+                  />
+                </div>
+                <Field label="Death Place">
+                  <div className="relative">
+                    <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                    <input
+                      type="text"
+                      value={form.deathPlace ?? ''}
+                      onChange={e => set('deathPlace', e.target.value)}
+                      placeholder="e.g. Dhaka, Bangladesh"
+                      className={`${inputCls} pl-9`}
+                    />
+                  </div>
+                </Field>
+              </div>
             </FormSection>
           )}
 
@@ -577,19 +594,6 @@ export function PersonFormModal({ person, onClose, onSaved }: PersonFormModalPro
 
           {/* Personal Details */}
           <FormSection icon={CreditCard} title="Personal Details">
-            <Field label="NID / National ID Number">
-              <div className="relative">
-                <CreditCard className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-                <input
-                  type="text"
-                  value={form.nidNumber ?? ''}
-                  onChange={e => set('nidNumber', e.target.value)}
-                  placeholder="e.g. 1234567890123"
-                  className={`${inputCls} pl-9`}
-                />
-              </div>
-            </Field>
-
             <Field label="Blood Group">
               <div className="flex flex-wrap gap-2">
                 {BLOOD_GROUPS.map(bg => (
@@ -609,34 +613,36 @@ export function PersonFormModal({ person, onClose, onSaved }: PersonFormModalPro
               </div>
             </Field>
 
-            <Field label="Profession / Occupation">
-              <div className="relative">
-                <Briefcase className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-                <input
-                  type="text"
-                  value={form.profession ?? ''}
-                  onChange={e => set('profession', e.target.value)}
-                  placeholder="e.g. Farmer, Teacher, Engineer…"
-                  className={`${inputCls} pl-9`}
-                />
-              </div>
-            </Field>
+            <div className="grid grid-cols-2 gap-3">
+              <Field label="Profession / Occupation">
+                <div className="relative">
+                  <Briefcase className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                  <input
+                    type="text"
+                    value={form.profession ?? ''}
+                    onChange={e => set('profession', e.target.value)}
+                    placeholder="e.g. Farmer, Teacher…"
+                    className={`${inputCls} pl-9`}
+                  />
+                </div>
+              </Field>
 
-            <Field label="Highest Education">
-              <div className="relative">
-                <GraduationCap className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-                <select
-                  value={form.highestEducation ?? ''}
-                  onChange={e => set('highestEducation', e.target.value || undefined)}
-                  className={`${inputCls} pl-9`}
-                >
-                  <option value="">— Select level —</option>
-                  {EDUCATION_LEVELS.map(lvl => (
-                    <option key={lvl} value={lvl}>{lvl}</option>
-                  ))}
-                </select>
-              </div>
-            </Field>
+              <Field label="Highest Education">
+                <div className="relative">
+                  <GraduationCap className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                  <select
+                    value={form.highestEducation ?? ''}
+                    onChange={e => set('highestEducation', e.target.value || undefined)}
+                    className={`${inputCls} pl-9`}
+                  >
+                    <option value="">— Select level —</option>
+                    {EDUCATION_LEVELS.map(lvl => (
+                      <option key={lvl} value={lvl}>{lvl}</option>
+                    ))}
+                  </select>
+                </div>
+              </Field>
+            </div>
           </FormSection>
 
           {/* Visibility */}
