@@ -130,6 +130,26 @@ class Person
     #[Groups(['person:read', 'person:write'])]
     private ?string $phone = null;
 
+    #[ORM\Column(type: 'string', length: 30, nullable: true)]
+    #[Groups(['person:read', 'person:write'])]
+    #[Assert\Length(max: 30)]
+    private ?string $nidNumber = null;
+
+    #[ORM\Column(type: 'string', length: 150, nullable: true)]
+    #[Groups(['person:read', 'person:write'])]
+    #[Assert\Length(max: 150)]
+    private ?string $profession = null;
+
+    #[ORM\Column(type: 'string', length: 5, nullable: true)]
+    #[Groups(['person:read', 'person:write'])]
+    #[Assert\Choice(choices: ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'])]
+    private ?string $bloodGroup = null;
+
+    #[ORM\Column(type: 'string', length: 150, nullable: true)]
+    #[Groups(['person:read', 'person:write'])]
+    #[Assert\Length(max: 150)]
+    private ?string $highestEducation = null;
+
     #[ORM\Column(type: 'text', nullable: true)]
     #[Groups(['person:read', 'person:write'])]
     private ?string $biography = null;
@@ -336,6 +356,50 @@ class Person
     public function setPhone(?string $phone): static
     {
         $this->phone = $phone;
+        return $this;
+    }
+
+    public function getNidNumber(): ?string
+    {
+        return $this->nidNumber;
+    }
+
+    public function setNidNumber(?string $nidNumber): static
+    {
+        $this->nidNumber = $nidNumber;
+        return $this;
+    }
+
+    public function getProfession(): ?string
+    {
+        return $this->profession;
+    }
+
+    public function setProfession(?string $profession): static
+    {
+        $this->profession = $profession;
+        return $this;
+    }
+
+    public function getBloodGroup(): ?string
+    {
+        return $this->bloodGroup;
+    }
+
+    public function setBloodGroup(?string $bloodGroup): static
+    {
+        $this->bloodGroup = $bloodGroup;
+        return $this;
+    }
+
+    public function getHighestEducation(): ?string
+    {
+        return $this->highestEducation;
+    }
+
+    public function setHighestEducation(?string $highestEducation): static
+    {
+        $this->highestEducation = $highestEducation;
         return $this;
     }
 

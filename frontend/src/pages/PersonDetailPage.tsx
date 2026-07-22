@@ -4,6 +4,7 @@ import { useState } from 'react'
 import {
   ArrowLeft, Calendar, MapPin, User,
   GitBranch, Dna, BookOpen, Pencil, Network, Phone, Share2, Star,
+  Briefcase, GraduationCap, CreditCard, Droplets,
 } from 'lucide-react'
 import { personsService } from '@/services/persons.service'
 import { relationshipsService } from '@/services/relationships.service'
@@ -155,6 +156,16 @@ export function PersonDetailPage() {
                 {birthYear}{!person.isLiving && deathYear ? ` – ${deathYear}` : ''}
               </Badge>
             )}
+            {person.bloodGroup && (
+              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-bold bg-red-50 text-red-700 border border-red-200">
+                <Droplets className="h-3 w-3" />{person.bloodGroup}
+              </span>
+            )}
+            {person.profession && (
+              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-amber-50 text-amber-700 border border-amber-200">
+                <Briefcase className="h-3 w-3" />{person.profession}
+              </span>
+            )}
           </div>
         </div>
         <Link
@@ -212,16 +223,44 @@ export function PersonDetailPage() {
           )}
         </Section>
 
-        {/* Contact */}
-        {person.phone && (
-          <Section title="Contact" icon={Phone}>
-            <a
-              href={`tel:${person.phone}`}
-              className="flex items-center gap-2 text-sm text-indigo-600 hover:text-indigo-800 font-medium"
-            >
-              <Phone className="h-4 w-4" />
-              {person.phone}
-            </a>
+        {/* Personal Info */}
+        {(person.phone || person.nidNumber || person.bloodGroup || person.profession || person.highestEducation) && (
+          <Section title="Personal Info" icon={User}>
+            {person.phone && (
+              <InfoRow label="Phone" value={
+                <a href={`tel:${person.phone}`} className="flex items-center gap-1.5 text-indigo-600 hover:text-indigo-800 font-medium">
+                  <Phone className="h-3.5 w-3.5" />{person.phone}
+                </a>
+              } />
+            )}
+            {person.bloodGroup && (
+              <InfoRow label="Blood Group" value={
+                <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-bold bg-red-50 text-red-700 border border-red-200">
+                  <Droplets className="h-3 w-3" />{person.bloodGroup}
+                </span>
+              } />
+            )}
+            {person.nidNumber && (
+              <InfoRow label="NID Number" value={
+                <span className="flex items-center gap-1.5 font-mono text-gray-800">
+                  <CreditCard className="h-3.5 w-3.5 text-gray-400" />{person.nidNumber}
+                </span>
+              } />
+            )}
+            {person.profession && (
+              <InfoRow label="Profession" value={
+                <span className="flex items-center gap-1.5">
+                  <Briefcase className="h-3.5 w-3.5 text-gray-400" />{person.profession}
+                </span>
+              } />
+            )}
+            {person.highestEducation && (
+              <InfoRow label="Education" value={
+                <span className="flex items-center gap-1.5">
+                  <GraduationCap className="h-3.5 w-3.5 text-gray-400" />{person.highestEducation}
+                </span>
+              } />
+            )}
           </Section>
         )}
 

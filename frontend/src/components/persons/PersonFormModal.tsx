@@ -1,9 +1,10 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useNavigate } from 'react-router-dom'
-import { X, User, Calendar, MapPin, BookOpen, Eye, Save, Loader2, AlertCircle, Phone, Camera, Trash2 } from 'lucide-react'
+import { X, User, Calendar, MapPin, BookOpen, Eye, Save, Loader2, AlertCircle, Phone, Camera, Trash2, Briefcase, GraduationCap, CreditCard } from 'lucide-react'
 import { personsService } from '@/services/persons.service'
-import type { Person, CreatePersonDto, Gender, DatePrecision, Visibility } from '@/types/person'
+import type { Person, CreatePersonDto, Gender, DatePrecision, Visibility, BloodGroup } from '@/types/person'
+import { BLOOD_GROUPS, EDUCATION_LEVELS } from '@/types/person'
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -50,6 +51,10 @@ const empty: CreatePersonDto = {
   gender: 'unknown',
   isLiving: true,
   phone: '',
+  nidNumber: '',
+  profession: '',
+  bloodGroup: undefined,
+  highestEducation: '',
   birthDate: '',
   birthDatePrecision: 'unknown',
   birthPlace: '',
@@ -67,6 +72,10 @@ function dtoFromPerson(p: Person): CreatePersonDto {
     gender:             p.gender,
     isLiving:           p.isLiving,
     phone:              p.phone ?? '',
+    nidNumber:          p.nidNumber ?? '',
+    profession:         p.profession ?? '',
+    bloodGroup:         p.bloodGroup ?? undefined,
+    highestEducation:   p.highestEducation ?? '',
     birthDate:          p.birthDate ?? '',
     birthDatePrecision: p.birthDatePrecision,
     birthPlace:         p.birthPlace ?? '',
@@ -88,7 +97,11 @@ function cleanDto(dto: CreatePersonDto): CreatePersonDto {
     deathDatePrecision: dto.deathDatePrecision,
     visibility: dto.visibility,
   }
-  if (dto.phone?.trim())      clean.phone      = dto.phone.trim()
+  if (dto.phone?.trim())             clean.phone             = dto.phone.trim()
+  if (dto.nidNumber?.trim())         clean.nidNumber         = dto.nidNumber.trim()
+  if (dto.profession?.trim())        clean.profession        = dto.profession.trim()
+  if (dto.bloodGroup)                clean.bloodGroup        = dto.bloodGroup
+  if (dto.highestEducation?.trim())  clean.highestEducation  = dto.highestEducation.trim()
   if (dto.birthDate?.trim())  clean.birthDate  = dto.birthDate.trim()
   if (dto.birthPlace?.trim()) clean.birthPlace = dto.birthPlace.trim()
   if (!dto.isLiving) {
@@ -559,6 +572,70 @@ export function PersonFormModal({ person, onClose, onSaved }: PersonFormModalPro
                 placeholder="Short biography, notes, or context about this person…"
                 className={`${inputCls} resize-none`}
               />
+            </Field>
+          </FormSection>
+
+          {/* Personal Details */}
+          <FormSection icon={CreditCard} title="Personal Details">
+            <Field label="NID / National ID Number">
+              <div className="relative">
+                <CreditCard className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                <input
+                  type="text"
+                  value={form.nidNumber ?? ''}
+                  onChange={e => set('nidNumber', e.target.value)}
+                  placeholder="e.g. 1234567890123"
+                  className={`${inputCls} pl-9`}
+                />
+              </div>
+            </Field>
+
+            <Field label="Blood Group">
+              <div className="flex flex-wrap gap-2">
+                {BLOOD_GROUPS.map(bg => (
+                  <button
+                    key={bg}
+                    type="button"
+                    onClick={() => set('bloodGroup', form.bloodGroup === bg ? undefined : bg as BloodGroup)}
+                    className={`px-3 py-1.5 rounded-lg border-2 text-sm font-semibold transition-all ${
+                      form.bloodGroup === bg
+                        ? 'border-red-400 bg-red-50 text-red-700'
+                        : 'border-gray-200 text-gray-500 hover:border-gray-300'
+                    }`}
+                  >
+                    {bg}
+                  </button>
+                ))}
+              </div>
+            </Field>
+
+            <Field label="Profession / Occupation">
+              <div className="relative">
+                <Briefcase className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                <input
+                  type="text"
+                  value={form.profession ?? ''}
+                  onChange={e => set('profession', e.target.value)}
+                  placeholder="e.g. Farmer, Teacher, Engineer…"
+                  className={`${inputCls} pl-9`}
+                />
+              </div>
+            </Field>
+
+            <Field label="Highest Education">
+              <div className="relative">
+                <GraduationCap className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                <select
+                  value={form.highestEducation ?? ''}
+                  onChange={e => set('highestEducation', e.target.value || undefined)}
+                  className={`${inputCls} pl-9`}
+                >
+                  <option value="">— Select level —</option>
+                  {EDUCATION_LEVELS.map(lvl => (
+                    <option key={lvl} value={lvl}>{lvl}</option>
+                  ))}
+                </select>
+              </div>
             </Field>
           </FormSection>
 

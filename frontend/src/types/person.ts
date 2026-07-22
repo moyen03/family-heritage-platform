@@ -2,6 +2,23 @@ export type Gender = 'male' | 'female' | 'other' | 'unknown'
 export type Visibility = 'public' | 'family' | 'branch' | 'private'
 export type DatePrecision = 'exact' | 'year' | 'approximate' | 'unknown'
 export type NameType = 'birth' | 'nickname' | 'title' | 'alias' | 'married'
+export type BloodGroup = 'A+' | 'A-' | 'B+' | 'B-' | 'AB+' | 'AB-' | 'O+' | 'O-'
+
+export const BLOOD_GROUPS: BloodGroup[] = ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-']
+
+export const EDUCATION_LEVELS = [
+  'None / Not recorded',
+  'Primary (Class 1–5)',
+  'Secondary / JSC',
+  'SSC / O-Level',
+  'HSC / A-Level',
+  'Diploma',
+  "Bachelor's Degree",
+  "Master's Degree",
+  'PhD / Doctorate',
+  'Other',
+] as const
+export type EducationLevel = typeof EDUCATION_LEVELS[number]
 
 export interface PersonName {
   id: string
@@ -38,6 +55,10 @@ export interface Person {
   deathPlace: string | null
   isLiving: boolean
   phone: string | null
+  nidNumber: string | null
+  profession: string | null
+  bloodGroup: BloodGroup | null
+  highestEducation: string | null
   biography: string | null
   visibility: Visibility
   profilePictureUrl: string | null
@@ -72,6 +93,10 @@ export interface CreatePersonDto {
   deathPlace?: string
   isLiving?: boolean
   phone?: string
+  nidNumber?: string
+  profession?: string
+  bloodGroup?: BloodGroup
+  highestEducation?: string
   biography?: string
   visibility?: Visibility
 }
