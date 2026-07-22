@@ -295,3 +295,57 @@ The `SmartDateInput` component adapts its UI based on the selected `DatePrecisio
 - Matches real-world genealogy data quality
 - Prevents forcing fake "Jan 1" dates when only year is known
 - Consistent with GEDCOM date precision model
+
+---
+
+## ADR-016: Person Profile Enrichment Fields (NID, Blood Group, Profession, Education)
+
+**Date:** 2026-07-22
+**Status:** Accepted
+
+**Context:**
+The initial `Person` entity had the basic genealogy fields (name, dates, biography). For a family that actively collects structured data about living members, we needed fields for NID, blood group, occupation, and education level.
+
+**Decision:**
+Add four optional columns directly to the `persons` table:
+- `nid_number VARCHAR(30) NULL` — National ID card number
+- `blood_group VARCHAR(5) NULL` — ABO/Rh type (A+, B+, O-, etc.)
+- `profession VARCHAR(150) NULL` — Free-text occupation/job title
+- `highest_education VARCHAR(150) NULL` — Enum-like string (None → PhD)
+
+Exposed via the existing `GET/PATCH /api/persons/{id}` endpoints.
+Rendered in the Person detail page under a dedicated **Personal Details** section.
+
+**Reasons:**
+- Blood group is critical family health information (emergency transfusions)
+- NID links the tree to official civil identity records
+- Profession and education give social context across generations
+- Simple columns on the existing table is the right fit (no separate entity needed — these are single-valued facts per person, not temporal ranges)
+
+**Alternatives considered:**
+- Separate `person_details` table: Unnecessary complexity for non-temporal single values
+- `events` table entries for education/occupation: Already have `occupations` / `educations` tables for detailed history; the new fields are just the top-level summary
+
+---
+
+## ADR-017: Branch Membership (User→Branch Access Control) vs. PersonBranch (Person→Branch Grouping)
+
+**Date:** 2026-07-22
+**Status:** Accepted
+
+**Context:**
+Two different concepts were conflated: (1) which branch does a *person* (genealogical entity) belong to, and (2) which branches can a *platform user* (account) access?
+
+**Decision:**
+Keep both as distinct entities:
+- `PersonBranch` — genealogical: links a `Person` to a `Branch` (`is_primary = 1` for blood descendants, `0` for spouses who married in)
+- `BranchMembership` — access control: links a `User` (account) to a `Branch` with a `role` (viewer, member)
+
+`Branch.is_shared = true` means the branch's persons (common ancestors) are visible to ALL authenticated users, bypassing membership checks.
+
+**Reasons:**
+- Clear separation of genealogical structure vs. access control
+- A person can belong to multiple branches without any login accounts
+- A user account can have access to multiple branches with different roles
+- Shared ancestor visibility is a branch-level policy, not per-person
+

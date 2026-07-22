@@ -419,6 +419,11 @@ Copy any existing entry and assign a new unique `id`. Add parent-child and marri
 | `birthDatePrecision` | ⬜ | `"year"` | `"exact"`, `"year"`, or `"approximate"` |
 | `birthPlace` | ⬜ | `"Dhaka, Bangladesh"` | Free text |
 | `deathDate` | ⬜ | `"2020-01-01"` | Required if deceased |
+| `phone` | ⬜ | `"+8801712345678"` | Mobile / phone number |
+| `nidNumber` | ⬜ | `"1234567890123"` | National ID card number |
+| `bloodGroup` | ⬜ | `"A+"` | A+, A-, B+, B-, AB+, AB-, O+, O- |
+| `profession` | ⬜ | `"Farmer"` | Occupation / job title |
+| `highestEducation` | ⬜ | `"SSC / O-Level"` | None, Primary, Secondary/JSC, SSC/O-Level, HSC/A-Level, Diploma, Bachelor's, Master's, PhD, Other |
 | `nickname` | ⬜ | `"Mota"` | Saved as PersonName (Nickname) |
 | `maidenName` | ⬜ | `"Begum"` | For women after marriage |
 | `biography` | ⬜ | `"..."` | Free text, any length |

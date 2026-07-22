@@ -58,9 +58,9 @@
 | Column | Type | Notes |
 |--------|------|-------|
 | id | CHAR(36) PK | UUID |
-| name | VARCHAR(255) | e.g. "Paternal Branch" |
-| description | TEXT | |
-| root_person_id | CHAR(36) FK NULL | |
+| name | VARCHAR(255) | e.g. "Hafez Family" |
+| description | TEXT NULL | |
+| is_shared | TINYINT(1) | 1 = common ancestors visible to ALL branches |
 | created_by | CHAR(36) FK | user_id |
 | created_at | DATETIME | |
 | updated_at | DATETIME | |
@@ -74,12 +74,21 @@
 | granted_at | DATETIME | |
 | granted_by | CHAR(36) FK | user_id |
 
+### branch_memberships
+| Column | Type | Notes |
+|--------|------|-------|
+| branch_id | CHAR(36) FK | |
+| user_id | CHAR(36) FK | links a platform User to a branch for access control |
+| role | VARCHAR(255) | viewer, member |
+| joined_at | DATETIME | |
+| invited_by | CHAR(36) FK | user_id |
+
 ### person_branches
 | Column | Type | Notes |
 |--------|------|-------|
 | person_id | CHAR(36) FK | |
 | branch_id | CHAR(36) FK | |
-| is_primary | TINYINT(1) | |
+| is_primary | TINYINT(1) | 1 = born into this branch (blood); 0 = married in (in-law) |
 
 ---
 
@@ -101,8 +110,13 @@
 | death_date_precision | ENUM | exact, year, approximate, unknown |
 | death_place | VARCHAR(255) NULL | |
 | is_living | TINYINT(1) | default 1 |
+| phone | VARCHAR(50) NULL | mobile/phone number |
+| nid_number | VARCHAR(30) NULL | National ID number |
+| profession | VARCHAR(150) NULL | occupation / job title |
+| blood_group | VARCHAR(5) NULL | A+, A-, B+, B-, AB+, AB-, O+, O- |
+| highest_education | VARCHAR(150) NULL | None, Primary, SSC, HSC, Diploma, Bachelor's, Master's, PhD, Other |
 | biography | TEXT NULL | |
-| profile_photo_id | CHAR(36) FK NULL | media.id |
+| profile_picture_path | VARCHAR(255) NULL | relative path to uploaded photo |
 | visibility | ENUM | public, family, branch, private |
 | created_by | CHAR(36) FK | user_id |
 | created_at | DATETIME | |
@@ -327,7 +341,7 @@
 | Group | Tables |
 |-------|--------|
 | Users & Auth | users, roles, permissions, role_permissions |
-| Branches | branches, branch_admins, person_branches |
+| Branches | branches, branch_admins, branch_memberships, person_branches |
 | Persons | persons, person_names |
 | Relationships | relationships, marriages |
 | Addresses | addresses |
@@ -336,5 +350,5 @@
 | Approval & Audit | approval_requests, audit_logs |
 | Notifications | notifications |
 | Career & Education | occupations, educations |
-| **Total** | **~22 core tables** (grows with features) |
+| **Total** | **~23 core tables** (grows with features) |
 

@@ -24,12 +24,14 @@
 ### Person Profiles
 
 - FR-PERSON-01: Create, read, update, delete person profiles
-- FR-PERSON-02: Fields: first name, middle name, last name, maiden name, birth date, birth place, death date, death place, gender, biography
+- FR-PERSON-02: Core fields: first name, middle name, last name, maiden name, birth date, birth place, death date, death place, gender, biography, phone
 - FR-PERSON-03: Support for unknown dates (year only, approximate)
 - FR-PERSON-04: Privacy level per person (public, family, branch, private)
 - FR-PERSON-05: Living person flag with automatic privacy protection
-- FR-PERSON-06: Profile photo
+- FR-PERSON-06: Profile photo upload (JPEG/PNG/WebP, max 5 MB)
 - FR-PERSON-07: Multiple names (name changes, nicknames, titles)
+- FR-PERSON-08: Personal details: NID/National ID number, blood group (ABO/Rh), profession/occupation
+- FR-PERSON-09: Education: highest academic qualification (None → Primary → SSC → HSC → Diploma → Bachelor's → Master's → PhD)
 
 ### Relationships
 
