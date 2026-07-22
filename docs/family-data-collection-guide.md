@@ -415,6 +415,8 @@ Copy any existing entry and assign a new unique `id`. Add parent-child and marri
 | `lastName` | ✅ | `"Uddin"` | Use `"Unknown"` if not known |
 | `gender` | ✅ | `"male"` / `"female"` | |
 | `isLiving` | ✅ | `true` / `false` | |
+| `nickname` | ⬜ | `"Mota"` | Common/family name — stored directly on person record |
+| `maidenName` | ⬜ | `"Begum"` | For women after marriage |
 | `birthDate` | ⬜ | `"1990-05-15"` | YYYY-MM-DD format |
 | `birthDatePrecision` | ⬜ | `"year"` | `"exact"`, `"year"`, or `"approximate"` |
 | `birthPlace` | ⬜ | `"Dhaka, Bangladesh"` | Free text |
@@ -424,8 +426,6 @@ Copy any existing entry and assign a new unique `id`. Add parent-child and marri
 | `bloodGroup` | ⬜ | `"A+"` | A+, A-, B+, B-, AB+, AB-, O+, O- |
 | `profession` | ⬜ | `"Farmer"` | Occupation / job title |
 | `highestEducation` | ⬜ | `"SSC / O-Level"` | None, Primary, Secondary/JSC, SSC/O-Level, HSC/A-Level, Diploma, Bachelor's, Master's, PhD, Other |
-| `nickname` | ⬜ | `"Mota"` | Saved as PersonName (Nickname) |
-| `maidenName` | ⬜ | `"Begum"` | For women after marriage |
 | `biography` | ⬜ | `"..."` | Free text, any length |
 | `_todo` | ⬜ | `["birthDate"]` | Reminder list — **ignored by importer** |
 | `_placeholder` | ⬜ | `true` | Marks unconfirmed persons — **ignored by importer** |

@@ -277,75 +277,103 @@ Use a custom Symfony controller (`PersonPhotoController`) for `POST /api/persons
 
 ---
 
-## ADR-015: Smart Date Precision Input
+## ADR-015: Nickname as a Direct Column on Person (not PersonName)
 
-**Date:** 2026-07-20
+**Date:** 2026-07-22  
 **Status:** Accepted
 
-**Context:**
-Many historical birth/death dates in the family are only known by year (e.g. "born around 1945"). The standard HTML date picker requires a full YYYY-MM-DD, making it unusable for year-only data.
+**Context:**  
+Every family member has a common name used informally (e.g. "Mota", "Babu", "Chhotu"). The existing `person_names` table supports nicknames but requires a separate API call and is managed through a dedicated panel — not convenient for quick data entry during person creation.
 
-**Decision:**
-The `SmartDateInput` component adapts its UI based on the selected `DatePrecision`:
-- `unknown` → disabled placeholder input
-- `year` → plain text input (4 digits), stored as `YYYY-01-01` internally
-- `exact` / `approximate` → date picker + manual text fallback
+**Decision:**  
+Add a `nickname VARCHAR(100) NULL` column directly on the `persons` table. It appears in the add/edit form between Birth Date and Birth Place, is shown in the person hero and overview grid, and requires no extra API call on save.
 
-**Reasons:**
-- Matches real-world genealogy data quality
-- Prevents forcing fake "Jan 1" dates when only year is known
-- Consistent with GEDCOM date precision model
-
----
-
-## ADR-016: Person Profile Enrichment Fields (NID, Blood Group, Profession, Education)
-
-**Date:** 2026-07-22
-**Status:** Accepted
-
-**Context:**
-The initial `Person` entity had the basic genealogy fields (name, dates, biography). For a family that actively collects structured data about living members, we needed fields for NID, blood group, occupation, and education level.
-
-**Decision:**
-Add four optional columns directly to the `persons` table:
-- `nid_number VARCHAR(30) NULL` — National ID card number
-- `blood_group VARCHAR(5) NULL` — ABO/Rh type (A+, B+, O-, etc.)
-- `profession VARCHAR(150) NULL` — Free-text occupation/job title
-- `highest_education VARCHAR(150) NULL` — Enum-like string (None → PhD)
-
-Exposed via the existing `GET/PATCH /api/persons/{id}` endpoints.
-Rendered in the Person detail page under a dedicated **Personal Details** section.
+`person_names` with `name_type = 'nickname'` remains available for additional/historical nicknames (e.g. a person known by different names at different times).
 
 **Reasons:**
-- Blood group is critical family health information (emergency transfusions)
-- NID links the tree to official civil identity records
-- Profession and education give social context across generations
-- Simple columns on the existing table is the right fit (no separate entity needed — these are single-valued facts per person, not temporal ranges)
+- Single-field convenience for the most common case (one nickname per person)
+- No extra POST to `/api/persons/{id}/names` needed during person creation
+- Consistent with how `maiden_name` is handled (direct column)
+- Advanced nickname management still available via Alternative Names panel
 
 **Alternatives considered:**
-- Separate `person_details` table: Unnecessary complexity for non-temporal single values
-- `events` table entries for education/occupation: Already have `occupations` / `educations` tables for detailed history; the new fields are just the top-level summary
+- Always use `person_names` for nicknames → requires two API calls to create a person with a nickname (create person, then create name)
+- Only show nickname in Alternative Names → users might miss it; most people expect a single nickname field
 
 ---
 
-## ADR-017: Branch Membership (User→Branch Access Control) vs. PersonBranch (Person→Branch Grouping)
+## ADR-016: PersonNameStateProcessor Must Manually Inject Person from uriVariables
 
-**Date:** 2026-07-22
+**Date:** 2026-07-22  
 **Status:** Accepted
 
-**Context:**
-Two different concepts were conflated: (1) which branch does a *person* (genealogical entity) belong to, and (2) which branches can a *platform user* (account) access?
+**Context:**  
+The `PersonName` entity uses a sub-resource route `/api/persons/{personId}/names` with `Link(fromClass: Person::class, toProperty: 'person')`. The assumption was that API Platform 3.x would automatically inject the resolved `Person` entity into `PersonName::$person` before calling the state processor.
 
-**Decision:**
-Keep both as distinct entities:
-- `PersonBranch` — genealogical: links a `Person` to a `Branch` (`is_primary = 1` for blood descendants, `0` for spouses who married in)
-- `BranchMembership` — access control: links a `User` (account) to a `Branch` with a `role` (viewer, member)
+**Decision:**  
+The `PersonNameStateProcessor` explicitly fetches the `Person` entity from `$uriVariables['personId']` using `EntityManager::find()` and calls `$data->setPerson($person)` before persisting.
 
-`Branch.is_shared = true` means the branch's persons (common ancestors) are visible to ALL authenticated users, bypassing membership checks.
+```php
+if (isset($uriVariables['personId'])) {
+    $person = $this->entityManager->find(Person::class, $uriVariables['personId']);
+    $data->setPerson($person);
+}
+```
+
+**Reason:**  
+API Platform 3.x does NOT automatically resolve `Link(toProperty:)` into the deserialized entity during the processor phase. Without this fix, `person_id` was always `NULL`, causing a DB constraint violation (500 error) when adding alternative names.
+
+---
+
+## ADR-017: Person Detail Page Layout — Compact 3-Column Overview
+
+**Date:** 2026-07-22  
+**Status:** Accepted
+
+**Context:**  
+The original person detail page had "Life Events" and "Personal Info" as two separate half-width sections. With sparse data (e.g. only birth year known), each section was a large empty box with one or two facts.
+
+**Decision:**  
+Merge all person facts (born, birth place, mobile, NID, blood group, profession, education, died, death place, nickname) into a single **full-width "Overview" card** with a `grid-cols-2 md:grid-cols-3` layout. Empty fields are hidden — only filled cards render.
+
+Additional layout changes:
+- Biography moved to full-width below Overview
+- Family Connections displayed in a **2×2 grid**: Parents | Siblings (row 1), Spouse | Children (row 2)
+- Alternative Names extracted as a standalone `AlternativeNamesPanel` component
+- Alternative Names and Addresses placed **side by side** in a 2-column row
 
 **Reasons:**
-- Clear separation of genealogical structure vs. access control
-- A person can belong to multiple branches without any login accounts
-- A user account can have access to multiple branches with different roles
-- Shared ancestor visibility is a branch-level policy, not per-person
+- More information visible at a glance with less scrolling
+- No wasted whitespace from empty half-page sections
+- Consistent with the form's 2-column grid layout
 
+---
+
+## ADR-018: Form Field Order (PersonFormModal)
+
+**Date:** 2026-07-22  
+**Status:** Accepted
+
+**Decision:**  
+The Add/Edit Person form uses a single flat "Person Details" section with fields in this specific 2-column order:
+
+| Left | Right |
+|------|-------|
+| First Name | Last Name |
+| Phone / Mobile | NID / National ID |
+| Birth Date Precision | Birth Date |
+| Nickname | Birth Place |
+| Gender | Profession |
+| Highest Education | |
+| Blood Group | *(full width)* |
+| Status | *(full width)* |
+| *(if Deceased)* Death Date Precision | Death Date |
+| *(if Deceased)* Death Place | |
+| Biography / Notes | *(full width)* |
+
+**Reasons:**
+- Groups related fields spatially (dates together, personal details together)
+- Nickname next to Birth Place fills the natural gap after date precision fields
+- Most important identity fields (name, phone, birth) appear first
+
+---

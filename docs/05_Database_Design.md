@@ -102,6 +102,7 @@
 | middle_name | VARCHAR(100) NULL | |
 | last_name | VARCHAR(100) | |
 | maiden_name | VARCHAR(100) NULL | |
+| nickname | VARCHAR(100) NULL | common/family name shown in hero |
 | gender | ENUM | male, female, other, unknown |
 | birth_date | DATE NULL | |
 | birth_date_precision | ENUM | exact, year, approximate, unknown |

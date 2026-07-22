@@ -62,9 +62,14 @@
 | Profile photo upload | ✅ Done |
 | Phone / mobile number field | ✅ Done |
 | NID number, blood group, profession, highest education fields | ✅ Done |
+| Nickname field (quick entry in form + shown in hero) | ✅ Done |
 | Smart date precision input (year-only, exact, approximate) | ✅ Done |
 | Adoption / step display (dashed edges + legend) | ✅ Done |
 | Person detail page (enriched profile view) | ✅ Done |
+| Person detail page — 3-col overview grid (all facts compact) | ✅ Done |
+| Person detail page — Biography at bottom full-width | ✅ Done |
+| Person detail page — Family connections 2×2 grid (Parents\|Siblings, Spouse\|Children) | ✅ Done |
+| Person detail page — Alternative Names + Addresses side by side | ✅ Done |
 | All Persons list page (paginated) | ✅ Done |
 | Relationships page (searchable table) | ✅ Done |
 | Marriages page (card grid, filter active/divorced) | ✅ Done |
@@ -72,6 +77,7 @@
 | Visibility extension (public / family / branch / private) | ✅ Done |
 | Family connector nodes (genealogy bracket layout) | ✅ Done |
 | Married couples Y-aligned side by side in tree | ✅ Done |
+| Form fields 2-column layout (50% width pairs) | ✅ Done |
 
 ---
 
