@@ -3,13 +3,14 @@ import { useParams, useNavigate, Link } from 'react-router-dom'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import {
   ArrowLeft, GitBranch, Users, Search, UserPlus, Trash2, Loader2, Share2, Star,
-  ShieldCheck, Eye, UserCog, TreePine,
+  ShieldCheck, Eye, UserCog, TreePine, Mail,
 } from 'lucide-react'
 import { branchesService } from '@/services/branches.service'
 import type { BranchMember, BranchUserMember } from '@/services/branches.service'
 import { personsService } from '@/services/persons.service'
 import { usersService } from '@/services/users.service'
-import { useAuthStore, selectIsSuperAdmin } from '@/store/auth.store'
+import { useAuthStore, selectIsSuperAdmin, selectIsAdmin } from '@/store/auth.store'
+import { InviteModal } from '@/components/branches/InviteModal'
 
 // ── Person picker (search + assign) ──────────────────────────────────────────
 
@@ -326,9 +327,11 @@ export function BranchDetailPage() {
   const navigate = useNavigate()
   const qc = useQueryClient()
   const isSuperAdmin = useAuthStore(selectIsSuperAdmin)
-  const [activeTab, setActiveTab] = useState<Tab>('persons')
+  const isAdmin      = useAuthStore(selectIsAdmin)
+  const [activeTab, setActiveTab]       = useState<Tab>('persons')
   const [memberSearch, setMemberSearch] = useState('')
-  const [userSearch, setUserSearch] = useState('')
+  const [userSearch, setUserSearch]     = useState('')
+  const [showInvite, setShowInvite]     = useState(false)
 
   const { data: branch, isLoading: branchLoading } = useQuery({
     queryKey: ['branch', id],
@@ -397,13 +400,24 @@ export function BranchDetailPage() {
           <div className="text-right flex-shrink-0">
             <p className="text-2xl font-bold text-indigo-600">{branch.memberCount}</p>
             <p className="text-xs text-gray-400">persons</p>
-            <Link
-              to={`/branches/${id}/tree`}
-              className="mt-2 inline-flex items-center gap-1.5 text-xs font-medium text-indigo-600 hover:text-indigo-800 bg-indigo-50 hover:bg-indigo-100 px-3 py-1.5 rounded-lg transition-colors"
-            >
-              <TreePine className="h-3.5 w-3.5" />
-              View Tree
-            </Link>
+            <div className="flex gap-2 mt-2 justify-end">
+              {isAdmin && (
+                <button
+                  onClick={() => setShowInvite(true)}
+                  className="inline-flex items-center gap-1.5 text-xs font-medium text-white bg-indigo-600 hover:bg-indigo-700 px-3 py-1.5 rounded-lg transition-colors"
+                >
+                  <Mail className="h-3.5 w-3.5" />
+                  Invite
+                </button>
+              )}
+              <Link
+                to={`/branches/${id}/tree`}
+                className="inline-flex items-center gap-1.5 text-xs font-medium text-indigo-600 hover:text-indigo-800 bg-indigo-50 hover:bg-indigo-100 px-3 py-1.5 rounded-lg transition-colors"
+              >
+                <TreePine className="h-3.5 w-3.5" />
+                View Tree
+              </Link>
+            </div>
           </div>
         </div>
       </div>
@@ -555,6 +569,15 @@ export function BranchDetailPage() {
             />
           </div>
         </div>
+      )}
+
+      {/* Invite Modal */}
+      {showInvite && branch && (
+        <InviteModal
+          branchId={id!}
+          branchName={branch.name}
+          onClose={() => setShowInvite(false)}
+        />
       )}
     </div>
   )

@@ -14,6 +14,8 @@ import MapPage from '@/pages/MapPage'
 import { BranchesPage } from '@/pages/BranchesPage'
 import { BranchDetailPage } from '@/pages/BranchDetailPage'
 import { BranchTreePage } from '@/pages/BranchTreePage'
+import { ApprovalsPage } from '@/pages/ApprovalsPage'
+import { AcceptInvitePage } from '@/pages/AcceptInvitePage'
 import { NotFoundPage } from '@/pages/NotFoundPage'
 import { useAuthStore } from '@/store/auth.store'
 
@@ -28,6 +30,7 @@ export default function App() {
     <Routes>
       {/* Public */}
       <Route path="/login" element={<LoginPage />} />
+      <Route path="/invite/:token" element={<AcceptInvitePage />} />
 
       {/* Protected */}
       <Route
@@ -48,6 +51,7 @@ export default function App() {
                 <Route path="branches" element={<BranchesPage />} />
                 <Route path="branches/:id" element={<BranchDetailPage />} />
                 <Route path="branches/:id/tree" element={<BranchTreePage />} />
+                <Route path="approvals" element={<ApprovalsPage />} />
                 <Route path="*" element={<NotFoundPage />} />
               </Routes>
             </Layout>
@@ -57,4 +61,5 @@ export default function App() {
     </Routes>
   )
 }
+
 
