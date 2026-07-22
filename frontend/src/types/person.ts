@@ -55,7 +55,8 @@ export interface Person {
   deathDatePrecision: DatePrecision
   deathPlace: string | null
   isLiving: boolean
-  phone: string | null
+  phone?: string | null
+  email?: string | null
   nidNumber: string | null
   profession: string | null
   bloodGroup: BloodGroup | null
@@ -95,6 +96,7 @@ export interface CreatePersonDto {
   deathPlace?: string
   isLiving?: boolean
   phone?: string
+  email?: string
   nidNumber?: string
   profession?: string
   bloodGroup?: BloodGroup

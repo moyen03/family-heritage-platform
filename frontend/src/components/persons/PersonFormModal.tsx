@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useNavigate } from 'react-router-dom'
-import { X, User, Calendar, MapPin, BookOpen, Eye, Save, Loader2, AlertCircle, Phone, Camera, Trash2, Briefcase, GraduationCap, CreditCard } from 'lucide-react'
+import { X, User, Calendar, MapPin, BookOpen, Eye, Save, Loader2, AlertCircle, Phone, Camera, Trash2, Briefcase, GraduationCap, CreditCard, Mail } from 'lucide-react'
 import { personsService } from '@/services/persons.service'
 import type { Person, CreatePersonDto, Gender, DatePrecision, Visibility, BloodGroup } from '@/types/person'
 import { BLOOD_GROUPS, EDUCATION_LEVELS } from '@/types/person'
@@ -51,6 +51,7 @@ const empty: CreatePersonDto = {
   gender: 'unknown',
   isLiving: true,
   phone: '',
+  email: '',
   nidNumber: '',
   nickname: '',
   profession: '',
@@ -73,6 +74,7 @@ function dtoFromPerson(p: Person): CreatePersonDto {
     gender:             p.gender,
     isLiving:           p.isLiving,
     phone:              p.phone ?? '',
+    email:              p.email ?? '',
     nidNumber:          p.nidNumber ?? '',
     nickname:           p.nickname ?? '',
     profession:         p.profession ?? '',
@@ -100,6 +102,7 @@ function cleanDto(dto: CreatePersonDto): CreatePersonDto {
     visibility: dto.visibility,
   }
   if (dto.phone?.trim())             clean.phone             = dto.phone.trim()
+  if (dto.email?.trim())             clean.email             = dto.email.trim()
   if (dto.nidNumber?.trim())         clean.nidNumber         = dto.nidNumber.trim()
   if (dto.nickname?.trim())          clean.nickname          = dto.nickname.trim()
   if (dto.profession?.trim())        clean.profession        = dto.profession.trim()
@@ -422,7 +425,7 @@ export function PersonFormModal({ person, onClose, onSaved }: PersonFormModalPro
               </Field>
             </div>
 
-            {/* Row 2: Phone | NID */}
+            {/* Row 2: Phone | Email */}
             <div className="grid grid-cols-2 gap-3">
               <Field label="Phone / Mobile">
                 <div className="relative">
@@ -431,6 +434,17 @@ export function PersonFormModal({ person, onClose, onSaved }: PersonFormModalPro
                     placeholder="+880 1700-000000" className={`${inputCls} pl-9`} />
                 </div>
               </Field>
+              <Field label="Email">
+                <div className="relative">
+                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                  <input type="email" value={form.email ?? ''} onChange={e => set('email', e.target.value)}
+                    placeholder="e.g. moyen@example.com" className={`${inputCls} pl-9`} />
+                </div>
+              </Field>
+            </div>
+
+            {/* Row 2b: NID | (gap) */}
+            <div className="grid grid-cols-2 gap-3">
               <Field label="NID / National ID">
                 <div className="relative">
                   <CreditCard className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
@@ -438,6 +452,7 @@ export function PersonFormModal({ person, onClose, onSaved }: PersonFormModalPro
                     placeholder="e.g. 1234567890123" className={`${inputCls} pl-9`} />
                 </div>
               </Field>
+              <div />{/* spacer */}
             </div>
 
             {/* Row 3: Birth Date Precision | Birth Date */}

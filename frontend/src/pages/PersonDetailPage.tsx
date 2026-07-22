@@ -4,7 +4,7 @@ import { useState } from 'react'
 import {
   ArrowLeft, Calendar, MapPin, User,
   GitBranch, Dna, BookOpen, Pencil, Network, Phone, Share2, Star,
-  Briefcase, GraduationCap, CreditCard, Droplets,
+  Briefcase, GraduationCap, CreditCard, Droplets, Mail,
 } from 'lucide-react'
 import { personsService } from '@/services/persons.service'
 import { relationshipsService } from '@/services/relationships.service'
@@ -217,6 +217,11 @@ export function PersonDetailPage() {
           <InfoCard label="Mobile" icon={Phone} value={
             person.phone
               ? <a href={`tel:${person.phone}`} className="text-indigo-600 hover:text-indigo-800">{person.phone}</a>
+              : null
+          } />
+          <InfoCard label="Email" icon={Mail} value={
+            person.email
+              ? <a href={`mailto:${person.email}`} className="text-indigo-600 hover:text-indigo-800">{person.email}</a>
               : null
           } />
           <InfoCard label="NID Number" icon={CreditCard} value={

@@ -97,6 +97,12 @@ class Person
     #[Assert\Length(max: 100)]
     private ?string $nickname = null;
 
+    #[ORM\Column(type: 'string', length: 180, nullable: true)]
+    #[Groups(['person:read', 'person:write'])]
+    #[Assert\Email]
+    #[Assert\Length(max: 180)]
+    private ?string $email = null;
+
     #[ORM\Column(type: 'string', enumType: Gender::class)]
     #[Groups(['person:read', 'person:write', 'relationship:read', 'marriage:read'])]
     private Gender $gender = Gender::Unknown;
@@ -257,6 +263,17 @@ class Person
     public function setNickname(?string $nickname): static
     {
         $this->nickname = $nickname;
+        return $this;
+    }
+
+    public function getEmail(): ?string
+    {
+        return $this->email;
+    }
+
+    public function setEmail(?string $email): static
+    {
+        $this->email = $email;
         return $this;
     }
 
