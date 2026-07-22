@@ -288,49 +288,49 @@ Branch 1.1.4 — Md Siraz Uddin Molla + Mrs Munnuzan Begum:
 Open `database/seed/moyen_family_data.json` and find the entry by its `id`.
 
 **Add a birth date (when only year is known):**
-```json
+```jsonc
 {
   "id": "moyen-uddin",
   "firstName": "Md Moyen",
   "lastName": "Uddin",
   "birthDate": "1990-01-01",
   "birthDatePrecision": "year",
-  ...
+  // ...other fields unchanged
 }
 ```
 
 **Add an exact birth date (day and month known):**
-```json
+```jsonc
 {
   "birthDate": "1990-05-15",
   "birthDatePrecision": "exact",
-  ...
+  // ...other fields unchanged
 }
 ```
 
 **Replace a placeholder name (e.g., "Mota"):**
-```json
+```jsonc
 {
   "id": "mota",
-  "firstName": "Fatema",        ← replace "Mota"
+  "firstName": "Fatema",        // replace "Mota"
   "lastName": "Molla",
-  "nickname": "Mota",           ← keep the nickname
-  ...
+  "nickname": "Mota",           // keep the nickname
+  // ...other fields unchanged
 }
 ```
 
 **Replace a placeholder spouse:**
-```json
+```jsonc
 {
   "id": "mota-husband",
-  "firstName": "Md Karim",      ← replace "Unknown"
-  "lastName": "Bepari",         ← replace "Unknown"
-  ...
+  "firstName": "Md Karim",      // replace "Unknown"
+  "lastName": "Bepari",         // replace "Unknown"
+  // ...other fields unchanged
 }
 ```
 
 **Add a marriage date:**
-```json
+```jsonc
 {
   "id": "hafez-atia",
   "spouse1": "hafez-uddin-molla",
@@ -338,7 +338,7 @@ Open `database/seed/moyen_family_data.json` and find the entry by its `id`.
   "marriageDate": "1958-01-01",
   "marriageDatePrecision": "year",
   "marriagePlace": "Dhaka, Bangladesh",
-  ...
+  // ...other fields unchanged
 }
 ```
 
