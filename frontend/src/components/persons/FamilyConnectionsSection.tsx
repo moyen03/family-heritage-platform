@@ -395,66 +395,65 @@ export function FamilyConnectionsSection({
 
   return (
     <div className="space-y-4">
-      {/* Parents */}
-      <ConnectionSection icon={Dna} title="Parents" action={<AddButton label="Add Parent" onClick={() => setModal('parent')} />}>
-        {parents.length === 0 ? empty : parents.map(r => (
-          <ConnectionRow
-            key={r.id}
-            label={r.person1.fullName}
-            to={`/persons/${r.person1.id}`}
-            onRemove={() => removeRelationship(r.id)}
-            removing={removing === r.id}
-          />
-        ))}
-      </ConnectionSection>
-
-      {/* Siblings */}
-      <ConnectionSection icon={Users} title="Siblings" action={<AddButton label="Add Sibling" onClick={() => setModal('sibling')} />}>
-        {siblings.length === 0 ? empty : siblings.map(r => {
-          const other = r.person1.id === personId ? r.person2 : r.person1
-          return (
+      {/* Row 1: Parents | Siblings  ·  Row 2: Spouse | Children */}
+      <div className="grid grid-cols-2 gap-4">
+        <ConnectionSection icon={Dna} title="Parents" action={<AddButton label="Add Parent" onClick={() => setModal('parent')} />}>
+          {parents.length === 0 ? empty : parents.map(r => (
             <ConnectionRow
               key={r.id}
-              label={other.fullName}
-              to={`/persons/${other.id}`}
+              label={r.person1.fullName}
+              to={`/persons/${r.person1.id}`}
               onRemove={() => removeRelationship(r.id)}
               removing={removing === r.id}
             />
-          )
-        })}
-      </ConnectionSection>
+          ))}
+        </ConnectionSection>
 
-      {/* Marriages */}
-      <ConnectionSection icon={Heart} title="Spouse / Marriages" action={<AddButton label="Add Spouse" onClick={() => setModal('marriage')} />}>
-        {personMarriages.length === 0 ? empty : personMarriages.map(m => {
-          const spouse = m.spouse1.id === personId ? m.spouse2 : m.spouse1
-          return (
+        <ConnectionSection icon={Users} title="Siblings" action={<AddButton label="Add Sibling" onClick={() => setModal('sibling')} />}>
+          {siblings.length === 0 ? empty : siblings.map(r => {
+            const other = r.person1.id === personId ? r.person2 : r.person1
+            return (
+              <ConnectionRow
+                key={r.id}
+                label={other.fullName}
+                to={`/persons/${other.id}`}
+                onRemove={() => removeRelationship(r.id)}
+                removing={removing === r.id}
+              />
+            )
+          })}
+        </ConnectionSection>
+
+        <ConnectionSection icon={Heart} title="Spouse / Marriages" action={<AddButton label="Add Spouse" onClick={() => setModal('marriage')} />}>
+          {personMarriages.length === 0 ? empty : personMarriages.map(m => {
+            const spouse = m.spouse1.id === personId ? m.spouse2 : m.spouse1
+            return (
+              <ConnectionRow
+                key={m.id}
+                label={spouse.fullName}
+                to={`/persons/${spouse.id}`}
+                badge={m.isDivorced ? 'Divorced' : undefined}
+                onRemove={() => removeMarriage(m.id)}
+                removing={removing === m.id}
+              />
+            )
+          })}
+        </ConnectionSection>
+
+        <ConnectionSection icon={UserCheck} title="Children" action={<AddButton label="Add Child" onClick={() => setModal('child')} />}>
+          {children.length === 0 ? empty : children.map(r => (
             <ConnectionRow
-              key={m.id}
-              label={spouse.fullName}
-              to={`/persons/${spouse.id}`}
-              badge={m.isDivorced ? 'Divorced' : undefined}
-              onRemove={() => removeMarriage(m.id)}
-              removing={removing === m.id}
+              key={r.id}
+              label={r.person2.fullName}
+              to={`/persons/${r.person2.id}`}
+              onRemove={() => removeRelationship(r.id)}
+              removing={removing === r.id}
             />
-          )
-        })}
-      </ConnectionSection>
+          ))}
+        </ConnectionSection>
+      </div>
 
-      {/* Children */}
-      <ConnectionSection icon={UserCheck} title="Children" action={<AddButton label="Add Child" onClick={() => setModal('child')} />}>
-        {children.length === 0 ? empty : children.map(r => (
-          <ConnectionRow
-            key={r.id}
-            label={r.person2.fullName}
-            to={`/persons/${r.person2.id}`}
-            onRemove={() => removeRelationship(r.id)}
-            removing={removing === r.id}
-          />
-        ))}
-      </ConnectionSection>
-
-      {/* Alternative Names */}
+      {/* Alternative Names — full width */}
       <ConnectionSection icon={BookOpen} title="Alternative Names" action={<AddButton label="Add Name" onClick={() => setModal('name')} />}>
         {personNames.length === 0 ? empty : personNames.map(n => (
           <div key={n.id} className="flex items-center justify-between py-1.5 border-b border-gray-50 last:border-0 group">
