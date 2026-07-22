@@ -150,7 +150,13 @@ export function PersonDetailPage() {
         </div>
         <div className="flex-1 min-w-0">
           <h1 className="text-2xl font-bold text-gray-900">{person.fullName}</h1>
-          {person.maidenName && (
+          {person.nickname && (
+            <p className="text-sm text-gray-500 mt-0.5">"{person.nickname}"</p>
+          )}
+          {!person.nickname && person.maidenName && (
+            <p className="text-sm text-gray-500 mt-0.5">née {person.maidenName}</p>
+          )}
+          {person.nickname && person.maidenName && (
             <p className="text-sm text-gray-500 mt-0.5">née {person.maidenName}</p>
           )}
           <div className="flex flex-wrap gap-2 mt-3">
@@ -207,6 +213,7 @@ export function PersonDetailPage() {
               : null
           } />
           <InfoCard label="Birth Place" icon={MapPin} value={person.birthPlace ?? null} />
+          <InfoCard label="Nickname" icon={User} value={person.nickname ?? null} />
           <InfoCard label="Mobile" icon={Phone} value={
             person.phone
               ? <a href={`tel:${person.phone}`} className="text-indigo-600 hover:text-indigo-800">{person.phone}</a>

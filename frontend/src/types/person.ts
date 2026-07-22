@@ -44,7 +44,8 @@ export interface Person {
   firstName: string
   middleName: string | null
   lastName: string
-  maidenName: string | null
+  maidenName?: string | null
+  nickname?: string | null
   fullName: string
   gender: Gender
   birthDate: string | null
@@ -84,6 +85,7 @@ export interface CreatePersonDto {
   middleName?: string
   lastName: string
   maidenName?: string
+  nickname?: string
   gender: Gender
   birthDate?: string
   birthDatePrecision?: DatePrecision

@@ -52,6 +52,7 @@ const empty: CreatePersonDto = {
   isLiving: true,
   phone: '',
   nidNumber: '',
+  nickname: '',
   profession: '',
   bloodGroup: undefined,
   highestEducation: '',
@@ -73,6 +74,7 @@ function dtoFromPerson(p: Person): CreatePersonDto {
     isLiving:           p.isLiving,
     phone:              p.phone ?? '',
     nidNumber:          p.nidNumber ?? '',
+    nickname:           p.nickname ?? '',
     profession:         p.profession ?? '',
     bloodGroup:         p.bloodGroup ?? undefined,
     highestEducation:   p.highestEducation ?? '',
@@ -99,6 +101,7 @@ function cleanDto(dto: CreatePersonDto): CreatePersonDto {
   }
   if (dto.phone?.trim())             clean.phone             = dto.phone.trim()
   if (dto.nidNumber?.trim())         clean.nidNumber         = dto.nidNumber.trim()
+  if (dto.nickname?.trim())          clean.nickname          = dto.nickname.trim()
   if (dto.profession?.trim())        clean.profession        = dto.profession.trim()
   if (dto.bloodGroup)                clean.bloodGroup        = dto.bloodGroup
   if (dto.highestEducation?.trim())  clean.highestEducation  = dto.highestEducation.trim()
@@ -460,7 +463,27 @@ export function PersonFormModal({ person, onClose, onSaved }: PersonFormModalPro
               />
             </div>
 
-            {/* Row 4: Gender | Birth Place */}
+            {/* Row 3b: Nickname | Birth Place */}
+            <div className="grid grid-cols-2 gap-3">
+              <Field label="Nickname" hint="Common name used by family">
+                <input
+                  type="text"
+                  value={form.nickname ?? ''}
+                  onChange={e => set('nickname', e.target.value)}
+                  placeholder="e.g. Mota, Babu, Chhotu…"
+                  className={inputCls}
+                />
+              </Field>
+              <Field label="Birth Place">
+                <div className="relative">
+                  <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                  <input type="text" value={form.birthPlace ?? ''} onChange={e => set('birthPlace', e.target.value)}
+                    placeholder="e.g. Dhaka, Bangladesh" className={`${inputCls} pl-9`} />
+                </div>
+              </Field>
+            </div>
+
+            {/* Row 4: Gender | Profession */}
             <div className="grid grid-cols-2 gap-3">
               <Field label="Gender">
                 <div className="flex gap-2 flex-wrap">
@@ -472,17 +495,6 @@ export function PersonFormModal({ person, onClose, onSaved }: PersonFormModalPro
                   ))}
                 </div>
               </Field>
-              <Field label="Birth Place">
-                <div className="relative">
-                  <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-                  <input type="text" value={form.birthPlace ?? ''} onChange={e => set('birthPlace', e.target.value)}
-                    placeholder="e.g. Dhaka, Bangladesh" className={`${inputCls} pl-9`} />
-                </div>
-              </Field>
-            </div>
-
-            {/* Row 5: Profession | Education */}
-            <div className="grid grid-cols-2 gap-3">
               <Field label="Profession / Occupation">
                 <div className="relative">
                   <Briefcase className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
@@ -490,6 +502,10 @@ export function PersonFormModal({ person, onClose, onSaved }: PersonFormModalPro
                     placeholder="e.g. Farmer, Teacher…" className={`${inputCls} pl-9`} />
                 </div>
               </Field>
+            </div>
+
+            {/* Row 5: Education | (empty) */}
+            <div className="grid grid-cols-2 gap-3">
               <Field label="Highest Education">
                 <div className="relative">
                   <GraduationCap className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
