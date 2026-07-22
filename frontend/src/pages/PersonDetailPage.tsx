@@ -192,65 +192,57 @@ export function PersonDetailPage() {
         </button>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Life Events */}
-        <Section title="Life Events" icon={Calendar}>
-          <div className="grid grid-cols-2 gap-3">
-            <InfoCard label="Born" icon={Calendar} value={
-              person.birthDate
-                ? person.birthDatePrecision === 'year'
-                  ? new Date(person.birthDate).getFullYear().toString()
-                  : person.birthDatePrecision === 'approximate'
-                    ? `~${new Date(person.birthDate).toLocaleDateString('en-GB', { year: 'numeric', month: 'short', day: 'numeric' })}`
-                    : new Date(person.birthDate).toLocaleDateString('en-GB', { year: 'numeric', month: 'short', day: 'numeric' })
-                : null
-            } />
-            <InfoCard label="Birth Place" icon={MapPin} value={person.birthPlace ?? null} />
-            {!person.isLiving && (
-              <>
-                <InfoCard label="Died" icon={Calendar} value={
-                  person.deathDate
-                    ? person.deathDatePrecision === 'year'
-                      ? new Date(person.deathDate).getFullYear().toString()
-                      : person.deathDatePrecision === 'approximate'
-                        ? `~${new Date(person.deathDate).toLocaleDateString('en-GB', { year: 'numeric', month: 'short', day: 'numeric' })}`
-                        : new Date(person.deathDate).toLocaleDateString('en-GB', { year: 'numeric', month: 'short', day: 'numeric' })
-                    : 'Unknown'
-                } />
-                <InfoCard label="Death Place" icon={MapPin} value={person.deathPlace ?? null} />
-              </>
-            )}
-          </div>
-          {!person.birthDate && !person.deathDate && (
-            <p className="text-sm text-gray-400">No life event records</p>
+      {/* ── Overview — full width, 3-col grid of facts ── */}
+      <div className="mt-6">
+      <Section title="Overview" icon={User}>
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+          {/* Life */}
+          <InfoCard label="Born" icon={Calendar} value={
+            person.birthDate
+              ? person.birthDatePrecision === 'year'
+                ? new Date(person.birthDate).getFullYear().toString()
+                : person.birthDatePrecision === 'approximate'
+                  ? `~${new Date(person.birthDate).toLocaleDateString('en-GB', { year: 'numeric', month: 'short', day: 'numeric' })}`
+                  : new Date(person.birthDate).toLocaleDateString('en-GB', { year: 'numeric', month: 'short', day: 'numeric' })
+              : null
+          } />
+          <InfoCard label="Birth Place" icon={MapPin} value={person.birthPlace ?? null} />
+          <InfoCard label="Mobile" icon={Phone} value={
+            person.phone
+              ? <a href={`tel:${person.phone}`} className="text-indigo-600 hover:text-indigo-800">{person.phone}</a>
+              : null
+          } />
+          <InfoCard label="NID Number" icon={CreditCard} value={
+            person.nidNumber ? <span className="font-mono">{person.nidNumber}</span> : null
+          } />
+          <InfoCard label="Blood Group" icon={Droplets} value={
+            person.bloodGroup ? <span className="font-bold text-red-600">{person.bloodGroup}</span> : null
+          } />
+          <InfoCard label="Profession" icon={Briefcase} value={person.profession ?? null} />
+          <InfoCard label="Education" icon={GraduationCap} value={person.highestEducation ?? null} />
+          {!person.isLiving && (
+            <>
+              <InfoCard label="Died" icon={Calendar} value={
+                person.deathDate
+                  ? person.deathDatePrecision === 'year'
+                    ? new Date(person.deathDate).getFullYear().toString()
+                    : person.deathDatePrecision === 'approximate'
+                      ? `~${new Date(person.deathDate).toLocaleDateString('en-GB', { year: 'numeric', month: 'short', day: 'numeric' })}`
+                      : new Date(person.deathDate).toLocaleDateString('en-GB', { year: 'numeric', month: 'short', day: 'numeric' })
+                  : 'Unknown'
+              } />
+              <InfoCard label="Death Place" icon={MapPin} value={person.deathPlace ?? null} />
+            </>
           )}
-        </Section>
-
-        {/* Personal Info */}
-        {(person.phone || person.nidNumber || person.bloodGroup || person.profession || person.highestEducation) && (
-          <Section title="Personal Info" icon={User}>
-            <div className="grid grid-cols-2 gap-3">
-              <InfoCard label="Mobile" icon={Phone} value={
-                person.phone
-                  ? <a href={`tel:${person.phone}`} className="text-indigo-600 hover:text-indigo-800">{person.phone}</a>
-                  : null
-              } />
-              <InfoCard label="NID Number" icon={CreditCard} value={
-                person.nidNumber
-                  ? <span className="font-mono">{person.nidNumber}</span>
-                  : null
-              } />
-              <InfoCard label="Blood Group" icon={Droplets} value={
-                person.bloodGroup
-                  ? <span className="font-bold text-red-600">{person.bloodGroup}</span>
-                  : null
-              } />
-              <InfoCard label="Profession" icon={Briefcase} value={person.profession ?? null} />
-              <InfoCard label="Education" icon={GraduationCap} value={person.highestEducation ?? null} span2 />
-            </div>
-          </Section>
+        </div>
+        {!person.birthDate && !person.phone && !person.nidNumber && !person.bloodGroup && !person.profession && !person.highestEducation && (
+          <p className="text-sm text-gray-400">No details recorded yet.</p>
         )}
+      </Section>
+      </div>
 
+      {/* ── Alt Names + Ancestry — 2 col ── */}
+      <div className="mt-6 grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Names */}
         <Section title="Alternative Names" icon={User}>
           {person.personNames && person.personNames.length > 0 ? (
@@ -267,7 +259,7 @@ export function PersonDetailPage() {
           )}
         </Section>
 
-        {/* Ancestors quick view */}
+        {/* Ancestry */}
         <Section title="Ancestry" icon={Dna}>
           <div className="flex gap-3">
             <Link
