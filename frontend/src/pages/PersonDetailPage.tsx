@@ -32,12 +32,21 @@ function Section({ title, icon: Icon, children }: {
   )
 }
 
-function InfoRow({ label, value }: { label: string; value: React.ReactNode }) {
+
+function InfoCard({ label, value, icon: Icon, span2 = false }: {
+  label: string
+  value: React.ReactNode
+  icon?: React.ElementType
+  span2?: boolean
+}) {
   if (!value) return null
   return (
-    <div className="flex gap-3 text-sm py-1.5 border-b border-gray-50 last:border-0">
-      <span className="text-gray-400 w-28 flex-shrink-0">{label}</span>
-      <span className="text-gray-800">{value}</span>
+    <div className={`bg-gray-50 rounded-lg p-3 ${span2 ? 'col-span-2' : ''}`}>
+      <p className="text-xs text-gray-400 mb-1">{label}</p>
+      <div className="text-sm font-medium text-gray-800 flex items-center gap-1.5">
+        {Icon && <Icon className="h-3.5 w-3.5 text-gray-400 flex-shrink-0" />}
+        <span>{value}</span>
+      </div>
     </div>
   )
 }
@@ -186,38 +195,32 @@ export function PersonDetailPage() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Life Events */}
         <Section title="Life Events" icon={Calendar}>
-          <InfoRow label="Born" value={
-            person.birthDate
-              ? person.birthDatePrecision === 'year'
-                ? new Date(person.birthDate).getFullYear().toString()
-                : person.birthDatePrecision === 'approximate'
-                  ? `~${new Date(person.birthDate).toLocaleDateString('en-GB', { year: 'numeric', month: 'long', day: 'numeric' })}`
-                  : new Date(person.birthDate).toLocaleDateString('en-GB', { year: 'numeric', month: 'long', day: 'numeric' })
-              : null
-          } />
-          {person.birthPlace && (
-            <InfoRow label="Birth Place" value={
-              <span className="flex items-center gap-1"><MapPin className="h-3 w-3 text-gray-400" />{person.birthPlace}</span>
+          <div className="grid grid-cols-2 gap-3">
+            <InfoCard label="Born" icon={Calendar} value={
+              person.birthDate
+                ? person.birthDatePrecision === 'year'
+                  ? new Date(person.birthDate).getFullYear().toString()
+                  : person.birthDatePrecision === 'approximate'
+                    ? `~${new Date(person.birthDate).toLocaleDateString('en-GB', { year: 'numeric', month: 'short', day: 'numeric' })}`
+                    : new Date(person.birthDate).toLocaleDateString('en-GB', { year: 'numeric', month: 'short', day: 'numeric' })
+                : null
             } />
-          )}
-          {!person.isLiving && (
-            <>
-              <InfoRow label="Died" value={
-                person.deathDate
-                  ? person.deathDatePrecision === 'year'
-                    ? new Date(person.deathDate).getFullYear().toString()
-                    : person.deathDatePrecision === 'approximate'
-                      ? `~${new Date(person.deathDate).toLocaleDateString('en-GB', { year: 'numeric', month: 'long', day: 'numeric' })}`
-                      : new Date(person.deathDate).toLocaleDateString('en-GB', { year: 'numeric', month: 'long', day: 'numeric' })
-                  : 'Unknown'
-              } />
-              {person.deathPlace && (
-                <InfoRow label="Death Place" value={
-                  <span className="flex items-center gap-1"><MapPin className="h-3 w-3 text-gray-400" />{person.deathPlace}</span>
+            <InfoCard label="Birth Place" icon={MapPin} value={person.birthPlace ?? null} />
+            {!person.isLiving && (
+              <>
+                <InfoCard label="Died" icon={Calendar} value={
+                  person.deathDate
+                    ? person.deathDatePrecision === 'year'
+                      ? new Date(person.deathDate).getFullYear().toString()
+                      : person.deathDatePrecision === 'approximate'
+                        ? `~${new Date(person.deathDate).toLocaleDateString('en-GB', { year: 'numeric', month: 'short', day: 'numeric' })}`
+                        : new Date(person.deathDate).toLocaleDateString('en-GB', { year: 'numeric', month: 'short', day: 'numeric' })
+                    : 'Unknown'
                 } />
-              )}
-            </>
-          )}
+                <InfoCard label="Death Place" icon={MapPin} value={person.deathPlace ?? null} />
+              </>
+            )}
+          </div>
           {!person.birthDate && !person.deathDate && (
             <p className="text-sm text-gray-400">No life event records</p>
           )}
@@ -226,41 +229,25 @@ export function PersonDetailPage() {
         {/* Personal Info */}
         {(person.phone || person.nidNumber || person.bloodGroup || person.profession || person.highestEducation) && (
           <Section title="Personal Info" icon={User}>
-            {person.phone && (
-              <InfoRow label="Phone" value={
-                <a href={`tel:${person.phone}`} className="flex items-center gap-1.5 text-indigo-600 hover:text-indigo-800 font-medium">
-                  <Phone className="h-3.5 w-3.5" />{person.phone}
-                </a>
+            <div className="grid grid-cols-2 gap-3">
+              <InfoCard label="Mobile" icon={Phone} value={
+                person.phone
+                  ? <a href={`tel:${person.phone}`} className="text-indigo-600 hover:text-indigo-800">{person.phone}</a>
+                  : null
               } />
-            )}
-            {person.bloodGroup && (
-              <InfoRow label="Blood Group" value={
-                <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-bold bg-red-50 text-red-700 border border-red-200">
-                  <Droplets className="h-3 w-3" />{person.bloodGroup}
-                </span>
+              <InfoCard label="NID Number" icon={CreditCard} value={
+                person.nidNumber
+                  ? <span className="font-mono">{person.nidNumber}</span>
+                  : null
               } />
-            )}
-            {person.nidNumber && (
-              <InfoRow label="NID Number" value={
-                <span className="flex items-center gap-1.5 font-mono text-gray-800">
-                  <CreditCard className="h-3.5 w-3.5 text-gray-400" />{person.nidNumber}
-                </span>
+              <InfoCard label="Blood Group" icon={Droplets} value={
+                person.bloodGroup
+                  ? <span className="font-bold text-red-600">{person.bloodGroup}</span>
+                  : null
               } />
-            )}
-            {person.profession && (
-              <InfoRow label="Profession" value={
-                <span className="flex items-center gap-1.5">
-                  <Briefcase className="h-3.5 w-3.5 text-gray-400" />{person.profession}
-                </span>
-              } />
-            )}
-            {person.highestEducation && (
-              <InfoRow label="Education" value={
-                <span className="flex items-center gap-1.5">
-                  <GraduationCap className="h-3.5 w-3.5 text-gray-400" />{person.highestEducation}
-                </span>
-              } />
-            )}
+              <InfoCard label="Profession" icon={Briefcase} value={person.profession ?? null} />
+              <InfoCard label="Education" icon={GraduationCap} value={person.highestEducation ?? null} span2 />
+            </div>
           </Section>
         )}
 
@@ -299,14 +286,16 @@ export function PersonDetailPage() {
             </Link>
           </div>
         </Section>
+      </div>
 
-        {/* Biography */}
-        {person.biography && (
+      {/* Biography — full width at bottom */}
+      {person.biography && (
+        <div className="mt-6">
           <Section title="Biography" icon={BookOpen}>
             <p className="text-sm text-gray-700 leading-relaxed whitespace-pre-wrap">{person.biography}</p>
           </Section>
-        )}
-      </div>
+        </div>
+      )}
 
       {/* Family Connections — full width below the grid */}
       <div className="mt-6">
