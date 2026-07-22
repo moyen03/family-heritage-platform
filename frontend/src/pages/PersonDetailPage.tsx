@@ -241,25 +241,8 @@ export function PersonDetailPage() {
       </Section>
       </div>
 
-      {/* ── Alt Names + Ancestry — 2 col ── */}
-      <div className="mt-6 grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Names */}
-        <Section title="Alternative Names" icon={User}>
-          {person.personNames && person.personNames.length > 0 ? (
-            <div className="space-y-2">
-              {person.personNames.map((n) => (
-                <div key={n.id} className="flex items-center justify-between py-1.5 border-b border-gray-50 last:border-0">
-                  <span className="text-sm text-gray-800">{n.name}</span>
-                  <Badge variant="default">{n.nameType}</Badge>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <p className="text-sm text-gray-400">No alternative names</p>
-          )}
-        </Section>
-
-        {/* Ancestry */}
+      {/* ── Ancestry — full width ── */}
+      <div className="mt-6">
         <Section title="Ancestry" icon={Dna}>
           <div className="flex gap-3">
             <Link
