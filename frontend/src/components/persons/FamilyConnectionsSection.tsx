@@ -328,13 +328,12 @@ interface FamilyConnectionsSectionProps {
   persons: Person[]
   relationships: Relationship[]
   marriages: Marriage[]
-  personNames: PersonName[]
 }
 
 type ModalType = 'parent' | 'child' | 'sibling' | 'marriage' | 'name' | null
 
 export function FamilyConnectionsSection({
-  personId, persons, relationships, marriages, personNames,
+  personId, persons, relationships, marriages,
 }: FamilyConnectionsSectionProps) {
   const qc = useQueryClient()
   const [modal, setModal]       = useState<ModalType>(null)
@@ -384,14 +383,6 @@ export function FamilyConnectionsSection({
       await relationshipsService.deleteMarriage(id)
       qc.invalidateQueries({ queryKey: ['marriages'] })
       qc.invalidateQueries({ queryKey: ['person-marriages', personId] })
-    } finally { setRemoving(null) }
-  }
-
-  async function removePersonName(id: string) {
-    setRemoving(id)
-    try {
-      await relationshipsService.deletePersonName(id)
-      qc.invalidateQueries({ queryKey: ['person', personId] })
     } finally { setRemoving(null) }
   }
 
@@ -457,25 +448,6 @@ export function FamilyConnectionsSection({
         </ConnectionSection>
       </div>
 
-      {/* Alternative Names — full width */}
-      <ConnectionSection icon={BookOpen} title="Alternative Names" action={<AddButton label="Add Name" onClick={() => setModal('name')} />}>
-        {personNames.length === 0 ? empty : personNames.map(n => (
-          <div key={n.id} className="flex items-center justify-between py-1.5 border-b border-gray-50 last:border-0 group">
-            <span className="text-sm text-gray-800">{n.name}</span>
-            <div className="flex items-center gap-2">
-              <Badge variant="default">{n.nameType}</Badge>
-              <button
-                onClick={() => removePersonName(n.id)}
-                disabled={removing === n.id}
-                className="p-1 rounded text-gray-300 hover:text-red-400 hover:bg-red-50 opacity-0 group-hover:opacity-100 transition-all"
-              >
-                {removing === n.id ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <X className="h-3.5 w-3.5" />}
-              </button>
-            </div>
-          </div>
-        ))}
-      </ConnectionSection>
-
       {/* Modals */}
       {(modal === 'parent' || modal === 'child' || modal === 'sibling') && (
         <AddRelationshipModal
@@ -494,13 +466,58 @@ export function FamilyConnectionsSection({
           onClose={() => setModal(null)}
         />
       )}
-      {modal === 'name' && (
-        <AddPersonNameModal
-          personId={personId}
-          onClose={() => setModal(null)}
-        />
-      )}
     </div>
+  )
+}
+
+// ── Standalone Alternative Names Panel ────────────────────────────────────────
+export function AlternativeNamesPanel({
+  personId,
+  personNames,
+}: {
+  personId: string
+  personNames: PersonName[]
+}) {
+  const qc = useQueryClient()
+  const [showModal, setShowModal] = useState(false)
+  const [removing, setRemoving]   = useState<string | null>(null)
+
+  async function removePersonName(id: string) {
+    setRemoving(id)
+    try {
+      await relationshipsService.deletePersonName(id)
+      qc.invalidateQueries({ queryKey: ['person', personId] })
+    } finally { setRemoving(null) }
+  }
+
+  return (
+    <ConnectionSection
+      icon={BookOpen}
+      title="Alternative Names"
+      action={<AddButton label="Add Name" onClick={() => setShowModal(true)} />}
+    >
+      {personNames.length === 0
+        ? <p className="text-sm text-gray-400">None recorded</p>
+        : personNames.map(n => (
+          <div key={n.id} className="flex items-center justify-between py-1.5 border-b border-gray-50 last:border-0 group">
+            <span className="text-sm text-gray-800">{n.name}</span>
+            <div className="flex items-center gap-2">
+              <Badge variant="default">{n.nameType}</Badge>
+              <button
+                onClick={() => removePersonName(n.id)}
+                disabled={removing === n.id}
+                className="p-1 rounded text-gray-300 hover:text-red-400 hover:bg-red-50 opacity-0 group-hover:opacity-100 transition-all"
+              >
+                {removing === n.id ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <X className="h-3.5 w-3.5" />}
+              </button>
+            </div>
+          </div>
+        ))
+      }
+      {showModal && (
+        <AddPersonNameModal personId={personId} onClose={() => setShowModal(false)} />
+      )}
+    </ConnectionSection>
   )
 }
 

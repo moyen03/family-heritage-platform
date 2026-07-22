@@ -12,7 +12,7 @@ import { branchesService } from '@/services/branches.service'
 import { Badge } from '@/components/ui/Badge'
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner'
 import { PersonFormModal } from '@/components/persons/PersonFormModal'
-import { FamilyConnectionsSection } from '@/components/persons/FamilyConnectionsSection'
+import { FamilyConnectionsSection, AlternativeNamesPanel } from '@/components/persons/FamilyConnectionsSection'
 import { PersonAddressPanel } from '@/components/addresses/PersonAddressPanel'
 import { useAuthStore, selectIsAdmin } from '@/store/auth.store'
 
@@ -284,16 +284,21 @@ export function PersonDetailPage() {
           persons={allPersons}
           relationships={personRelationships}
           marriages={personMarriages}
-          personNames={person.personNames ?? []}
         />
       </div>
 
-      {/* Addresses — full width */}
-      <div className="mt-6 bg-white rounded-xl border border-gray-100 shadow-sm p-5">
-        <PersonAddressPanel
+      {/* Alternative Names + Addresses — side by side */}
+      <div className="mt-6 grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <AlternativeNamesPanel
           personId={person.id}
-          personName={person.fullName}
+          personNames={person.personNames ?? []}
         />
+        <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-5">
+          <PersonAddressPanel
+            personId={person.id}
+            personName={person.fullName}
+          />
+        </div>
       </div>
 
       {/* Branches — full width, admin only */}
