@@ -443,17 +443,6 @@ export function PersonFormModal({ person, onClose, onSaved }: PersonFormModalPro
               </Field>
             </div>
 
-            {/* Row 2b: NID | (gap) */}
-            <div className="grid grid-cols-2 gap-3">
-              <Field label="NID / National ID">
-                <div className="relative">
-                  <CreditCard className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-                  <input type="text" value={form.nidNumber ?? ''} onChange={e => set('nidNumber', e.target.value)}
-                    placeholder="e.g. 1234567890123" className={`${inputCls} pl-9`} />
-                </div>
-              </Field>
-              <div />{/* spacer */}
-            </div>
 
             {/* Row 3: Birth Date Precision | Birth Date */}
             <div className="grid grid-cols-2 gap-3">
@@ -478,27 +467,22 @@ export function PersonFormModal({ person, onClose, onSaved }: PersonFormModalPro
               />
             </div>
 
-            {/* Row 3b: Nickname | Birth Place */}
+            {/* Row 4: Nickname | NID */}
             <div className="grid grid-cols-2 gap-3">
               <Field label="Nickname" hint="Common name used by family">
-                <input
-                  type="text"
-                  value={form.nickname ?? ''}
-                  onChange={e => set('nickname', e.target.value)}
-                  placeholder="e.g. Mota, Babu, Chhotu…"
-                  className={inputCls}
-                />
+                <input type="text" value={form.nickname ?? ''} onChange={e => set('nickname', e.target.value)}
+                  placeholder="e.g. Mota, Babu, Chhotu…" className={inputCls} />
               </Field>
-              <Field label="Birth Place">
+              <Field label="NID / National ID">
                 <div className="relative">
-                  <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-                  <input type="text" value={form.birthPlace ?? ''} onChange={e => set('birthPlace', e.target.value)}
-                    placeholder="e.g. Dhaka, Bangladesh" className={`${inputCls} pl-9`} />
+                  <CreditCard className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                  <input type="text" value={form.nidNumber ?? ''} onChange={e => set('nidNumber', e.target.value)}
+                    placeholder="e.g. 1234567890123" className={`${inputCls} pl-9`} />
                 </div>
               </Field>
             </div>
 
-            {/* Row 4: Gender | Profession */}
+            {/* Row 5: Gender | Birth Place */}
             <div className="grid grid-cols-2 gap-3">
               <Field label="Gender">
                 <div className="flex gap-2 flex-wrap">
@@ -510,6 +494,17 @@ export function PersonFormModal({ person, onClose, onSaved }: PersonFormModalPro
                   ))}
                 </div>
               </Field>
+              <Field label="Birth Place">
+                <div className="relative">
+                  <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                  <input type="text" value={form.birthPlace ?? ''} onChange={e => set('birthPlace', e.target.value)}
+                    placeholder="e.g. Dhaka, Bangladesh" className={`${inputCls} pl-9`} />
+                </div>
+              </Field>
+            </div>
+
+            {/* Row 6: Profession | Highest Education */}
+            <div className="grid grid-cols-2 gap-3">
               <Field label="Profession / Occupation">
                 <div className="relative">
                   <Briefcase className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
@@ -517,10 +512,6 @@ export function PersonFormModal({ person, onClose, onSaved }: PersonFormModalPro
                     placeholder="e.g. Farmer, Teacher…" className={`${inputCls} pl-9`} />
                 </div>
               </Field>
-            </div>
-
-            {/* Row 5: Education | (empty) */}
-            <div className="grid grid-cols-2 gap-3">
               <Field label="Highest Education">
                 <div className="relative">
                   <GraduationCap className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
