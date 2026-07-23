@@ -115,7 +115,7 @@
 
 ---
 
-## Phase 6 – Branch Management ✅
+## Phase 6 – Branch Management 🔄
 
 **Goal:** Multi-branch family support — each grandparent line is its own branch with controlled access.
 
@@ -161,15 +161,21 @@ Shared (common ancestors — visible to ALL branches)
 | Branch tree view (`/branches/:id/tree`) with shared ancestors included | ✅ Done |
 | Grant / revoke user branch access (viewer or member role) | ✅ Done |
 
-### Phase 6c – Invitation & Edit Approval ⏳
+### Phase 6c – Invitation & Edit Approval 🔄
 
 | Task | Status |
 |------|--------|
-| Invite user by email to a branch (Super Admin or Branch Admin) | ⏳ |
-| Invited members get read-only access by default | ⏳ |
-| Member edit request workflow | ⏳ |
-| Branch Admin approval UI (approve / reject edits) | ⏳ |
-| Email notification on invitation and approval | ⏳ |
+| Invite user by email to a branch (Super Admin or Branch Admin) | ✅ Done |
+| Accept invitation page (creates account + joins branch) | ✅ Done |
+| Invited members get read-only (Viewer) access by default | ✅ Done |
+| Branch Admin invitation list (`GET /branches/{id}/invitations`) | ✅ Done |
+| Resend / expire old pending invitations | ✅ Done |
+| `ApprovalRequest` entity + API (POST by members, PATCH/review by branch admin) | ✅ Done |
+| Apply approved changes back to Person entity | ✅ Done |
+| Branch Admin approval UI (approve / reject edits with notes) | ✅ Done |
+| Invitation email sent on invite (with manual-link fallback) | ✅ Done |
+| Email notification on approval result (approved / rejected) | ⏳ |
+| Member UI to submit edit requests from Person profile | ⏳ |
 
 ---
 
@@ -228,7 +234,7 @@ Shared (common ancestors — visible to ALL branches)
 | Phase 3 – Family Tree UI | ✅ Complete |
 | Phase 4 – Media | ✅ Complete |
 | Phase 5 – Addresses & Maps | ✅ Complete |
-| Phase 6 – Branch Management | ✅ Complete (6c pending) |
+| Phase 6 – Branch Management | 🔄 Mostly complete (6c partially pending) |
 | Phase 7 – Reports | ⏳ Planned |
 | Phase 8 – Mobile App | ⏳ Planned |
 | Phase 9 – AI Features | ⏳ Planned |
