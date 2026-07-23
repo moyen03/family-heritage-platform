@@ -349,34 +349,6 @@ Additional layout changes:
 
 ---
 
-## ADR-019: Branch Admin Can Assign/Remove Persons from Their Branch
-
-**Date:** 2026-07-24
-**Status:** Accepted
-
-**Context:**
-The "Add Person to Branch" panel on the Branch Detail page was originally restricted to Super Admins only. Branch Admins had no way to manage which persons belonged to their branch, making their admin role largely decorative.
-
-**Decision:**
-Allow Branch Admins to assign persons to — and remove persons from — their own branch via `POST /api/branches/{id}/persons` and `DELETE /api/branches/{id}/persons/{personId}`.
-
-**Implementation details:**
-
-- `BranchPersonController` changed `#[IsGranted('ROLE_SUPER_ADMIN')]` to `#[IsGranted('ROLE_BRANCH_ADMIN')]` on both `assign` and `remove` actions
-- Added an `isAdminOfBranch(Branch $branch, User $user)` private method that checks both `branch_admins` and `branch_memberships` (with `role = 'branch_admin'`) for the specific branch — so a user can only modify **their** branch, not any branch
-- `Branch` entity gained a computed `isCurrentUserAdmin: bool` field (serialization group `branch:read`) populated by `BranchItemProvider` and `BranchCollectionProvider`
-- Frontend `BranchDetailPage` switched panel/button visibility from `{isSuperAdmin && ...}` to `{branch?.isCurrentUserAdmin && ...}`
-- Frontend `AssignPersonPanel` uses a dedicated React Query key (`persons-all-for-branch-assign`) to avoid colliding with the cached `ApiCollection` object used by the Persons list page, and renders an inline error banner on mutation failure
-
-**JWT note:**
-A user whose `global_role = member` but who has an entry in `branch_admins` or `branch_memberships.role = 'branch_admin'` receives `ROLE_BRANCH_ADMIN` in their JWT via `JWTCreatedListener`. Symfony's `#[IsGranted('ROLE_BRANCH_ADMIN')]` gate passes; the `isAdminOfBranch()` guard then confirms branch-level scope.
-
-**Alternatives considered:**
-- Keep Super Admin-only: Branch Admins would have no meaningful control over their branch membership
-- Use a Symfony Voter instead of inline guard: Cleaner long-term but more boilerplate for a single endpoint pair
-
----
-
 ## ADR-018: Form Field Order (PersonFormModal)
 
 **Date:** 2026-07-22  
@@ -405,3 +377,32 @@ The Add/Edit Person form uses a single flat "Person Details" section with fields
 - Most important identity fields (name, phone, birth) appear first
 
 ---
+
+## ADR-019: Branch Admin Can Assign/Remove Persons from Their Branch
+
+**Date:** 2026-07-24
+**Status:** Accepted
+
+**Context:**
+The "Add Person to Branch" panel on the Branch Detail page was originally restricted to Super Admins only. Branch Admins had no way to manage which persons belonged to their branch, making their admin role largely decorative.
+
+**Decision:**
+Allow Branch Admins to assign persons to — and remove persons from — their own branch via `POST /api/branches/{id}/persons` and `DELETE /api/branches/{id}/persons/{personId}`.
+
+**Implementation details:**
+
+- `BranchPersonController` changed `#[IsGranted('ROLE_SUPER_ADMIN')]` to `#[IsGranted('ROLE_BRANCH_ADMIN')]` on both `assign` and `remove` actions
+- Added an `isAdminOfBranch(Branch $branch, User $user)` private method that checks both `branch_admins` and `branch_memberships` (with `role = 'branch_admin'`) for the specific branch — so a user can only modify **their** branch, not any branch
+- `Branch` entity gained a computed `isCurrentUserAdmin: bool` field (serialization group `branch:read`) populated by `BranchItemProvider` and `BranchCollectionProvider`
+- Frontend `BranchDetailPage` switched panel/button visibility from `{isSuperAdmin && ...}` to `{branch?.isCurrentUserAdmin && ...}`
+- Frontend `AssignPersonPanel` uses a dedicated React Query key (`persons-all-for-branch-assign`) to avoid colliding with the cached `ApiCollection` object used by the Persons list page, and renders an inline error banner on mutation failure
+
+**JWT note:**
+A user whose `global_role = member` but who has an entry in `branch_admins` or `branch_memberships.role = 'branch_admin'` receives `ROLE_BRANCH_ADMIN` in their JWT via `JWTCreatedListener`. Symfony's `#[IsGranted('ROLE_BRANCH_ADMIN')]` gate passes; the `isAdminOfBranch()` guard then confirms branch-level scope.
+
+**Alternatives considered:**
+- Keep Super Admin-only: Branch Admins would have no meaningful control over their branch membership
+- Use a Symfony Voter instead of inline guard: Cleaner long-term but more boilerplate for a single endpoint pair
+
+---
+
