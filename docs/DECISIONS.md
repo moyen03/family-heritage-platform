@@ -378,6 +378,39 @@ The Add/Edit Person form uses a single flat "Person Details" section with fields
 
 ---
 
+## ADR-020: Branch Scoping for All Non-Super-Admin Users
+
+**Date:** 2026-07-24
+**Status:** Accepted
+
+**Context:**
+The `PersonVisibilityExtension` previously filtered persons by privacy level only (`public`/`family` visible to all authenticated users, `branch` visible to same-branch members, `private` to super admin only). This meant a Branch Admin of "Siraz Family" could see all `family`-visibility persons from "Hafez Family" in the All Persons list and family tree — violating branch separation.
+
+**Decision:**
+Add a **branch scope layer** on top of the privacy layer in `PersonVisibilityExtension`. Non-super-admin users only see persons who belong to at least one of their accessible branches OR a shared (common ancestor) branch. Privacy level still applies within that scope (`private` is always hidden from non-super-admins).
+
+**Effective rules after this change:**
+
+| User | Sees |
+|------|------|
+| Super Admin | All persons across all branches |
+| Branch Admin | Non-private persons in their branch(es) + shared branches |
+| Member / Viewer | Non-private persons in their branch(es) + shared branches |
+| No branch membership | Non-private persons in shared branches only |
+
+**Why this is correct:**
+- Branches exist to give each sub-family their own private scope
+- Without branch scoping, `family` visibility made all person data visible platform-wide, defeating the purpose of branch separation
+- Shared branches (common ancestors like great-grandparents) remain visible to everyone as intended
+- Privacy levels (`branch`, `family`, `public`) still carry meaning within a branch's own scope
+
+**Implementation:**
+`PersonVisibilityExtension::addFilters()` now applies two filters in sequence:
+1. Exclude `private` visibility
+2. Restrict to persons in shared branches OR the user's accessible branches (from `branch_admins` + `branch_memberships`)
+
+---
+
 ## ADR-019: Branch Admin Can Assign/Remove Persons from Their Branch
 
 **Date:** 2026-07-24

@@ -13,16 +13,23 @@
 
 ## Visibility Levels
 
-Each person record has a `visibility` field that controls who can see it:
+Each person record has a `visibility` field that controls who can see it **within their branch scope**:
 
 | Visibility | Who can see |
 |-----------|-------------|
-| `public` | All logged-in users (and unauthenticated if firewall allows) |
-| `family` | All logged-in users on the platform *(default)* |
+| `public` | All logged-in users within their branch scope (and unauthenticated if firewall allows) |
+| `family` | All authenticated users within their branch scope *(default)* |
 | `branch` | Only members of the same branch the person belongs to |
 | `private` | Super Admin only |
 
-**Common ancestors** (e.g. great-grandparents shared by multiple branches) are visible to all branches they belong to, regardless of `branch` visibility.
+> **Branch scoping (enforced by `PersonVisibilityExtension`):**
+> Non-super-admin users only ever see persons who belong to **their own branch(es)** or a **shared (common ancestor) branch** — regardless of the visibility level. A Branch Admin of "Siraz Family" will never see persons who belong exclusively to "Hafez Family", even if those persons have `family` visibility.
+>
+> - Super Admin → all persons across all branches
+> - Branch Admin / Member / Viewer → persons in their branch(es) + shared branches (excluding `private`)
+> - No branch membership → only shared branch persons (excluding `private`)
+
+**Common ancestors** (e.g. great-grandparents shared by multiple branches) belong to the Shared branch (`isShared = true`) and are visible to all authenticated users regardless of branch membership.
 
 ---
 
