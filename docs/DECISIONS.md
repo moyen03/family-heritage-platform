@@ -378,36 +378,51 @@ The Add/Edit Person form uses a single flat "Person Details" section with fields
 
 ---
 
-## ADR-020: Branch Scoping for All Non-Super-Admin Users
+## ADR-020: Branch Scoping for All Non-Super-Admin Users (Persons + Related Entities)
 
 **Date:** 2026-07-24
 **Status:** Accepted
 
 **Context:**
-The `PersonVisibilityExtension` previously filtered persons by privacy level only (`public`/`family` visible to all authenticated users, `branch` visible to same-branch members, `private` to super admin only). This meant a Branch Admin of "Siraz Family" could see all `family`-visibility persons from "Hafez Family" in the All Persons list and family tree — violating branch separation.
+The `PersonVisibilityExtension` previously filtered persons by privacy level only (`public`/`family` visible to all authenticated users, `branch` visible to same-branch members, `private` to super admin only). This meant a Branch Admin of "Siraz Family" could see all `family`-visibility persons from "Hafez Family" in the All Persons list and family tree — violating branch separation. Relationships, marriages, addresses, and media had no branch filtering at all.
 
 **Decision:**
-Add a **branch scope layer** on top of the privacy layer in `PersonVisibilityExtension`. Non-super-admin users only see persons who belong to at least one of their accessible branches OR a shared (common ancestor) branch. Privacy level still applies within that scope (`private` is always hidden from non-super-admins).
+Apply a **branch scope layer** across all entity types. Non-super-admin users only see data that belongs to persons in their accessible branches OR a shared (common ancestor) branch.
 
-**Effective rules after this change:**
+Two extensions implement this:
+
+1. **`PersonVisibilityExtension`** (updated) — scopes `Person` collections/items:
+   - Exclude `private` visibility (super admin only)
+   - Restrict to persons in shared branches OR the user's accessible branches
+
+2. **`BranchScopingExtension`** (new) — scopes all related entities:
+   - `Relationship` → visible only if **both** `person1` and `person2` are in scope
+   - `Marriage` → visible only if **both** `spouse1` and `spouse2` are in scope
+   - `Address` → visible only if the linked `person` is in scope
+   - `Media` → visible if uploaded by the current user OR at least one tagged person is in scope
+
+**Effective rules:**
 
 | User | Sees |
 |------|------|
-| Super Admin | All persons across all branches |
-| Branch Admin | Non-private persons in their branch(es) + shared branches |
-| Member / Viewer | Non-private persons in their branch(es) + shared branches |
-| No branch membership | Non-private persons in shared branches only |
+| Super Admin | All data across all branches |
+| Branch Admin | Non-private persons + related data in their branch(es) + shared branches |
+| Member / Viewer | Non-private persons + related data in their branch(es) + shared branches |
+| No branch membership | Non-private persons + data in shared branches only |
 
-**Why this is correct:**
-- Branches exist to give each sub-family their own private scope
-- Without branch scoping, `family` visibility made all person data visible platform-wide, defeating the purpose of branch separation
-- Shared branches (common ancestors like great-grandparents) remain visible to everyone as intended
-- Privacy levels (`branch`, `family`, `public`) still carry meaning within a branch's own scope
+**Branch scope definition:** person is in a branch whose `id` is in `branch_admins` or `branch_memberships` for the current user, OR whose `isShared = true`.
 
-**Implementation:**
-`PersonVisibilityExtension::addFilters()` now applies two filters in sequence:
-1. Exclude `private` visibility
-2. Restrict to persons in shared branches OR the user's accessible branches (from `branch_admins` + `branch_memberships`)
+**Map coverage:** The map page reads from `/api/addresses`, which is now scoped by `BranchScopingExtension`. No separate map filter needed.
+
+**Verified counts (Siraz Family branch admin vs Super Admin):**
+
+| Entity | Branch Admin | Super Admin |
+|--------|-------------|-------------|
+| Persons | 25 | 122 |
+| Relationships | 80 | 492 |
+| Marriages | 8 | 41 |
+| Addresses | branch-scoped | all |
+| Media | branch-scoped | all |
 
 ---
 

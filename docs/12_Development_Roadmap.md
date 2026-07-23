@@ -156,10 +156,11 @@ Shared (common ancestors — visible to ALL branches)
 | Task | Status |
 |------|--------|
 | `BranchMembership` entity (User → Branch access control) | ✅ Done |
-| `PersonVisibilityExtension` filters by branch membership | ✅ Done |
+| `PersonVisibilityExtension` filters persons by branch membership + shared | ✅ Done |
 | Shared branch persons visible to all authenticated users | ✅ Done |
 | Branch tree view (`/branches/:id/tree`) with shared ancestors included | ✅ Done |
 | Grant / revoke user branch access (viewer or member role) | ✅ Done |
+| `BranchScopingExtension` scopes relationships, marriages, addresses, media | ✅ Done |
 
 ### Phase 6c – Invitation & Edit Approval 🔄
 
