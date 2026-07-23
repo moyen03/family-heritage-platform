@@ -11,7 +11,7 @@ interface InviteModalProps {
 
 export function InviteModal({ branchId, branchName, onClose }: InviteModalProps) {
   const [email, setEmail] = useState('')
-  const [role, setRole]   = useState<'viewer' | 'member'>('viewer')
+  const [role, setRole]   = useState<'viewer' | 'member' | 'branch_admin'>('viewer')
   const [copied, setCopied] = useState(false)
 
   const mutation = useMutation({
@@ -56,10 +56,11 @@ export function InviteModal({ branchId, branchName, onClose }: InviteModalProps)
             {/* Role */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">Access Level</label>
-              <div className="grid grid-cols-2 gap-2">
+              <div className="grid grid-cols-3 gap-2">
                 {([
-                  { value: 'viewer', label: '👁 Viewer', desc: 'Read-only access' },
-                  { value: 'member', label: '✏️ Member', desc: 'Can propose edits' },
+                  { value: 'viewer',       label: '👁 Viewer',        desc: 'Read-only' },
+                  { value: 'member',       label: '✏️ Member',         desc: 'Can propose edits' },
+                  { value: 'branch_admin', label: '🛡 Branch Admin',   desc: 'Manage this branch' },
                 ] as const).map(opt => (
                   <button
                     key={opt.value}

@@ -14,7 +14,7 @@ import { LoadingSpinner } from '@/components/ui/LoadingSpinner'
 import { PersonFormModal } from '@/components/persons/PersonFormModal'
 import { FamilyConnectionsSection, AlternativeNamesPanel } from '@/components/persons/FamilyConnectionsSection'
 import { PersonAddressPanel } from '@/components/addresses/PersonAddressPanel'
-import { useAuthStore, selectIsAdmin } from '@/store/auth.store'
+import { useAuthStore, selectIsAdmin, selectCanWrite, selectIsSuperAdmin } from '@/store/auth.store'
 
 function Section({ title, icon: Icon, children }: {
   title: string
@@ -56,7 +56,9 @@ export function PersonDetailPage() {
   const navigate = useNavigate()
   const qc = useQueryClient()
   const [showEdit, setShowEdit] = useState(false)
-  const isAdmin = useAuthStore(selectIsAdmin)
+  const isAdmin    = useAuthStore(selectIsAdmin)
+  const isSuperAdmin = useAuthStore(selectIsSuperAdmin)
+  const canWrite   = useAuthStore(selectCanWrite)
 
   const { data: person, isLoading, error } = useQuery({
     queryKey: ['person', id],
@@ -190,12 +192,14 @@ export function PersonDetailPage() {
         >
           <GitBranch className="h-3 w-3" /> View in tree
         </Link>
-        <button
-          onClick={() => setShowEdit(true)}
-          className="flex items-center gap-1.5 px-3 py-1.5 bg-indigo-600 text-white text-xs font-semibold rounded-lg hover:bg-indigo-700 transition-colors flex-shrink-0"
-        >
-          <Pencil className="h-3 w-3" /> Edit
-        </button>
+        {canWrite && (
+          <button
+            onClick={() => setShowEdit(true)}
+            className="flex items-center gap-1.5 px-3 py-1.5 bg-indigo-600 text-white text-xs font-semibold rounded-lg hover:bg-indigo-700 transition-colors flex-shrink-0"
+          >
+            <Pencil className="h-3 w-3" /> Edit
+          </button>
+        )}
       </div>
 
       {/* ── Overview — full width, 3-col grid of facts ── */}
@@ -313,7 +317,7 @@ export function PersonDetailPage() {
         </div>
       </div>
 
-      {/* Branches — full width, admin only */}
+      {/* Branches — visible to all admins; modify buttons super-admin only */}
       {isAdmin && (
         <div className="mt-6 bg-white rounded-xl border border-gray-100 shadow-sm p-5">
           <div className="flex items-center gap-2 mb-4">
@@ -331,15 +335,17 @@ export function PersonDetailPage() {
                     {b.isShared ? <Share2 className="h-3 w-3 text-amber-500" /> : <GitBranch className="h-3 w-3 text-indigo-500" />}
                     <span className="text-sm font-medium text-indigo-700">{b.name}</span>
                     {pb?.isPrimary && <span title="Primary branch"><Star className="h-3 w-3 text-amber-500 fill-amber-500" /></span>}
-                    <button
-                      onClick={async () => {
-                        await branchesService.removePerson(b.id, person.id)
-                        qc.invalidateQueries({ queryKey: ['person', id] })
-                        qc.invalidateQueries({ queryKey: ['branches'] })
-                      }}
-                      className="ml-1 text-indigo-400 hover:text-red-500 transition-colors"
-                      title="Remove from this branch"
-                    >×</button>
+                    {isSuperAdmin && (
+                      <button
+                        onClick={async () => {
+                          await branchesService.removePerson(b.id, person.id)
+                          qc.invalidateQueries({ queryKey: ['person', id] })
+                          qc.invalidateQueries({ queryKey: ['branches'] })
+                        }}
+                        className="ml-1 text-indigo-400 hover:text-red-500 transition-colors"
+                        title="Remove from this branch"
+                      >×</button>
+                    )}
                   </div>
                 )
               })}
@@ -348,8 +354,8 @@ export function PersonDetailPage() {
             <p className="text-sm text-gray-400 mb-4">Not assigned to any branch yet.</p>
           )}
 
-          {/* Assign to branch */}
-          {allBranches.filter(b => !personBranchIds.has(b.id)).length > 0 && (
+          {/* Assign to branch — super admin only */}
+          {isSuperAdmin && allBranches.filter(b => !personBranchIds.has(b.id)).length > 0 && (
             <div>
               <p className="text-xs text-gray-500 mb-2">Add to branch:</p>
               <div className="flex flex-wrap gap-2">

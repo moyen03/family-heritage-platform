@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { MapPin, Plus, Edit2, Trash2, Calendar, Navigation } from 'lucide-react'
 import { useAddresses, useDeleteAddress, type Address } from '../../hooks/useAddresses'
 import { AddressFormModal } from './AddressFormModal'
+import { useAuthStore, selectCanWrite } from '@/store/auth.store'
 
 interface Props {
   personId: string
@@ -23,10 +24,11 @@ const TYPE_LABELS: Record<string, string> = {
   childhood:  'Childhood',
 }
 
-function AddressCard({ address, onEdit, onDelete }: {
+function AddressCard({ address, onEdit, onDelete, canEdit }: {
   address: Address
   onEdit: () => void
   onDelete: () => void
+  canEdit: boolean
 }) {
   const hasCords = address.latitude && address.longitude
   const parts = [
@@ -65,28 +67,27 @@ function AddressCard({ address, onEdit, onDelete }: {
         )}
       </div>
       <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-        <button
-          onClick={onEdit}
-          className="p-1 text-gray-400 hover:text-indigo-600 rounded"
-          title="Edit"
-        >
-          <Edit2 className="w-4 h-4" />
-        </button>
-        <button
-          onClick={onDelete}
-          className="p-1 text-gray-400 hover:text-red-600 rounded"
-          title="Delete"
-        >
-          <Trash2 className="w-4 h-4" />
-        </button>
+        {canEdit && (
+          <>
+            <button onClick={onEdit} className="p-1 text-gray-400 hover:text-indigo-600 rounded" title="Edit">
+              <Edit2 className="w-4 h-4" />
+            </button>
+            <button onClick={onDelete} className="p-1 text-gray-400 hover:text-red-600 rounded" title="Delete">
+              <Trash2 className="w-4 h-4" />
+            </button>
+          </>
+        )}
       </div>
     </div>
   )
 }
 
-export function PersonAddressPanel({ personId, personName, canEdit = true }: Props) {
+export function PersonAddressPanel({ personId, personName, canEdit }: Props) {
   const { data: addresses = [], isLoading } = useAddresses(personId)
   const deleteAddress = useDeleteAddress()
+  const canWrite = useAuthStore(selectCanWrite)
+  // canEdit prop can override (e.g. force-disable); defaults to canWrite
+  const editAllowed = canEdit !== undefined ? canEdit && canWrite : canWrite
   const [showForm, setShowForm] = useState(false)
   const [editing, setEditing]   = useState<Address | null>(null)
 
@@ -106,7 +107,7 @@ export function PersonAddressPanel({ personId, personName, canEdit = true }: Pro
         <h3 className="text-sm font-semibold text-gray-700 flex items-center gap-2">
           <MapPin className="w-4 h-4" /> Addresses ({addresses.length})
         </h3>
-        {canEdit && (
+        {editAllowed && (
           <button
             onClick={() => { setEditing(null); setShowForm(true) }}
             className="flex items-center gap-1 text-xs text-indigo-600 hover:text-indigo-800 font-medium"
@@ -129,12 +130,13 @@ export function PersonAddressPanel({ personId, personName, canEdit = true }: Pro
               address={addr}
               onEdit={() => { setEditing(addr); setShowForm(true) }}
               onDelete={() => handleDelete(addr.id)}
+              canEdit={editAllowed}
             />
           ))}
         </div>
       )}
 
-      {showForm && (
+      {editAllowed && showForm && (
         <AddressFormModal
           personId={personId}
           personName={personName}

@@ -5,10 +5,16 @@ declare(strict_types=1);
 namespace App\Controller\Api;
 
 use App\Entity\PersonBranch;
+use App\Entity\User;
+use App\Entity\Branch;
+use App\Enum\UserRole;
+use App\Repository\BranchAdminRepository;
+use App\Repository\BranchMembershipRepository;
 use App\Repository\BranchRepository;
 use App\Repository\PersonRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
@@ -21,7 +27,31 @@ class BranchPersonController extends AbstractController
         private readonly BranchRepository $branchRepository,
         private readonly PersonRepository $personRepository,
         private readonly EntityManagerInterface $em,
+        private readonly Security $security,
+        private readonly BranchAdminRepository $branchAdminRepo,
+        private readonly BranchMembershipRepository $membershipRepo,
     ) {
+    }
+
+    /**
+     * Returns true if the user is super admin OR is admin of the given branch
+     * (via branch_admins table OR branch_memberships with branch_admin role).
+     */
+    private function isAdminOfBranch(Branch $branch, User $user): bool
+    {
+        if ($user->getRole() === UserRole::SuperAdmin) {
+            return true;
+        }
+
+        $branchId = $branch->getId();
+
+        $adminBranches = $this->branchAdminRepo->getBranchIdsForUser($user->getId());
+        if (in_array($branchId, $adminBranches, true)) {
+            return true;
+        }
+
+        $memberAdminBranches = $this->membershipRepo->getBranchAdminIdsForUser($user->getId());
+        return in_array($branchId, $memberAdminBranches, true);
     }
 
     /** List all persons in a branch */
@@ -54,12 +84,18 @@ class BranchPersonController extends AbstractController
 
     /** Assign a person to a branch */
     #[Route('', name: 'api_branch_persons_assign', methods: ['POST'])]
-    #[IsGranted('ROLE_SUPER_ADMIN')]
+    #[IsGranted('ROLE_BRANCH_ADMIN')]
     public function assign(string $branchId, Request $request): JsonResponse
     {
         $branch = $this->branchRepository->find($branchId);
         if (!$branch) {
             return $this->json(['error' => 'Branch not found'], 404);
+        }
+
+        /** @var User $user */
+        $user = $this->security->getUser();
+        if (!$this->isAdminOfBranch($branch, $user)) {
+            return $this->json(['error' => 'You are not an admin of this branch'], 403);
         }
 
         $body = json_decode($request->getContent(), true);
@@ -105,12 +141,18 @@ class BranchPersonController extends AbstractController
 
     /** Remove a person from a branch */
     #[Route('/{personId}', name: 'api_branch_persons_remove', methods: ['DELETE'])]
-    #[IsGranted('ROLE_SUPER_ADMIN')]
+    #[IsGranted('ROLE_BRANCH_ADMIN')]
     public function remove(string $branchId, string $personId): JsonResponse
     {
         $branch = $this->branchRepository->find($branchId);
         if (!$branch) {
             return $this->json(['error' => 'Branch not found'], 404);
+        }
+
+        /** @var User $user */
+        $user = $this->security->getUser();
+        if (!$this->isAdminOfBranch($branch, $user)) {
+            return $this->json(['error' => 'You are not an admin of this branch'], 403);
         }
 
         $person = $this->personRepository->find($personId);

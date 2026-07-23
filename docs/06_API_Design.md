@@ -77,16 +77,32 @@ Authorization: Bearer <token>
 
 ## Branch Endpoints
 
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| GET | /api/branches | List branches |
-| POST | /api/branches | Create branch |
-| GET | /api/branches/{id} | Get branch |
-| PUT | /api/branches/{id} | Update branch |
-| POST | /api/branches/{id}/admins | Add branch admin |
-| DELETE | /api/branches/{id}/admins/{userId} | Remove branch admin |
-| GET | /api/branches/{id}/members | List branch members |
-| POST | /api/branches/{id}/invite | Invite member |
+| Method | Endpoint | Description | Access |
+|--------|----------|-------------|--------|
+| GET | /api/branches | List branches | All authenticated |
+| POST | /api/branches | Create branch | Super Admin |
+| GET | /api/branches/{id} | Get branch | All authenticated |
+| PUT | /api/branches/{id} | Update branch | Super Admin |
+| POST | /api/branches/{id}/admins | Add branch admin | Super Admin |
+| DELETE | /api/branches/{id}/admins/{userId} | Remove branch admin | Super Admin |
+| GET | /api/branches/{id}/members | List branch members | Super Admin, Branch Admin |
+| POST | /api/branches/{id}/invite | Invite member | Super Admin, Branch Admin |
+| POST | /api/branches/{id}/persons | Assign a person to the branch | Super Admin, Branch Admin (own branch) |
+| DELETE | /api/branches/{id}/persons/{personId} | Remove a person from the branch | Super Admin, Branch Admin (own branch) |
+
+### Branch Response Fields
+
+The `GET /api/branches/{id}` and `GET /api/branches` responses include a computed `isCurrentUserAdmin` boolean field indicating whether the currently authenticated user is an admin of that specific branch. This is used by the frontend to conditionally show admin UI controls (e.g. "Add Person to Branch" panel, remove-person buttons).
+
+```json
+{
+  "id": "fafdf653-a270-4da1-928c-4d2dce2cb7f4",
+  "name": "Siraz Family",
+  "isShared": false,
+  "isCurrentUserAdmin": true,
+  "personCount": 42
+}
+```
 
 ---
 

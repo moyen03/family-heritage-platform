@@ -10,6 +10,7 @@ import { PersonSearchPicker } from './PersonSearchPicker'
 import { Badge } from '@/components/ui/Badge'
 import type { Person, NameType, PersonName } from '@/types/person'
 import type { Relationship, Marriage } from '@/types/relationship'
+import { useAuthStore, selectCanWrite } from '@/store/auth.store'
 
 // ── shared modal shell ────────────────────────────────────────────────────────
 function Modal({ title, onClose, children }: {
@@ -272,8 +273,8 @@ function AddPersonNameModal({ personId, onClose }: { personId: string; onClose: 
 }
 
 // ── Connection Row ─────────────────────────────────────────────────────────────
-function ConnectionRow({ label, to, badge, onRemove, removing }: {
-  label: string; to: string; badge?: string; onRemove: () => void; removing: boolean
+function ConnectionRow({ label, to, badge, onRemove, removing, canWrite }: {
+  label: string; to: string; badge?: string; onRemove: () => void; removing: boolean; canWrite?: boolean
 }) {
   return (
     <div className="flex items-center justify-between py-1.5 border-b border-gray-50 last:border-0 group">
@@ -281,14 +282,16 @@ function ConnectionRow({ label, to, badge, onRemove, removing }: {
         {label}
       </Link>
       {badge && <Badge variant="default">{badge}</Badge>}
-      <button
-        onClick={onRemove}
-        disabled={removing}
-        className="ml-2 p-1 rounded text-gray-300 hover:text-red-400 hover:bg-red-50 opacity-0 group-hover:opacity-100 transition-all disabled:opacity-50"
-        title="Remove"
-      >
-        {removing ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <X className="h-3.5 w-3.5" />}
-      </button>
+      {canWrite && (
+        <button
+          onClick={onRemove}
+          disabled={removing}
+          className="ml-2 p-1 rounded text-gray-300 hover:text-red-400 hover:bg-red-50 opacity-0 group-hover:opacity-100 transition-all disabled:opacity-50"
+          title="Remove"
+        >
+          {removing ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <X className="h-3.5 w-3.5" />}
+        </button>
+      )}
     </div>
   )
 }
@@ -336,6 +339,7 @@ export function FamilyConnectionsSection({
   personId, persons, relationships, marriages,
 }: FamilyConnectionsSectionProps) {
   const qc = useQueryClient()
+  const canWrite = useAuthStore(selectCanWrite)
   const [modal, setModal]       = useState<ModalType>(null)
   const [removing, setRemoving] = useState<string | null>(null)
 
@@ -392,7 +396,7 @@ export function FamilyConnectionsSection({
     <div className="space-y-4">
       {/* Row 1: Parents | Siblings  ·  Row 2: Spouse | Children */}
       <div className="grid grid-cols-2 gap-4">
-        <ConnectionSection icon={Dna} title="Parents" action={<AddButton label="Add Parent" onClick={() => setModal('parent')} />}>
+        <ConnectionSection icon={Dna} title="Parents" action={canWrite ? <AddButton label="Add Parent" onClick={() => setModal('parent')} /> : null}>
           {parents.length === 0 ? empty : parents.map(r => (
             <ConnectionRow
               key={r.id}
@@ -400,11 +404,12 @@ export function FamilyConnectionsSection({
               to={`/persons/${r.person1.id}`}
               onRemove={() => removeRelationship(r.id)}
               removing={removing === r.id}
+              canWrite={canWrite}
             />
           ))}
         </ConnectionSection>
 
-        <ConnectionSection icon={Users} title="Siblings" action={<AddButton label="Add Sibling" onClick={() => setModal('sibling')} />}>
+        <ConnectionSection icon={Users} title="Siblings" action={canWrite ? <AddButton label="Add Sibling" onClick={() => setModal('sibling')} /> : null}>
           {siblings.length === 0 ? empty : siblings.map(r => {
             const other = r.person1.id === personId ? r.person2 : r.person1
             return (
@@ -414,12 +419,13 @@ export function FamilyConnectionsSection({
                 to={`/persons/${other.id}`}
                 onRemove={() => removeRelationship(r.id)}
                 removing={removing === r.id}
+                canWrite={canWrite}
               />
             )
           })}
         </ConnectionSection>
 
-        <ConnectionSection icon={Heart} title="Spouse / Marriages" action={<AddButton label="Add Spouse" onClick={() => setModal('marriage')} />}>
+        <ConnectionSection icon={Heart} title="Spouse / Marriages" action={canWrite ? <AddButton label="Add Spouse" onClick={() => setModal('marriage')} /> : null}>
           {personMarriages.length === 0 ? empty : personMarriages.map(m => {
             const spouse = m.spouse1.id === personId ? m.spouse2 : m.spouse1
             return (
@@ -430,12 +436,13 @@ export function FamilyConnectionsSection({
                 badge={m.isDivorced ? 'Divorced' : undefined}
                 onRemove={() => removeMarriage(m.id)}
                 removing={removing === m.id}
+                canWrite={canWrite}
               />
             )
           })}
         </ConnectionSection>
 
-        <ConnectionSection icon={UserCheck} title="Children" action={<AddButton label="Add Child" onClick={() => setModal('child')} />}>
+        <ConnectionSection icon={UserCheck} title="Children" action={canWrite ? <AddButton label="Add Child" onClick={() => setModal('child')} /> : null}>
           {children.length === 0 ? empty : children.map(r => (
             <ConnectionRow
               key={r.id}
@@ -443,6 +450,7 @@ export function FamilyConnectionsSection({
               to={`/persons/${r.person2.id}`}
               onRemove={() => removeRelationship(r.id)}
               removing={removing === r.id}
+              canWrite={canWrite}
             />
           ))}
         </ConnectionSection>
@@ -479,6 +487,7 @@ export function AlternativeNamesPanel({
   personNames: PersonName[]
 }) {
   const qc = useQueryClient()
+  const canWrite = useAuthStore(selectCanWrite)
   const [showModal, setShowModal] = useState(false)
   const [removing, setRemoving]   = useState<string | null>(null)
 
@@ -494,7 +503,7 @@ export function AlternativeNamesPanel({
     <ConnectionSection
       icon={BookOpen}
       title="Alternative Names"
-      action={<AddButton label="Add Name" onClick={() => setShowModal(true)} />}
+      action={canWrite ? <AddButton label="Add Name" onClick={() => setShowModal(true)} /> : null}
     >
       {personNames.length === 0
         ? <p className="text-sm text-gray-400">None recorded</p>
@@ -503,18 +512,20 @@ export function AlternativeNamesPanel({
             <span className="text-sm text-gray-800">{n.name}</span>
             <div className="flex items-center gap-2">
               <Badge variant="default">{n.nameType}</Badge>
-              <button
-                onClick={() => removePersonName(n.id)}
-                disabled={removing === n.id}
-                className="p-1 rounded text-gray-300 hover:text-red-400 hover:bg-red-50 opacity-0 group-hover:opacity-100 transition-all"
-              >
-                {removing === n.id ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <X className="h-3.5 w-3.5" />}
-              </button>
+              {canWrite && (
+                <button
+                  onClick={() => removePersonName(n.id)}
+                  disabled={removing === n.id}
+                  className="p-1 rounded text-gray-300 hover:text-red-400 hover:bg-red-50 opacity-0 group-hover:opacity-100 transition-all"
+                >
+                  {removing === n.id ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <X className="h-3.5 w-3.5" />}
+                </button>
+              )}
             </div>
           </div>
         ))
       }
-      {showModal && (
+      {canWrite && showModal && (
         <AddPersonNameModal personId={personId} onClose={() => setShowModal(false)} />
       )}
     </ConnectionSection>

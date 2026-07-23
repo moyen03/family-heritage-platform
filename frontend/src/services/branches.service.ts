@@ -7,6 +7,8 @@ export interface Branch {
   description: string | null
   isShared: boolean
   memberCount: number
+  /** True when the currently logged-in user is an admin of this specific branch. */
+  isCurrentUserAdmin: boolean
 }
 
 export interface BranchMember {
@@ -26,7 +28,7 @@ export interface BranchUserMember {
   firstName: string
   lastName: string
   email: string
-  role: 'viewer' | 'member'
+  role: 'viewer' | 'member' | 'branch_admin'
   joinedAt: string
   invitedBy: string
 }
@@ -86,7 +88,7 @@ export const branchesService = {
     return data
   },
 
-  async addUser(branchId: string, userId: string, role: 'viewer' | 'member' = 'member'): Promise<void> {
+  async addUser(branchId: string, userId: string, role: 'viewer' | 'member' | 'branch_admin' = 'member'): Promise<void> {
     await api.post(`/branches/${branchId}/users`, { userId, role })
   },
 
@@ -94,7 +96,7 @@ export const branchesService = {
     await api.delete(`/branches/${branchId}/users/${userId}`)
   },
 
-  async updateUserRole(branchId: string, userId: string, role: 'viewer' | 'member'): Promise<void> {
+  async updateUserRole(branchId: string, userId: string, role: 'viewer' | 'member' | 'branch_admin'): Promise<void> {
     await api.patch(`/branches/${branchId}/users/${userId}`, { role })
   },
 }

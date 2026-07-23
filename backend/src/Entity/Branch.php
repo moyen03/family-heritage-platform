@@ -26,6 +26,7 @@ use Symfony\Component\Validator\Constraints as Assert;
             uriTemplate: '/branches',
             security: "is_granted('ROLE_USER')",
             paginationEnabled: false,
+            provider: \App\State\BranchCollectionProvider::class,
         ),
         new Post(
             uriTemplate: '/branches',
@@ -35,6 +36,7 @@ use Symfony\Component\Validator\Constraints as Assert;
         new Get(
             uriTemplate: '/branches/{id}',
             security: "is_granted('ROLE_USER')",
+            provider: \App\State\BranchItemProvider::class,
         ),
         new Patch(
             uriTemplate: '/branches/{id}',
@@ -92,6 +94,12 @@ class Branch
     /** @var Collection<int, BranchMembership> */
     #[ORM\OneToMany(targetEntity: BranchMembership::class, mappedBy: 'branch', cascade: ['persist', 'remove'])]
     private Collection $memberships;
+
+    /**
+     * Virtual field — set by BranchCollectionProvider/BranchItemProvider, not persisted.
+     */
+    #[Groups(['branch:read'])]
+    private bool $isCurrentUserAdmin = false;
 
     public function __construct(string $id = '')
     {
@@ -197,5 +205,17 @@ class Branch
             }
         }
         return false;
+    }
+
+    public function getIsCurrentUserAdmin(): bool
+    {
+        return $this->isCurrentUserAdmin;
+    }
+
+    public function setIsCurrentUserAdmin(bool $isCurrentUserAdmin): static
+    {
+        $this->isCurrentUserAdmin = $isCurrentUserAdmin;
+
+        return $this;
     }
 }

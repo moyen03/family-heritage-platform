@@ -91,4 +91,10 @@ export const selectIsAdmin = (s: AuthState) =>
   s.user?.roles.some((r) => ['ROLE_SUPER_ADMIN', 'ROLE_BRANCH_ADMIN'].includes(r)) ?? false
 export const selectIsSuperAdmin = (s: AuthState) =>
   s.user?.roles.includes('ROLE_SUPER_ADMIN') ?? false
+/** True if the user can create/edit records (Member, BranchAdmin, SuperAdmin). False for viewers. */
+export const selectCanWrite = (s: AuthState) =>
+  s.user?.roles.some((r) => ['ROLE_SUPER_ADMIN', 'ROLE_BRANCH_ADMIN', 'ROLE_MEMBER'].includes(r)) ?? false
+/** True only for pure read-only viewers (no write permissions at all). */
+export const selectIsViewer = (s: AuthState) =>
+  !selectCanWrite(s) && selectIsAuthenticated(s)
 

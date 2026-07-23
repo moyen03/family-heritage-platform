@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom'
 import { GitBranch, Plus, Pencil, Trash2, Users, Loader2, X, Save, AlertCircle, Share2, TreePine } from 'lucide-react'
 import { branchesService } from '@/services/branches.service'
 import type { Branch, CreateBranchDto } from '@/services/branches.service'
+import { useAuthStore, selectIsSuperAdmin } from '@/store/auth.store'
 
 // ── Branch Form Modal ─────────────────────────────────────────────────────────
 
@@ -101,7 +102,7 @@ function BranchFormModal({
 
 // ── Branch Card ───────────────────────────────────────────────────────────────
 
-function BranchCard({ branch, onEdit, onDelete }: { branch: Branch; onEdit: () => void; onDelete: () => void }) {
+function BranchCard({ branch, onEdit, onDelete, isSuperAdmin }: { branch: Branch; onEdit: () => void; onDelete: () => void; isSuperAdmin: boolean }) {
   return (
     <div className="bg-white rounded-xl border border-gray-100 shadow-sm hover:shadow-md transition-shadow p-5">
       <div className="flex items-start justify-between mb-3">
@@ -116,10 +117,12 @@ function BranchCard({ branch, onEdit, onDelete }: { branch: Branch; onEdit: () =
             )}
           </div>
         </div>
-        <div className="flex gap-1">
-          <button onClick={onEdit} className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-400 hover:text-gray-600"><Pencil className="h-3.5 w-3.5" /></button>
-          <button onClick={onDelete} className="p-1.5 rounded-lg hover:bg-red-50 text-gray-400 hover:text-red-500"><Trash2 className="h-3.5 w-3.5" /></button>
-        </div>
+        {isSuperAdmin && (
+          <div className="flex gap-1">
+            <button onClick={onEdit} className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-400 hover:text-gray-600"><Pencil className="h-3.5 w-3.5" /></button>
+            <button onClick={onDelete} className="p-1.5 rounded-lg hover:bg-red-50 text-gray-400 hover:text-red-500"><Trash2 className="h-3.5 w-3.5" /></button>
+          </div>
+        )}
       </div>
 
       {branch.description && (
@@ -143,7 +146,7 @@ function BranchCard({ branch, onEdit, onDelete }: { branch: Branch; onEdit: () =
             to={`/branches/${branch.id}`}
             className="text-xs font-medium text-indigo-600 hover:text-indigo-800 flex items-center gap-1"
           >
-            Manage →
+            {branch.isCurrentUserAdmin ? 'Manage →' : 'View →'}
           </Link>
         </div>
       </div>
@@ -155,6 +158,7 @@ function BranchCard({ branch, onEdit, onDelete }: { branch: Branch; onEdit: () =
 
 export function BranchesPage() {
   const qc = useQueryClient()
+  const isSuperAdmin = useAuthStore(selectIsSuperAdmin)
   const [showCreate, setShowCreate] = useState(false)
   const [editing, setEditing]       = useState<Branch | null>(null)
 
@@ -188,12 +192,14 @@ export function BranchesPage() {
             {branches.length} branches · {totalPersons} person assignments
           </p>
         </div>
-        <button
-          onClick={() => setShowCreate(true)}
-          className="flex items-center gap-2 bg-indigo-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-indigo-700 transition-colors"
-        >
-          <Plus className="h-4 w-4" /> New Branch
-        </button>
+        {isSuperAdmin && (
+          <button
+            onClick={() => setShowCreate(true)}
+            className="flex items-center gap-2 bg-indigo-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-indigo-700 transition-colors"
+          >
+            <Plus className="h-4 w-4" /> New Branch
+          </button>
+        )}
       </div>
 
       {/* Info banner */}
@@ -224,10 +230,16 @@ export function BranchesPage() {
         <div className="text-center py-20 bg-white rounded-xl border border-gray-100">
           <GitBranch className="h-12 w-12 text-gray-300 mx-auto mb-3" />
           <p className="text-gray-500 font-medium">No branches yet</p>
-          <p className="text-gray-400 text-sm mt-1">Create your first branch to start organizing your family.</p>
-          <button onClick={() => setShowCreate(true)} className="mt-4 inline-flex items-center gap-2 bg-indigo-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-indigo-700">
-            <Plus className="h-4 w-4" /> Create first branch
-          </button>
+          {isSuperAdmin ? (
+            <>
+              <p className="text-gray-400 text-sm mt-1">Create your first branch to start organizing your family.</p>
+              <button onClick={() => setShowCreate(true)} className="mt-4 inline-flex items-center gap-2 bg-indigo-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-indigo-700">
+                <Plus className="h-4 w-4" /> Create first branch
+              </button>
+            </>
+          ) : (
+            <p className="text-gray-400 text-sm mt-1">No branches have been created yet.</p>
+          )}
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -237,14 +249,15 @@ export function BranchesPage() {
               branch={branch}
               onEdit={() => setEditing(branch)}
               onDelete={() => handleDelete(branch)}
+              isSuperAdmin={isSuperAdmin}
             />
           ))}
         </div>
       )}
 
-      {/* Modals */}
-      {showCreate && <BranchFormModal onClose={() => setShowCreate(false)} />}
-      {editing    && <BranchFormModal branch={editing} onClose={() => setEditing(null)} />}
+      {/* Modals — super admin only */}
+      {isSuperAdmin && showCreate && <BranchFormModal onClose={() => setShowCreate(false)} />}
+      {isSuperAdmin && editing    && <BranchFormModal branch={editing} onClose={() => setEditing(null)} />}
     </div>
   )
 }

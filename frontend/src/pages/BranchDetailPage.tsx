@@ -3,14 +3,15 @@ import { useParams, useNavigate, Link } from 'react-router-dom'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import {
   ArrowLeft, GitBranch, Users, Search, UserPlus, Trash2, Loader2, Share2, Star,
-  ShieldCheck, Eye, UserCog, TreePine, Mail,
+  ShieldCheck, Eye, UserCog, TreePine, Mail, AlertCircle,
 } from 'lucide-react'
 import { branchesService } from '@/services/branches.service'
 import type { BranchMember, BranchUserMember } from '@/services/branches.service'
 import { personsService } from '@/services/persons.service'
 import { usersService } from '@/services/users.service'
-import { useAuthStore, selectIsSuperAdmin, selectIsAdmin } from '@/store/auth.store'
+import { useAuthStore, selectIsSuperAdmin } from '@/store/auth.store'
 import { InviteModal } from '@/components/branches/InviteModal'
+import type { Person } from '@/types/person'
 
 // ── Person picker (search + assign) ──────────────────────────────────────────
 
@@ -25,11 +26,22 @@ function AssignPersonPanel({
 }) {
   const [search, setSearch] = useState('')
   const [isPrimary, setIsPrimary] = useState(false)
+  const [mutationError, setMutationError] = useState<string | null>(null)
   const qc = useQueryClient()
 
-  const { data: allPersons = [] } = useQuery({
-    queryKey: ['persons'],
-    queryFn: () => personsService.getAll().then(d => d?.['member'] ?? d?.['hydra:member'] ?? []),
+  // Use a dedicated key so we always get a clean Person[] array,
+  // independent of the paginated cache used by PersonsPage.
+  const { data: allPersons = [], isLoading: personsLoading } = useQuery<Person[]>({
+    queryKey: ['persons-all-for-branch-assign'],
+    queryFn: async () => {
+      const raw = await personsService.getAll()
+      // API Platform may return: plain array | { member: [] } | { 'hydra:member': [] }
+      if (Array.isArray(raw)) return raw as Person[]
+      const col = raw as Record<string, unknown>
+      const items = col['member'] ?? col['hydra:member']
+      return Array.isArray(items) ? (items as Person[]) : []
+    },
+    staleTime: 60_000,
   })
 
   const suggestions = useMemo(() => {
@@ -44,10 +56,20 @@ function AssignPersonPanel({
   const assignMutation = useMutation({
     mutationFn: (personId: string) => branchesService.assignPerson(branchId, personId, isPrimary),
     onSuccess: () => {
+      setMutationError(null)
       qc.invalidateQueries({ queryKey: ['branch-persons', branchId] })
       qc.invalidateQueries({ queryKey: ['branches'] })
       setSearch('')
       onAssigned()
+    },
+    onError: (err: unknown) => {
+      const msg =
+        (err as { response?: { data?: { error?: string; message?: string } } })
+          ?.response?.data?.error ??
+        (err as { response?: { data?: { error?: string; message?: string } } })
+          ?.response?.data?.message ??
+        'Failed to add person. You may need to log out and log back in.'
+      setMutationError(msg)
     },
   })
 
@@ -57,15 +79,26 @@ function AssignPersonPanel({
         <UserPlus className="h-4 w-4 text-indigo-500" /> Add Person to Branch
       </h3>
 
+      {mutationError && (
+        <div className="flex items-start gap-2 mb-3 p-3 bg-red-50 border border-red-200 rounded-lg text-xs text-red-700">
+          <AlertCircle className="h-3.5 w-3.5 flex-shrink-0 mt-0.5" />
+          <span>{mutationError}</span>
+        </div>
+      )}
+
       <div className="relative mb-3">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
         <input
           type="text"
           value={search}
-          onChange={e => setSearch(e.target.value)}
-          placeholder="Search by name…"
-          className="w-full pl-9 pr-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
+          onChange={e => { setSearch(e.target.value); setMutationError(null) }}
+          placeholder={personsLoading ? 'Loading persons…' : 'Search by name…'}
+          disabled={personsLoading}
+          className="w-full pl-9 pr-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 disabled:bg-gray-50 disabled:text-gray-400"
         />
+        {personsLoading && (
+          <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 animate-spin text-gray-400" />
+        )}
       </div>
 
       <label className="flex items-center gap-2 text-sm text-gray-600 mb-3 cursor-pointer">
@@ -80,21 +113,23 @@ function AssignPersonPanel({
               key={p.id}
               onClick={() => assignMutation.mutate(p.id)}
               disabled={assignMutation.isPending}
-              className="w-full flex items-center justify-between px-3 py-2 rounded-lg hover:bg-indigo-50 text-left transition-colors group"
+              className="w-full flex items-center justify-between px-3 py-2 rounded-lg hover:bg-indigo-50 text-left transition-colors group disabled:opacity-50"
             >
               <div>
                 <p className="text-sm font-medium text-gray-800">{p.fullName}</p>
                 <p className="text-xs text-gray-400">{p.isLiving ? 'Living' : 'Deceased'}</p>
               </div>
-              <span className="text-xs text-indigo-600 opacity-0 group-hover:opacity-100 transition-opacity">
-                {assignMutation.isPending ? '…' : '+ Add'}
+              <span className="text-xs text-indigo-600 opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1">
+                {assignMutation.isPending
+                  ? <><Loader2 className="h-3 w-3 animate-spin" /> Adding…</>
+                  : '+ Add'}
               </span>
             </button>
           ))}
         </div>
       )}
 
-      {search.trim() && suggestions.length === 0 && (
+      {search.trim() && !personsLoading && suggestions.length === 0 && (
         <p className="text-sm text-gray-400 text-center py-3">No matching persons found</p>
       )}
     </div>
@@ -103,44 +138,61 @@ function AssignPersonPanel({
 
 // ── Member row (person) ───────────────────────────────────────────────────────
 
-function MemberRow({ member, branchId, onRemove }: { member: BranchMember; branchId: string; onRemove: () => void }) {
+function MemberRow({ member, branchId, onRemove, canManage }: { member: BranchMember; branchId: string; onRemove: () => void; canManage: boolean }) {
+  const [removeError, setRemoveError] = useState<string | null>(null)
+
   const removeMutation = useMutation({
     mutationFn: () => branchesService.removePerson(branchId, member.id),
-    onSuccess: onRemove,
+    onSuccess: () => { setRemoveError(null); onRemove() },
+    onError: (err: unknown) => {
+      const msg =
+        (err as { response?: { data?: { error?: string } } })?.response?.data?.error ??
+        'Failed to remove. Please try again.'
+      setRemoveError(msg)
+    },
   })
 
   return (
-    <div className="flex items-center gap-3 py-2.5 px-3 rounded-lg hover:bg-gray-50 group">
-      <div className={`flex h-8 w-8 items-center justify-center rounded-full text-xs font-bold flex-shrink-0 ${
-        member.gender === 'male' ? 'bg-blue-100 text-blue-700' :
-        member.gender === 'female' ? 'bg-pink-100 text-pink-700' :
-        'bg-gray-100 text-gray-500'
-      }`}>
-        {member.firstName.charAt(0)}
-      </div>
-      <div className="flex-1 min-w-0">
-        <div className="flex items-center gap-1.5">
-          <Link to={`/persons/${member.id}`} className="text-sm font-medium text-gray-800 hover:text-indigo-600 truncate">
-            {member.fullName}
-          </Link>
-          {member.isPrimary && (
-            <span title="Primary branch" className="flex-shrink-0">
-              <Star className="h-3 w-3 text-amber-500 fill-amber-500" />
-            </span>
-          )}
+    <div className="py-2.5 px-3 rounded-lg hover:bg-gray-50 group">
+      <div className="flex items-center gap-3">
+        <div className={`flex h-8 w-8 items-center justify-center rounded-full text-xs font-bold flex-shrink-0 ${
+          member.gender === 'male' ? 'bg-blue-100 text-blue-700' :
+          member.gender === 'female' ? 'bg-pink-100 text-pink-700' :
+          'bg-gray-100 text-gray-500'
+        }`}>
+          {member.firstName.charAt(0)}
         </div>
-        <p className="text-xs text-gray-400">
-          {member.birthDate ? new Date(member.birthDate).getFullYear() : '?'} · {member.isLiving ? 'Living' : 'Deceased'}
-        </p>
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-1.5">
+            <Link to={`/persons/${member.id}`} className="text-sm font-medium text-gray-800 hover:text-indigo-600 truncate">
+              {member.fullName}
+            </Link>
+            {member.isPrimary && (
+              <span title="Primary branch" className="flex-shrink-0">
+                <Star className="h-3 w-3 text-amber-500 fill-amber-500" />
+              </span>
+            )}
+          </div>
+          <p className="text-xs text-gray-400">
+            {member.birthDate ? new Date(member.birthDate).getFullYear() : '?'} · {member.isLiving ? 'Living' : 'Deceased'}
+          </p>
+        </div>
+        {canManage && (
+          <button
+            onClick={() => { setRemoveError(null); removeMutation.mutate() }}
+            disabled={removeMutation.isPending}
+            className="opacity-0 group-hover:opacity-100 p-1.5 rounded hover:bg-red-50 text-gray-400 hover:text-red-500 transition-all"
+            title="Remove from branch"
+          >
+            {removeMutation.isPending ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Trash2 className="h-3.5 w-3.5" />}
+          </button>
+        )}
       </div>
-      <button
-        onClick={() => removeMutation.mutate()}
-        disabled={removeMutation.isPending}
-        className="opacity-0 group-hover:opacity-100 p-1.5 rounded hover:bg-red-50 text-gray-400 hover:text-red-500 transition-all"
-        title="Remove from branch"
-      >
-        {removeMutation.isPending ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Trash2 className="h-3.5 w-3.5" />}
-      </button>
+      {removeError && (
+        <p className="mt-1 text-xs text-red-600 flex items-center gap-1">
+          <AlertCircle className="h-3 w-3" /> {removeError}
+        </p>
+      )}
     </div>
   )
 }
@@ -157,7 +209,7 @@ function AddUserPanel({
   onAdded: () => void
 }) {
   const [search, setSearch] = useState('')
-  const [role, setRole] = useState<'viewer' | 'member'>('member')
+  const [role, setRole] = useState<'viewer' | 'member' | 'branch_admin'>('member')
   const qc = useQueryClient()
 
   const { data: allUsers = [] } = useQuery({
@@ -204,7 +256,7 @@ function AddUserPanel({
       </div>
 
       <div className="flex gap-2 mb-3">
-        {(['member', 'viewer'] as const).map(r => (
+        {(['viewer', 'member', 'branch_admin'] as const).map(r => (
           <button
             key={r}
             onClick={() => setRole(r)}
@@ -214,7 +266,7 @@ function AddUserPanel({
                 : 'text-gray-600 border-gray-300 hover:border-violet-400'
             }`}
           >
-            {r === 'member' ? '👥 Member' : '👁 Viewer'}
+            {r === 'branch_admin' ? '🛡 Admin' : r === 'member' ? '👥 Member' : '👁 Viewer'}
           </button>
         ))}
       </div>
@@ -246,8 +298,9 @@ function AddUserPanel({
 
       <div className="mt-4 rounded-lg bg-violet-50 p-3 text-xs text-violet-700 space-y-1">
         <p className="font-semibold">Role guide</p>
-        <p><strong>Member</strong> — can view branch &amp; family content</p>
-        <p><strong>Viewer</strong> — read-only, limited visibility</p>
+        <p><strong>🛡 Branch Admin</strong> — manage members &amp; edit all content in this branch</p>
+        <p><strong>👥 Member</strong> — can view &amp; edit records they create</p>
+        <p><strong>👁 Viewer</strong> — read-only access</p>
       </div>
     </div>
   )
@@ -275,9 +328,23 @@ function UserMemberRow({
   })
 
   const updateRoleMutation = useMutation({
-    mutationFn: (role: 'viewer' | 'member') => branchesService.updateUserRole(branchId, member.id, role),
+    mutationFn: (role: 'viewer' | 'member' | 'branch_admin') => branchesService.updateUserRole(branchId, member.id, role),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['branch-users', branchId] }),
   })
+
+  // Cycle through: viewer → member → branch_admin → viewer
+  function nextRole(current: string): 'viewer' | 'member' | 'branch_admin' {
+    if (current === 'viewer') return 'member'
+    if (current === 'member') return 'branch_admin'
+    return 'viewer'
+  }
+
+  const roleConfig: Record<string, { label: string; icon: React.ReactNode; cls: string }> = {
+    viewer:       { label: 'Viewer',       icon: <Eye className="h-3 w-3" />,        cls: 'bg-gray-100 text-gray-600 hover:bg-gray-200' },
+    member:       { label: 'Member',       icon: <ShieldCheck className="h-3 w-3" />, cls: 'bg-violet-100 text-violet-700 hover:bg-violet-200' },
+    branch_admin: { label: 'Branch Admin', icon: <UserCog className="h-3 w-3" />,     cls: 'bg-amber-100 text-amber-700 hover:bg-amber-200' },
+  }
+  const cfg = roleConfig[member.role] ?? roleConfig['viewer']
 
   return (
     <div className="flex items-center gap-3 py-2.5 px-3 rounded-lg hover:bg-gray-50 group">
@@ -289,21 +356,14 @@ function UserMemberRow({
         <p className="text-xs text-gray-400 truncate">{member.email}</p>
       </div>
       <div className="flex items-center gap-2 flex-shrink-0">
-        {/* Role toggle */}
+        {/* Role cycle button */}
         <button
-          onClick={() => updateRoleMutation.mutate(member.role === 'member' ? 'viewer' : 'member')}
+          onClick={() => updateRoleMutation.mutate(nextRole(member.role))}
           disabled={updateRoleMutation.isPending}
-          title="Click to toggle role"
-          className={`flex items-center gap-1 text-xs px-2 py-0.5 rounded-full font-medium transition-colors ${
-            member.role === 'member'
-              ? 'bg-violet-100 text-violet-700 hover:bg-violet-200'
-              : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-          }`}
+          title="Click to change role"
+          className={`flex items-center gap-1 text-xs px-2 py-0.5 rounded-full font-medium transition-colors ${cfg.cls}`}
         >
-          {member.role === 'member'
-            ? <><ShieldCheck className="h-3 w-3" /> Member</>
-            : <><Eye className="h-3 w-3" /> Viewer</>
-          }
+          {cfg.icon} {cfg.label}
         </button>
         <button
           onClick={() => removeMutation.mutate()}
@@ -327,7 +387,6 @@ export function BranchDetailPage() {
   const navigate = useNavigate()
   const qc = useQueryClient()
   const isSuperAdmin = useAuthStore(selectIsSuperAdmin)
-  const isAdmin      = useAuthStore(selectIsAdmin)
   const [activeTab, setActiveTab]       = useState<Tab>('persons')
   const [memberSearch, setMemberSearch] = useState('')
   const [userSearch, setUserSearch]     = useState('')
@@ -401,7 +460,7 @@ export function BranchDetailPage() {
             <p className="text-2xl font-bold text-indigo-600">{branch.memberCount}</p>
             <p className="text-xs text-gray-400">persons</p>
             <div className="flex gap-2 mt-2 justify-end">
-              {isAdmin && (
+              {branch.isCurrentUserAdmin && (
                 <button
                   onClick={() => setShowInvite(true)}
                   className="inline-flex items-center gap-1.5 text-xs font-medium text-white bg-indigo-600 hover:bg-indigo-700 px-3 py-1.5 rounded-lg transition-colors"
@@ -481,6 +540,7 @@ export function BranchDetailPage() {
                       member={member}
                       branchId={id!}
                       onRemove={handleAssigned}
+                      canManage={branch?.isCurrentUserAdmin}
                     />
                   ))}
                 </div>
@@ -488,8 +548,8 @@ export function BranchDetailPage() {
             </div>
           </div>
 
-          {/* Add person panel */}
-          {isSuperAdmin && (
+          {/* Add person panel — visible to branch admins and super admin */}
+          {branch?.isCurrentUserAdmin && (
             <div>
               <AssignPersonPanel
                 branchId={id!}

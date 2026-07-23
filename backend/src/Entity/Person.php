@@ -42,13 +42,13 @@ use Symfony\Component\Validator\Constraints as Assert;
         ),
         new Patch(
             uriTemplate: '/persons/{id}',
-            security: "is_granted('ROLE_MEMBER') and (object.getCreatedBy() == user or is_granted('ROLE_BRANCH_ADMIN'))",
+            security: "is_granted('PERSON_EDIT', object)",
             securityMessage: 'You do not have permission to edit this person.',
             processor: PersonStateProcessor::class,
         ),
         new Delete(
             uriTemplate: '/persons/{id}',
-            security: "is_granted('ROLE_BRANCH_ADMIN')",
+            security: "is_granted('PERSON_DELETE', object)",
             securityMessage: 'Only Branch Admins or Super Admins can delete persons.',
             processor: PersonStateProcessor::class,
         ),

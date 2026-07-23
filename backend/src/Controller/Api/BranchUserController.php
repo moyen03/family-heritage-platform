@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Controller\Api;
 
+use App\Entity\BranchAdmin;
 use App\Entity\BranchMembership;
 use App\Enum\BranchMemberRole;
 use App\Repository\BranchRepository;
@@ -81,14 +82,26 @@ class BranchUserController extends AbstractController
             return $this->json(['error' => 'User is already a member of this branch'], 409);
         }
 
-        $roleValue = $body['role'] ?? BranchMemberRole::Member->value;
-        $role = BranchMemberRole::tryFrom($roleValue) ?? BranchMemberRole::Member;
+        $allowedRoles = array_map(fn ($c) => $c->value, BranchMemberRole::cases());
+        $roleValue    = $body['role'] ?? BranchMemberRole::Member->value;
+        $role         = BranchMemberRole::tryFrom($roleValue) ?? BranchMemberRole::Member;
+
+        if (!in_array($roleValue, $allowedRoles, true)) {
+            return $this->json(['error' => 'Invalid role. Allowed: ' . implode(', ', $allowedRoles)], 400);
+        }
 
         /** @var \App\Entity\User $currentUser */
         $currentUser = $this->security->getUser();
 
         $membership = new BranchMembership($branch, $user, $currentUser, $role);
         $this->em->persist($membership);
+
+        // Sync branch_admins table
+        if ($role === BranchMemberRole::BranchAdmin) {
+            $branchAdmin = new BranchAdmin($branch, $user, $currentUser);
+            $this->em->persist($branchAdmin);
+        }
+
         $this->em->flush();
 
         return $this->json([
@@ -117,6 +130,14 @@ class BranchUserController extends AbstractController
         foreach ($branch->getMemberships() as $m) {
             if ($m->getUser()->getId() === $user->getId()) {
                 $this->em->remove($m);
+
+                // Also remove from branch_admins if present
+                $branchAdmin = $this->em->getRepository(BranchAdmin::class)
+                    ->findOneBy(['branch' => $branch, 'user' => $user]);
+                if ($branchAdmin) {
+                    $this->em->remove($branchAdmin);
+                }
+
                 $this->em->flush();
                 return $this->json(['message' => 'User removed from branch']);
             }
@@ -144,13 +165,29 @@ class BranchUserController extends AbstractController
         $roleValue = $body['role'] ?? null;
         $role      = $roleValue ? BranchMemberRole::tryFrom($roleValue) : null;
 
-        if ($role === null) {
-            return $this->json(['error' => 'Invalid or missing role. Use: viewer, member'], 400);
+        $allowedRoles = array_map(fn ($c) => $c->value, BranchMemberRole::cases());
+        if ($role === null || !in_array($roleValue, $allowedRoles, true)) {
+            return $this->json(['error' => 'Invalid or missing role. Allowed: ' . implode(', ', $allowedRoles)], 400);
         }
+
+        /** @var \App\Entity\User $currentUser */
+        $currentUser = $this->security->getUser();
 
         foreach ($branch->getMemberships() as $m) {
             if ($m->getUser()->getId() === $user->getId()) {
+                $previousRole = $m->getRole();
                 $m->setRole($role);
+
+                // Sync branch_admins table
+                $existingBranchAdmin = $this->em->getRepository(BranchAdmin::class)
+                    ->findOneBy(['branch' => $branch, 'user' => $user]);
+
+                if ($role === BranchMemberRole::BranchAdmin && !$existingBranchAdmin) {
+                    $this->em->persist(new BranchAdmin($branch, $user, $currentUser));
+                } elseif ($role !== BranchMemberRole::BranchAdmin && $existingBranchAdmin) {
+                    $this->em->remove($existingBranchAdmin);
+                }
+
                 $this->em->flush();
                 return $this->json([
                     'message' => 'Role updated',

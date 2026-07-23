@@ -9,6 +9,8 @@ security:
             entity:
                 class: App\Entity\User
                 property: email
+        jwt_user_provider:
+            id: App\Security\JWTUserProvider
 
     role_hierarchy:
         ROLE_SUPER_ADMIN: [ROLE_BRANCH_ADMIN, ROLE_MEMBER, ROLE_VIEWER, ROLE_USER]
@@ -24,6 +26,7 @@ security:
         login:
             pattern: ^/api/auth/login
             stateless: true
+            provider: app_user_provider
             json_login:
                 check_path: /api/auth/login
                 username_path: email
@@ -38,12 +41,14 @@ security:
             jwt: ~
             refresh_jwt:
                 check_path: /api/auth/refresh
-            provider: app_user_provider
+            provider: jwt_user_provider
 
     access_control:
         - { path: ^/api/auth/login, roles: PUBLIC_ACCESS }
         - { path: ^/api/auth/refresh, roles: PUBLIC_ACCESS }
         - { path: ^/api/docs, roles: PUBLIC_ACCESS }
+        - { path: ^/api/invitations/.+/accept, roles: PUBLIC_ACCESS }
+        - { path: ^/api/invitations/.+$, roles: PUBLIC_ACCESS }
         - { path: ^/api, roles: ROLE_USER }
 
 when@test:

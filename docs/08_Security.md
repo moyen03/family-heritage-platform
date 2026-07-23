@@ -9,6 +9,17 @@
 - Email verification on registration
 - Invite-only registration (no public sign-up)
 
+### JWT Role Injection
+
+On every login the `JWTCreatedListener` enriches the token payload with Symfony roles beyond the user's `global_role`:
+
+| Condition | Role added to JWT |
+|-----------|------------------|
+| User has entry in `branch_admins` table | `ROLE_BRANCH_ADMIN` |
+| User has `branch_memberships.role = 'branch_admin'` for any branch | `ROLE_BRANCH_ADMIN` |
+
+This means a user whose `global_role = member` can still receive `ROLE_BRANCH_ADMIN` in their JWT, enabling branch-scoped admin endpoints without a global role upgrade. The backend controller (`BranchPersonController`) additionally runs an `isAdminOfBranch()` guard to ensure the user is admin of **that specific branch** before allowing changes.
+
 ## Authorization
 
 Symfony Security Voters control access to every resource.

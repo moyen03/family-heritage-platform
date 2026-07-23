@@ -83,9 +83,18 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this->email;
     }
 
+    /** Extra roles injected at runtime (e.g., ROLE_BRANCH_ADMIN from JWT payload). */
+    private array $extraRoles = [];
+
+    public function addExtraRoles(array $roles): static
+    {
+        $this->extraRoles = $roles;
+        return $this;
+    }
+
     public function getRoles(): array
     {
-        return [$this->role->symfonyRole(), 'ROLE_USER'];
+        return array_unique(array_merge([$this->role->symfonyRole(), 'ROLE_USER'], $this->extraRoles));
     }
 
     public function getPassword(): string

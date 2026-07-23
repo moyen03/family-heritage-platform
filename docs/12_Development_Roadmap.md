@@ -148,6 +148,8 @@ Shared (common ancestors — visible to ALL branches)
 | Branch detail page with Persons + Users tabs | ✅ Done |
 | Branch listing with member count | ✅ Done |
 | Auto-assign all family members (`app:assign-branches` command) | ✅ Done |
+| `isCurrentUserAdmin` virtual field on Branch API response | ✅ Done |
+| Branch Admin can assign/remove persons from their own branch | ✅ Done |
 
 ### Phase 6b – Branch Visibility Enforcement ✅
 

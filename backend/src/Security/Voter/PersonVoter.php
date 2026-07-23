@@ -49,7 +49,7 @@ final class PersonVoter extends Voter
         return match ($attribute) {
             self::VIEW   => $this->canView($subject, $user),
             self::EDIT   => $this->canEdit($subject, $user),
-            self::DELETE => $this->canDelete($user),
+            self::DELETE => $this->canDelete($subject, $user),
             default      => false,
         };
     }
@@ -104,16 +104,62 @@ final class PersonVoter extends Voter
             return true;
         }
 
-        if ($user->getRole() === UserRole::BranchAdmin) {
+        // Viewers can never write
+        if ($user->getRole() === UserRole::Viewer) {
+            return false;
+        }
+
+        // Branch admins may only edit persons that belong to a branch they administer
+        $personBranchIds = $this->getActiveBranchIds($person);
+        if (!empty($personBranchIds)) {
+            $allAdminIds = $this->resolveAdminBranchIds($user);
+            if (!empty(array_intersect($personBranchIds, $allAdminIds))) {
+                return true;
+            }
+        }
+
+        // Members (and non-admin branch_admin memberships) can edit persons they created
+        return $person->getCreatedBy()?->getId() === $user->getId();
+    }
+
+    private function canDelete(Person $person, User $user): bool
+    {
+        if ($user->getRole() === UserRole::SuperAdmin) {
             return true;
         }
 
-        // Members can only edit persons they created
-        return $person->getCreatedBy()->getId() === $user->getId();
+        // Only branch admins may delete, and only within their branches
+        $personBranchIds = $this->getActiveBranchIds($person);
+        if (empty($personBranchIds)) {
+            return false;
+        }
+
+        return !empty(array_intersect($personBranchIds, $this->resolveAdminBranchIds($user)));
     }
 
-    private function canDelete(User $user): bool
+    /** Returns IDs of non-deleted branches for a person. */
+    private function getActiveBranchIds(Person $person): array
     {
-        return in_array($user->getRole(), [UserRole::SuperAdmin, UserRole::BranchAdmin], true);
+        $ids = [];
+        foreach ($person->getPersonBranches() as $pb) {
+            $branch = $pb->getBranch();
+            if ($branch->getDeletedAt() === null) {
+                $ids[] = $branch->getId();
+            }
+        }
+        return $ids;
+    }
+
+    /**
+     * Combines branch IDs from both the branch_admins table and
+     * branch_memberships rows where role = branch_admin.
+     *
+     * @return string[]
+     */
+    private function resolveAdminBranchIds(User $user): array
+    {
+        $fromAdminsTable     = $this->branchAdminRepo->getBranchIdsForUser($user->getId());
+        $fromMembershipTable = $this->membershipRepo->getBranchAdminIdsForUser($user->getId());
+        return array_unique(array_merge($fromAdminsTable, $fromMembershipTable));
     }
 }

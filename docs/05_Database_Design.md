@@ -79,9 +79,11 @@
 |--------|------|-------|
 | branch_id | CHAR(36) FK | |
 | user_id | CHAR(36) FK | links a platform User to a branch for access control |
-| role | VARCHAR(255) | viewer, member |
+| role | VARCHAR(255) | `viewer`, `member`, `branch_admin` — `branch_admin` grants the same privileges as an entry in `branch_admins` |
 | joined_at | DATETIME | |
 | invited_by | CHAR(36) FK | user_id |
+
+> **Note:** A user is considered a Branch Admin for a given branch if they have an entry in `branch_admins` **or** if their `branch_memberships.role = 'branch_admin'` for that branch. On login, `JWTCreatedListener` checks both tables and adds `ROLE_BRANCH_ADMIN` to the JWT payload if either condition is true.
 
 ### person_branches
 | Column | Type | Notes |

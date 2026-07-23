@@ -7,6 +7,7 @@ import { Badge } from '@/components/ui/Badge'
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner'
 import { PersonFormModal } from '@/components/persons/PersonFormModal'
 import type { Person } from '@/types/person'
+import { useAuthStore, selectCanWrite } from '@/store/auth.store'
 
 function GenderBadge({ gender }: { gender: Person['gender'] }) {
   const map = {
@@ -26,6 +27,7 @@ export function PersonsPage() {
   const [showAdd, setShowAdd] = useState(false)
   const [currentPage, setCurrentPage] = useState(1)
   const [pageSize, setPageSize] = useState(20)
+  const canWrite = useAuthStore(selectCanWrite)
 
   const { data, isLoading, error } = useQuery({
     queryKey: ['persons'],
@@ -70,12 +72,14 @@ export function PersonsPage() {
             {search && ` · ${totalFiltered} matching`}
           </p>
         </div>
-        <button
-          onClick={() => setShowAdd(true)}
-          className="flex items-center gap-2 bg-indigo-600 text-white px-4 py-2 rounded-xl text-sm font-semibold hover:bg-indigo-700 transition-colors shadow-sm"
-        >
-          <UserPlus className="h-4 w-4" /> Add Person
-        </button>
+        {canWrite && (
+          <button
+            onClick={() => setShowAdd(true)}
+            className="flex items-center gap-2 bg-indigo-600 text-white px-4 py-2 rounded-xl text-sm font-semibold hover:bg-indigo-700 transition-colors shadow-sm"
+          >
+            <UserPlus className="h-4 w-4" /> Add Person
+          </button>
+        )}
       </div>
 
       {/* Search */}

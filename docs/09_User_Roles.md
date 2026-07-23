@@ -80,7 +80,19 @@ A Branch Admin can only manage:
 - Media uploaded within **their branch**
 - Approval requests from members of **their branch**
 - Members who belong to **their branch**
+- **Assigning and removing persons** from **their branch** (via Branch Detail page → "Add Person to Branch" panel)
 - Cannot create new branches (Super Admin only)
+
+### How Branch Admin Role Is Determined
+
+A user is treated as a Branch Admin if **either** of the following is true:
+
+1. The `branch_admins` table has a row for `(branch_id, user_id)`
+2. The `branch_memberships` table has a row for `(branch_id, user_id)` with `role = 'branch_admin'`
+
+On login, `JWTCreatedListener` checks both tables. If either condition is met, `ROLE_BRANCH_ADMIN` is added to the JWT payload. The global `users.global_role` column does **not** need to be `branch_admin` — a user can have `global_role = member` and still receive `ROLE_BRANCH_ADMIN` in their token.
+
+At the controller level, `BranchPersonController` additionally runs an `isAdminOfBranch()` check to confirm the user is admin of **the specific branch** being modified, not just any branch.
 
 ---
 

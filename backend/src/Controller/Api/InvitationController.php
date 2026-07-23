@@ -4,12 +4,15 @@ declare(strict_types=1);
 
 namespace App\Controller\Api;
 
+use App\Entity\BranchAdmin;
 use App\Entity\BranchInvitation;
 use App\Entity\BranchMembership;
 use App\Entity\User;
 use App\Enum\BranchMemberRole;
 use App\Enum\UserRole;
+use App\Repository\BranchAdminRepository;
 use App\Repository\BranchInvitationRepository;
+use App\Repository\BranchMembershipRepository;
 use App\Repository\BranchRepository;
 use App\Repository\UserRepository;
 use Doctrine\ORM\EntityManagerInterface;
@@ -35,7 +38,29 @@ class InvitationController extends AbstractController
         private readonly Security $security,
         private readonly MailerInterface $mailer,
         private readonly UserPasswordHasherInterface $passwordHasher,
+        private readonly BranchAdminRepository $branchAdminRepo,
+        private readonly BranchMembershipRepository $membershipRepo,
     ) {
+    }
+
+    /**
+     * Returns true if the given user is super admin OR is admin of the given branch
+     * (via branch_admins table OR branch_memberships with branch_admin role).
+     */
+    private function isAdminOfBranch(\App\Entity\Branch $branch, User $user): bool
+    {
+        if ($user->getRole() === UserRole::SuperAdmin) {
+            return true;
+        }
+
+        $branchId      = $branch->getId();
+        $adminBranches = $this->branchAdminRepo->getBranchIdsForUser($user->getId());
+        if (in_array($branchId, $adminBranches, true)) {
+            return true;
+        }
+
+        $memberAdminBranches = $this->membershipRepo->getBranchAdminIdsForUser($user->getId());
+        return in_array($branchId, $memberAdminBranches, true);
     }
 
     /** Send an invitation email to join a branch */
@@ -48,6 +73,14 @@ class InvitationController extends AbstractController
             return $this->json(['error' => 'Branch not found'], 404);
         }
 
+        /** @var User $inviter */
+        $inviter = $this->security->getUser();
+
+        // Ensure the caller is actually admin of THIS branch, not just any branch
+        if (!$this->isAdminOfBranch($branch, $inviter)) {
+            return $this->json(['error' => 'You are not an admin of this branch'], 403);
+        }
+
         $body  = json_decode($request->getContent(), true) ?? [];
         $email = trim($body['email'] ?? '');
         $role  = $body['role'] ?? 'viewer';
@@ -56,8 +89,9 @@ class InvitationController extends AbstractController
             return $this->json(['error' => 'A valid email address is required'], 400);
         }
 
-        if (!in_array($role, ['viewer', 'member'], true)) {
-            return $this->json(['error' => 'Role must be viewer or member'], 400);
+        $allowedRoles = array_map(fn ($case) => $case->value, BranchMemberRole::cases());
+        if (!in_array($role, $allowedRoles, true)) {
+            return $this->json(['error' => 'Invalid role. Allowed: ' . implode(', ', $allowedRoles)], 400);
         }
 
         // Check if already a member
@@ -66,18 +100,18 @@ class InvitationController extends AbstractController
             return $this->json(['error' => 'This person is already a member of this branch'], 409);
         }
 
-        // Check for existing pending invitation
+        // Check for existing pending invitation — renew it instead of blocking
         $pending = $this->em->getRepository(BranchInvitation::class)->findOneBy([
-            'email' => $email,
+            'email'  => $email,
             'branch' => $branch,
             'status' => 'pending',
         ]);
         if ($pending && $pending->isPending()) {
-            return $this->json(['error' => 'An invitation has already been sent to this email'], 409);
+            // Supersede the old pending invitation so its token is invalidated,
+            // then fall through to create a fresh one below.
+            $pending->setStatus('expired');
         }
 
-        /** @var User $inviter */
-        $inviter    = $this->security->getUser();
         $invitation = new BranchInvitation();
         $invitation->setBranch($branch);
         $invitation->setEmail($email);
@@ -192,7 +226,11 @@ class InvitationController extends AbstractController
             $user->setEmail($email);
             $user->setFirstName($firstName);
             $user->setLastName($lastName);
-            $user->setRole(UserRole::Viewer);
+            // Branch admins need at least Member global role so they can write
+            $globalRole = ($invitation->getRole() === BranchMemberRole::BranchAdmin->value)
+                ? UserRole::Member
+                : UserRole::Viewer;
+            $user->setRole($globalRole);
             $user->setIsActive(true);
             $user->setPasswordHash($this->passwordHasher->hashPassword($user, $password));
             $this->em->persist($user);
@@ -203,6 +241,11 @@ class InvitationController extends AbstractController
             $role       = BranchMemberRole::tryFrom($invitation->getRole()) ?? BranchMemberRole::Viewer;
             $membership = new BranchMembership($branch, $user, $invitation->getInvitedBy(), $role);
             $this->em->persist($membership);
+
+            // Branch admins also go into the dedicated branch_admins table
+            if ($role === BranchMemberRole::BranchAdmin) {
+                $this->em->persist(new BranchAdmin($branch, $user, $invitation->getInvitedBy()));
+            }
         }
 
         // Mark invitation accepted
@@ -227,6 +270,12 @@ class InvitationController extends AbstractController
         $branch = $this->branchRepo->find($branchId);
         if (!$branch) {
             return $this->json(['error' => 'Branch not found'], 404);
+        }
+
+        /** @var User $currentUser */
+        $currentUser = $this->security->getUser();
+        if (!$this->isAdminOfBranch($branch, $currentUser)) {
+            return $this->json(['error' => 'You are not an admin of this branch'], 403);
         }
 
         $invitations = $this->em->getRepository(BranchInvitation::class)->findBy(
