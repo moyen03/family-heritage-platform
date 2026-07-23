@@ -24,8 +24,12 @@ export function useMedia() {
     queryKey: ['media'],
     queryFn: async () => {
       const res = await api.get<ApiCollection<MediaItem>>('/media')
-      return res.data?.['member'] ?? res.data?.['hydra:member'] ?? []
+      const data = res.data as Record<string, unknown>
+      const items = data?.['member'] ?? data?.['hydra:member']
+      return Array.isArray(items) ? (items as MediaItem[]) : []
     },
+    staleTime: 60_000,         // keep data fresh for 1 min — prevents blank flash on navigation
+    placeholderData: (prev) => prev,  // keep showing old data while refetching
   })
 }
 

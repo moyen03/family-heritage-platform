@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Upload, Image, Film, FileText, Music, Search, Loader2 } from 'lucide-react'
+import { Upload, Image, Film, FileText, Music, Search, Loader2, AlertCircle } from 'lucide-react'
 import { useMedia } from '../hooks/useMedia'
 import type { MediaItem } from '../hooks/useMedia'
 import UploadModal from '../components/media/UploadModal'
@@ -59,7 +59,7 @@ function MediaCard({ item, onClick }: { item: MediaItem; onClick: () => void }) 
 const TYPE_FILTERS = ['all', 'photo', 'video', 'document', 'audio']
 
 export default function MediaPage() {
-  const { data: items = [], isLoading } = useMedia()
+  const { data: items = [], isLoading, isFetching, isError } = useMedia()
   const [showUpload, setShowUpload] = useState(false)
   const [selected, setSelected]     = useState<MediaItem | null>(null)
   const [search, setSearch]         = useState('')
@@ -92,6 +92,9 @@ export default function MediaPage() {
             <h1 className="text-xl font-bold text-gray-900 flex items-center gap-2">
               <Image className="w-5 h-5 text-indigo-600" />
               Media Library
+              {isFetching && !isLoading && (
+                <Loader2 className="w-4 h-4 animate-spin text-gray-400" />
+              )}
             </h1>
             <button
               onClick={() => setShowUpload(true)}
@@ -137,7 +140,13 @@ export default function MediaPage() {
         </div>
 
         {/* Grid */}
-        {isLoading ? (
+        {isError ? (
+          <div className="flex flex-col items-center justify-center h-64 gap-3 text-red-500">
+            <AlertCircle className="w-10 h-10" />
+            <p className="font-medium">Failed to load media</p>
+            <p className="text-sm text-red-400">Check your connection and try refreshing the page.</p>
+          </div>
+        ) : (isLoading || (isFetching && items.length === 0)) ? (
           <div className="flex items-center justify-center h-64">
             <Loader2 className="w-8 h-8 animate-spin text-indigo-400" />
           </div>
