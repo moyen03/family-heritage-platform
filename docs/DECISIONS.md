@@ -454,3 +454,39 @@ A user whose `global_role = member` but who has an entry in `branch_admins` or `
 
 ---
 
+## ADR-021: Auto-Assign Newly Created Person to Branch Admin's Branch
+
+**Date:** 2026-07-24
+**Status:** Accepted
+
+**Context:**
+After branch scoping was added (`PersonVisibilityExtension`), non-super-admin users can only see persons in their own branch(es) or shared branches. When a Branch Admin created a new person via `POST /api/persons`, the person had no branch assignment, making them immediately invisible to the creator. Navigating to the new person's detail page returned "Person not found".
+
+**Decision:**
+In `PersonStateProcessor`, when a Branch Admin (and not Super Admin) creates a new person, automatically create `PersonBranch` entries linking the person to all branches the admin manages (`branch_admins` + `branch_memberships` with `branch_admin` role), with `isPrimary = false`.
+
+**Implementation:**
+```php
+// PersonStateProcessor::process() — on Post operation for Branch Admins:
+$this->entityManager->persist($data);
+$this->entityManager->flush(); // need the UUID before creating PersonBranch
+
+foreach ($branchIds as $branchId) {
+    $branch = $this->branchRepository->find($branchId);
+    $personBranch = new PersonBranch($data, $branch, false);
+    $this->entityManager->persist($personBranch);
+}
+$this->entityManager->flush();
+```
+
+**Why `isPrimary = false`:**
+Primary branch membership (`isPrimary = true`) should reflect the person's actual bloodline branch (their father's branch, per BR-BRANCH-11). The auto-assignment is a temporary convenience membership; the Super Admin or the branch admin can later correct the primary flag via the Branch Detail page.
+
+**Super Admins:** unaffected — they see all persons regardless of branch assignment, so no auto-assignment is needed.
+
+**Alternatives considered:**
+- Force the admin to manually assign the person to a branch after creation: too many steps, poor UX
+- Show a branch-selection step in the Add Person form: adds complexity to a common workflow
+
+---
+
