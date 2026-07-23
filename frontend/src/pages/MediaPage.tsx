@@ -59,7 +59,7 @@ function MediaCard({ item, onClick }: { item: MediaItem; onClick: () => void }) 
 const TYPE_FILTERS = ['all', 'photo', 'video', 'document', 'audio']
 
 export default function MediaPage() {
-  const { data: items = [], isLoading, isFetching, isError } = useMedia()
+  const { data: items = [], isPending, isFetching, isError } = useMedia()
   const [showUpload, setShowUpload] = useState(false)
   const [selected, setSelected]     = useState<MediaItem | null>(null)
   const [search, setSearch]         = useState('')
@@ -92,7 +92,7 @@ export default function MediaPage() {
             <h1 className="text-xl font-bold text-gray-900 flex items-center gap-2">
               <Image className="w-5 h-5 text-indigo-600" />
               Media Library
-              {isFetching && !isLoading && (
+              {isFetching && !isPending && (
                 <Loader2 className="w-4 h-4 animate-spin text-gray-400" />
               )}
             </h1>
@@ -146,7 +146,7 @@ export default function MediaPage() {
             <p className="font-medium">Failed to load media</p>
             <p className="text-sm text-red-400">Check your connection and try refreshing the page.</p>
           </div>
-        ) : (isLoading || (isFetching && items.length === 0)) ? (
+        ) : (isPending || (isFetching && items.length === 0)) ? (
           <div className="flex items-center justify-center h-64">
             <Loader2 className="w-8 h-8 animate-spin text-indigo-400" />
           </div>
