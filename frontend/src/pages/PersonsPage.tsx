@@ -1,13 +1,14 @@
 import { useState, useMemo } from 'react'
-import { useQuery } from '@tanstack/react-query'
-import { Search, User, ChevronRight, UserPlus, ChevronLeft } from 'lucide-react'
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { Search, User, ChevronRight, UserPlus, ChevronLeft, Trash2, Loader2 } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { personsService } from '@/services/persons.service'
+import { branchesService, type Branch } from '@/services/branches.service'
 import { Badge } from '@/components/ui/Badge'
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner'
 import { PersonFormModal } from '@/components/persons/PersonFormModal'
 import type { Person } from '@/types/person'
-import { useAuthStore, selectCanWrite } from '@/store/auth.store'
+import { useAuthStore, selectCanWrite, selectIsSuperAdmin, selectIsBranchAdmin } from '@/store/auth.store'
 
 function GenderBadge({ gender }: { gender: Person['gender'] }) {
   const map = {
@@ -27,11 +28,47 @@ export function PersonsPage() {
   const [showAdd, setShowAdd] = useState(false)
   const [currentPage, setCurrentPage] = useState(1)
   const [pageSize, setPageSize] = useState(20)
-  const canWrite = useAuthStore(selectCanWrite)
+  const [confirmId, setConfirmId] = useState<string | null>(null)
+
+  const canWrite    = useAuthStore(selectCanWrite)
+  const isSuperAdmin  = useAuthStore(selectIsSuperAdmin)
+  const isBranchAdmin = useAuthStore(selectIsBranchAdmin)
+  const qc = useQueryClient()
 
   const { data, isLoading, error } = useQuery({
     queryKey: ['persons'],
     queryFn: () => personsService.getAll(),
+  })
+
+  // Fetch admin's own branches (only used for branch-admin remove action)
+  const { data: adminBranches = [] } = useQuery<Branch[]>({
+    queryKey: ['branches-admin-own'],
+    queryFn: async () => {
+      const list = await branchesService.getAll()
+      return list.filter((b) => b.isCurrentUserAdmin)
+    },
+    enabled: isBranchAdmin && !isSuperAdmin,
+  })
+  const adminBranchIds = new Set(adminBranches.map((b) => b.id))
+
+  // Super admin: soft-delete the person entirely
+  const deleteMutation = useMutation({
+    mutationFn: (id: string) => personsService.delete(id),
+    onSuccess: () => {
+      setConfirmId(null)
+      qc.invalidateQueries({ queryKey: ['persons'] })
+    },
+  })
+
+  // Branch admin: unassign person from their branch
+  const removeMutation = useMutation({
+    mutationFn: ({ branchId, personId }: { branchId: string; personId: string }) =>
+      branchesService.removePerson(branchId, personId),
+    onSuccess: () => {
+      setConfirmId(null)
+      qc.invalidateQueries({ queryKey: ['persons'] })
+      qc.invalidateQueries({ queryKey: ['branch-persons'] })
+    },
   })
 
   const persons = data?.['member'] ?? data?.['hydra:member'] ?? []
@@ -176,14 +213,77 @@ export function PersonsPage() {
                         {person.isLiving ? 'Living' : 'Deceased'}
                       </Badge>
                     </td>
-                    <td className="px-6 py-4 text-right">
-                      <Link
-                        to={`/persons/${person.id}`}
-                        className="inline-flex items-center text-sm font-medium text-primary-600 hover:text-primary-800"
-                      >
-                        View <ChevronRight className="h-4 w-4" />
-                      </Link>
-                    </td>
+                     <td className="px-6 py-4 text-right">
+                      <div className="flex items-center justify-end gap-2">
+                        {/* Super admin: delete person entirely */}
+                        {isSuperAdmin && (
+                          confirmId === person.id ? (
+                            <span className="flex items-center gap-1.5 text-sm">
+                              <span className="text-red-600 font-medium">Delete?</span>
+                              <button
+                                onClick={() => deleteMutation.mutate(person.id)}
+                                disabled={deleteMutation.isPending}
+                                className="rounded-md bg-red-600 px-2 py-0.5 text-xs font-semibold text-white hover:bg-red-700 disabled:opacity-50"
+                              >
+                                {deleteMutation.isPending ? <Loader2 className="h-3 w-3 animate-spin" /> : 'Yes'}
+                              </button>
+                              <button
+                                onClick={() => setConfirmId(null)}
+                                className="rounded-md border border-gray-300 px-2 py-0.5 text-xs font-medium text-gray-600 hover:bg-gray-50"
+                              >No</button>
+                            </span>
+                          ) : (
+                            <button
+                              onClick={() => setConfirmId(person.id)}
+                              className="rounded-md p-1 text-gray-300 hover:text-red-500 hover:bg-red-50 transition-colors"
+                              title="Delete person"
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </button>
+                          )
+                        )}
+
+                        {/* Branch admin: remove person from their branch */}
+                        {isBranchAdmin && !isSuperAdmin && (() => {
+                          // Find which of the admin's branches this person belongs to
+                          const matchBranch = person.personBranches
+                            .filter((pb) => adminBranchIds.has(pb.branch.id) && !pb.branch.name.toLowerCase().includes('shared'))
+                            .map((pb) => pb.branch)[0]
+                          if (!matchBranch) return null
+                          return confirmId === person.id ? (
+                            <span className="flex items-center gap-1.5 text-sm">
+                              <span className="text-orange-600 font-medium text-xs">Remove from {matchBranch.name}?</span>
+                              <button
+                                onClick={() => removeMutation.mutate({ branchId: matchBranch.id, personId: person.id })}
+                                disabled={removeMutation.isPending}
+                                className="rounded-md bg-orange-500 px-2 py-0.5 text-xs font-semibold text-white hover:bg-orange-600 disabled:opacity-50"
+                              >
+                                {removeMutation.isPending ? <Loader2 className="h-3 w-3 animate-spin" /> : 'Yes'}
+                              </button>
+                              <button
+                                onClick={() => setConfirmId(null)}
+                                className="rounded-md border border-gray-300 px-2 py-0.5 text-xs font-medium text-gray-600 hover:bg-gray-50"
+                              >No</button>
+                            </span>
+                          ) : (
+                            <button
+                              onClick={() => setConfirmId(person.id)}
+                              className="rounded-md p-1 text-gray-300 hover:text-orange-500 hover:bg-orange-50 transition-colors"
+                              title={`Remove from ${matchBranch.name}`}
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </button>
+                          )
+                        })()}
+
+                        <Link
+                          to={`/persons/${person.id}`}
+                          className="inline-flex items-center text-sm font-medium text-primary-600 hover:text-primary-800"
+                        >
+                          View <ChevronRight className="h-4 w-4" />
+                        </Link>
+                      </div>
+                     </td>
                   </tr>
                 ))}
               </tbody>
