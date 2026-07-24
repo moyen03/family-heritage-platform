@@ -21,4 +21,3 @@ class BranchInvitationRepository extends ServiceEntityRepository
         return $this->findOneBy(['token' => $token]);
     }
 }
-

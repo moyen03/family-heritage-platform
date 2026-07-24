@@ -67,4 +67,3 @@ class BranchCollectionProvider implements ProviderInterface
         return $branches;
     }
 }
-

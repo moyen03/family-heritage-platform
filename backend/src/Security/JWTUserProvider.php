@@ -17,7 +17,9 @@ use Symfony\Component\Security\Core\User\UserInterface;
  */
 final class JWTUserProvider implements PayloadAwareUserProviderInterface
 {
-    public function __construct(private readonly UserRepository $userRepository) {}
+    public function __construct(private readonly UserRepository $userRepository)
+    {
+    }
 
     public function loadUserByIdentifier(string $identifier): UserInterface
     {
@@ -62,4 +64,3 @@ final class JWTUserProvider implements PayloadAwareUserProviderInterface
         return $class === User::class || is_subclass_of($class, User::class);
     }
 }
-

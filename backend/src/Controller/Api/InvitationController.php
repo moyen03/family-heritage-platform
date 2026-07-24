@@ -296,4 +296,3 @@ class InvitationController extends AbstractController
         return $this->json(['invitations' => $data, 'count' => count($data)]);
     }
 }
-

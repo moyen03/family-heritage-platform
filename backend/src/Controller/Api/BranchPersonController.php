@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace App\Controller\Api;
 
+use App\Entity\Branch;
 use App\Entity\PersonBranch;
 use App\Entity\User;
-use App\Entity\Branch;
 use App\Enum\UserRole;
 use App\Repository\BranchAdminRepository;
 use App\Repository\BranchMembershipRepository;

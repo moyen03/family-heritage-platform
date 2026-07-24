@@ -53,29 +53,80 @@ class BranchInvitation
         $this->expiresAt = new \DateTimeImmutable('+72 hours');
     }
 
-    public function getId(): string { return $this->id; }
+    public function getId(): string
+    {
+        return $this->id;
+    }
 
-    public function getBranch(): Branch { return $this->branch; }
-    public function setBranch(Branch $branch): static { $this->branch = $branch; return $this; }
+    public function getBranch(): Branch
+    {
+        return $this->branch;
+    }
+    public function setBranch(Branch $branch): static
+    {
+        $this->branch = $branch;
+        return $this;
+    }
 
-    public function getEmail(): string { return $this->email; }
-    public function setEmail(string $email): static { $this->email = $email; return $this; }
+    public function getEmail(): string
+    {
+        return $this->email;
+    }
+    public function setEmail(string $email): static
+    {
+        $this->email = $email;
+        return $this;
+    }
 
-    public function getRole(): string { return $this->role; }
-    public function setRole(string $role): static { $this->role = $role; return $this; }
+    public function getRole(): string
+    {
+        return $this->role;
+    }
+    public function setRole(string $role): static
+    {
+        $this->role = $role;
+        return $this;
+    }
 
-    public function getToken(): string { return $this->token; }
+    public function getToken(): string
+    {
+        return $this->token;
+    }
 
-    public function getStatus(): string { return $this->status; }
-    public function setStatus(string $status): static { $this->status = $status; return $this; }
+    public function getStatus(): string
+    {
+        return $this->status;
+    }
+    public function setStatus(string $status): static
+    {
+        $this->status = $status;
+        return $this;
+    }
 
-    public function getInvitedBy(): User { return $this->invitedBy; }
-    public function setInvitedBy(User $user): static { $this->invitedBy = $user; return $this; }
+    public function getInvitedBy(): User
+    {
+        return $this->invitedBy;
+    }
+    public function setInvitedBy(User $user): static
+    {
+        $this->invitedBy = $user;
+        return $this;
+    }
 
-    public function getExpiresAt(): \DateTimeImmutable { return $this->expiresAt; }
+    public function getExpiresAt(): \DateTimeImmutable
+    {
+        return $this->expiresAt;
+    }
 
-    public function getAcceptedAt(): ?\DateTimeImmutable { return $this->acceptedAt; }
-    public function setAcceptedAt(?\DateTimeImmutable $dt): static { $this->acceptedAt = $dt; return $this; }
+    public function getAcceptedAt(): ?\DateTimeImmutable
+    {
+        return $this->acceptedAt;
+    }
+    public function setAcceptedAt(?\DateTimeImmutable $dt): static
+    {
+        $this->acceptedAt = $dt;
+        return $this;
+    }
 
     public function isExpired(): bool
     {
@@ -87,4 +138,3 @@ class BranchInvitation
         return $this->status === 'pending' && !$this->isExpired();
     }
 }
-

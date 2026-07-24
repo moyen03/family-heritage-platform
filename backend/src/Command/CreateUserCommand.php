@@ -33,10 +33,10 @@ final class CreateUserCommand extends Command
     protected function configure(): void
     {
         $this
-            ->addArgument('email',     InputArgument::OPTIONAL, 'Email address')
+            ->addArgument('email', InputArgument::OPTIONAL, 'Email address')
             ->addArgument('firstName', InputArgument::OPTIONAL, 'First name')
-            ->addArgument('lastName',  InputArgument::OPTIONAL, 'Last name')
-            ->addArgument('password',  InputArgument::OPTIONAL, 'Password')
+            ->addArgument('lastName', InputArgument::OPTIONAL, 'Last name')
+            ->addArgument('password', InputArgument::OPTIONAL, 'Password')
             ->addOption('role', 'r', InputOption::VALUE_REQUIRED, 'Role: super_admin | branch_admin | member | viewer', 'member');
     }
 
@@ -93,4 +93,3 @@ final class CreateUserCommand extends Command
         return Command::SUCCESS;
     }
 }
-

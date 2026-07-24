@@ -96,11 +96,11 @@ final class BranchScopingExtension implements QueryCollectionExtensionInterface,
         // Each call MUST receive a unique $tag so DQL alias names don't conflict
         // when the closure is called multiple times within the same query.
         if (empty($accessibleBranchIds)) {
-            $inScope = fn(string $personRef, string $tag) =>
+            $inScope = fn (string $personRef, string $tag) =>
                 "EXISTS (SELECT 1 FROM App\\Entity\\PersonBranch bse_pb_{$tag} JOIN bse_pb_{$tag}.branch bse_b_{$tag} WHERE bse_pb_{$tag}.person = {$personRef} AND bse_b_{$tag}.deletedAt IS NULL AND bse_b_{$tag}.isShared = true)";
         } else {
             $qb->setParameter('bse_branch_ids', $accessibleBranchIds);
-            $inScope = fn(string $personRef, string $tag) =>
+            $inScope = fn (string $personRef, string $tag) =>
                 "EXISTS (SELECT 1 FROM App\\Entity\\PersonBranch bse_pb_{$tag} JOIN bse_pb_{$tag}.branch bse_b_{$tag} WHERE bse_pb_{$tag}.person = {$personRef} AND bse_b_{$tag}.deletedAt IS NULL AND (bse_b_{$tag}.isShared = true OR bse_b_{$tag}.id IN (:bse_branch_ids)))";
         }
 
@@ -134,8 +134,8 @@ final class BranchScopingExtension implements QueryCollectionExtensionInterface,
                     "EXISTS (
                         SELECT 1 FROM App\\Entity\\MediaTag bse_mt
                         WHERE bse_mt.media = {$alias}
-                        AND " . ($inScope)('bse_mt.person', 'mtp') . "
-                    )",
+                        AND " . ($inScope)('bse_mt.person', 'mtp') . '
+                    )',
                 )
             )->setParameter('bse_uid', $user->getId()),
 

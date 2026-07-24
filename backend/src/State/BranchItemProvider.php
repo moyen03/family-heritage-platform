@@ -52,7 +52,7 @@ class BranchItemProvider implements ProviderInterface
         if (!$isSuperAdmin) {
             // Non-super-admins can only access branches they belong to
             $accessible = $this->branchRepository->findAccessibleForUser($user);
-            $accessibleIds = array_map(fn(Branch $b) => $b->getId(), $accessible);
+            $accessibleIds = array_map(fn (Branch $b) => $b->getId(), $accessible);
             if (!in_array($branch->getId(), $accessibleIds, true)) {
                 throw new AccessDeniedHttpException('You do not have access to this branch.');
             }
@@ -69,4 +69,3 @@ class BranchItemProvider implements ProviderInterface
         return $branch;
     }
 }
-
