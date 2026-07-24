@@ -33,6 +33,8 @@ final class JWTUserProvider implements PayloadAwareUserProviderInterface
      * Called by the Lexik JWT authenticator when the provider is payload-aware.
      * Merges any extra roles from the JWT payload (e.g. ROLE_BRANCH_ADMIN) into
      * the User entity so Symfony's isGranted() respects them.
+     *
+     * @param array<string, mixed> $payload
      */
     public function loadUserByIdentifierAndPayload(string $identifier, array $payload): UserInterface
     {

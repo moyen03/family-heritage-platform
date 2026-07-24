@@ -83,9 +83,12 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this->email;
     }
 
-    /** Extra roles injected at runtime (e.g., ROLE_BRANCH_ADMIN from JWT payload). */
+    /** Extra roles injected at runtime (e.g., ROLE_BRANCH_ADMIN from JWT payload).
+     * @var string[]
+     */
     private array $extraRoles = [];
 
+    /** @param string[] $roles */
     public function addExtraRoles(array $roles): static
     {
         $this->extraRoles = $roles;

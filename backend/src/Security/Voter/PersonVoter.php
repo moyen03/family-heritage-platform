@@ -119,7 +119,7 @@ final class PersonVoter extends Voter
         }
 
         // Members (and non-admin branch_admin memberships) can edit persons they created
-        return $person->getCreatedBy()?->getId() === $user->getId();
+        return $person->getCreatedBy()->getId() === $user->getId();
     }
 
     private function canDelete(Person $person, User $user): bool
@@ -137,7 +137,11 @@ final class PersonVoter extends Voter
         return !empty(array_intersect($personBranchIds, $this->resolveAdminBranchIds($user)));
     }
 
-    /** Returns IDs of non-deleted branches for a person. */
+    /**
+     * Returns IDs of non-deleted branches for a person.
+     *
+     * @return string[]
+     */
     private function getActiveBranchIds(Person $person): array
     {
         $ids = [];

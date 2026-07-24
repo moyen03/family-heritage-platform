@@ -7,4 +7,7 @@ parameters:
     treatPhpDocTypesAsCertain: false
     doctrine:
         objectManagerLoader: phpstan-object-manager.php
+    phpVersion: 80300
+    parallel:
+        maximumNumberOfProcesses: 1
 
