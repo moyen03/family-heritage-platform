@@ -490,3 +490,45 @@ Primary branch membership (`isPrimary = true`) should reflect the person's actua
 
 ---
 
+## ADR-022 – In-Law / Cross-Branch Person Assignment (TODO)
+
+**Date:** 2026-07-24
+**Status:** 🟡 Deferred — design agreed, implementation pending (Phase 6d)
+
+**Context:**
+In-laws marry into one branch's family but originate from a different branch (or have their own independent branch). The data model already allows a person to belong to multiple branches (`PersonBranch` with `isPrimary` flag), but the UX workflow for cross-branch assignment has gaps:
+
+1. The "Add Person to Branch" search panel in `BranchDetailPage` only returns persons already visible to the branch admin (i.e., persons already in their branch or shared branches). A `forAssign=1` context flag was prepared in `PersonVisibilityExtension` but never wired to the frontend — so a branch admin cannot find and assign an in-law who lives in a different branch.
+2. There is no post-marriage prompt suggesting cross-branch assignment after two persons from different branches are wed.
+
+**Options considered:**
+
+| Option | Summary | Decision |
+|--------|---------|----------|
+| A — Manual assignment | Admin searches all non-private persons via `forAssign=1` flag; clicks assign | ✅ **Chosen as Step 1** |
+| B — Auto-assign on marriage | Cross-assign both spouses to each other's branch automatically | ❌ Privacy risk, no consent |
+| C — Post-marriage suggestion | After saving a marriage, prompt "Add [Spouse] to your branch?" | ✅ **Chosen as Step 2** |
+| D — Read-only linked person | Show in-law in tree view without cross-assigning to the branch | ⏳ Optional future enhancement |
+
+**Decision:**
+Implement in two steps:
+
+**Step 1 (high priority):** Wire the `forAssign=1` flag end-to-end.
+- Backend: `PersonVisibilityExtension::addFilters()` already accepts `$context`; when `$context['forAssign'] === true`, skip Layer 2 branch scope and return all non-private, non-deleted persons.
+- Frontend: `BranchDetailPage` assign-person panel passes `?forAssign=1` to the persons collection endpoint so the search finds candidates from any branch.
+
+**Step 2 (medium priority):** Post-marriage cross-branch suggestion.
+- After a marriage is saved (in `PersonFormModal` or a dedicated Marriage form), check if the two persons belong to different branches.
+- If yes, show a non-blocking prompt per branch: "Add [Spouse] to [Branch]?" → calls `POST /api/branches/{id}/persons`.
+
+**Step 3 (optional):** Per-`PersonBranch` visibility override — a `visibilityOverride` field on `PersonBranch` so an in-law can be *in* a branch but only exposed with name + photo (limited info) to that branch's members.
+
+**Constraints:**
+- Privacy must be respected: `forAssign=1` only shows `visibility != private` persons.
+- Cross-assignment is always admin-initiated (manual or prompted) — never fully automatic.
+- `isPrimary` stays with the person's bloodline branch; cross-branch assignment uses `isPrimary = false`.
+
+**Files to change (when implemented):**
+- `backend/src/Doctrine/Extension/PersonVisibilityExtension.php` — honour `forAssign` context flag
+- `frontend/src/pages/BranchDetailPage.tsx` — pass `?forAssign=1` in assign-person query
+- `frontend/src/components/PersonFormModal.tsx` or marriage form — post-marriage suggestion prompt

@@ -178,6 +178,24 @@ Shared (common ancestors — visible to ALL branches)
 | Email notification on approval result (approved / rejected) | ⏳ |
 | Member UI to submit edit requests from Person profile | ⏳ |
 
+### Phase 6d – In-Law / Cross-Branch Person Assignment ⏳
+
+**Problem:** In-laws marry into one branch but originate from another (or have their own branch).
+They should be assignable to multiple branches so both sides of the family can see and manage them.
+The infrastructure (multi-`PersonBranch` rows, `isPrimary` flag) already supports this; what is
+missing is the UX workflow to make cross-branch assignment friction-free.
+
+**Agreed approach (to implement):**
+
+| Task | Status |
+|------|--------|
+| Wire `forAssign=1` flag in `PersonVisibilityExtension` so the "Add Person to Branch" search returns **all non-private persons** across all branches (not just the admin's own branch) | ⏳ |
+| Frontend: pass `?forAssign=1` query param when branch admin opens the assign-person panel in `BranchDetailPage` | ⏳ |
+| Post-marriage suggestion: after saving a marriage between persons from different branches, show a prompt "Add [Spouse] to your branch as an in-law?" (Accept / Skip) | ⏳ |
+| (Optional) Per-`PersonBranch` visibility override — in-law visible in branch but with limited info shown to that branch's members | ⏳ |
+
+> **See also:** ADR-022 in `DECISIONS.md` for the full design discussion.
+
 ---
 
 ## Phase 7 – Reports ⏳
