@@ -41,6 +41,9 @@
 - BR-BRANCH-16: This approach tracks the **full bloodline of Azim Uddin through all descendants** — including daughters' families — in a single connected tree
 - BR-BRANCH-17: When a Branch Admin creates a new person, that person is automatically assigned as a secondary member (`isPrimary = false`) to all branches the admin manages — so the person is immediately visible after creation without requiring a manual branch assignment step
 - BR-BRANCH-18: Non-super-admin users can only see persons, relationships, marriages, addresses, and media that belong to their own branch(es) or a shared (common ancestor) branch — cross-branch data is not visible regardless of `visibility` level (except `private` which is super-admin only)
+- BR-BRANCH-19: **Unassigned persons** (no branch membership) are visible to all authenticated non-super-admin users — removing a person from their last branch does not hide them, it simply unassigns them
+- BR-BRANCH-20: **Super Admin** can soft-delete any person from the All Persons list; soft-deleted persons are hidden from all views but preserved in the database (recoverable). **Branch Admin** can only *unassign* (remove from their branch) — they cannot soft-delete persons
+- BR-BRANCH-21: When a Branch Admin searches for persons to assign to their branch, they can see **all non-private persons across all branches** (bypasses branch scope via `forAssign=1` flag) — this allows them to find and assign in-laws or persons from other branches without violating privacy rules
 
 ## Approval Rules
 

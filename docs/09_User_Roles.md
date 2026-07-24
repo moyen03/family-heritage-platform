@@ -43,11 +43,12 @@ Each person record has a `visibility` field that controls who can see it **withi
 | View `private` persons | ✅ | ❌ | ❌ | ❌ |
 | Create person | ✅ | ✅ | 🔄 (needs approval) | ❌ |
 | Edit person | ✅ | ✅ (own branch) | 🔄 (needs approval) | ❌ |
-| Delete person | ✅ | ✅ (own branch) | ❌ | ❌ |
+| Delete person (soft-delete entirely) | ✅ | ❌ | ❌ | ❌ |
+| Remove person from branch (unassign) | ✅ | ✅ (own branch) | ❌ | ❌ |
 | Upload profile photo | ✅ | ✅ | ✅ | ❌ |
 | Create branch | ✅ | ❌ | ❌ | ❌ |
 | Manage branch admins | ✅ | ❌ | ❌ | ❌ |
-| Assign persons to branches | ✅ | ✅ (own branch) | ❌ | ❌ |
+| Assign persons to branches | ✅ | ✅ (own branch, cross-branch search supported) | ❌ | ❌ |
 | Invite members | ✅ | ✅ (own branch) | ❌ | ❌ |
 | Upload media | ✅ | ✅ | ✅ | ❌ |
 | Delete media | ✅ | ✅ (own branch) | ✅ (own uploads) | ❌ |
@@ -87,7 +88,9 @@ A Branch Admin can only manage:
 - Media uploaded within **their branch**
 - Approval requests from members of **their branch**
 - Members who belong to **their branch**
-- **Assigning and removing persons** from **their branch** (via Branch Detail page → "Add Person to Branch" panel)
+- **Assigning and removing persons** from **their branch** (via Branch Detail page → "Add Person to Branch" panel, or via the All Persons list row action)
+- **Cross-branch person search** when assigning: the "Add Person to Branch" panel returns **all non-private persons across all branches** (`forAssign=1`), so in-laws or persons from other branches can be found and assigned
+- Cannot soft-delete a person entirely — only Super Admin can do that
 - Cannot create new branches (Super Admin only)
 
 ### How Branch Admin Role Is Determined

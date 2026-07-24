@@ -161,6 +161,7 @@ Shared (common ancestors — visible to ALL branches)
 | Branch tree view (`/branches/:id/tree`) with shared ancestors included | ✅ Done |
 | Grant / revoke user branch access (viewer or member role) | ✅ Done |
 | `BranchScopingExtension` scopes relationships, marriages, addresses, media | ✅ Done |
+| Super Admin delete + Branch Admin unassign actions on All Persons list | ✅ Done |
 
 ### Phase 6c – Invitation & Edit Approval 🔄
 
