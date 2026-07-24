@@ -15,6 +15,7 @@ use App\Repository\BranchAdminRepository;
 use App\Repository\BranchMembershipRepository;
 use Doctrine\ORM\QueryBuilder;
 use Symfony\Bundle\SecurityBundle\Security;
+use Symfony\Component\HttpFoundation\RequestStack;
 
 final class PersonVisibilityExtension implements QueryCollectionExtensionInterface, QueryItemExtensionInterface
 {
@@ -22,6 +23,7 @@ final class PersonVisibilityExtension implements QueryCollectionExtensionInterfa
         private readonly Security $security,
         private readonly BranchMembershipRepository $membershipRepo,
         private readonly BranchAdminRepository $branchAdminRepo,
+        private readonly RequestStack $requestStack,
     ) {
     }
 
@@ -81,10 +83,24 @@ final class PersonVisibilityExtension implements QueryCollectionExtensionInterfa
         //           OR a shared (common ancestor) branch. This applies equally to
         //           Branch Admins, Members, and Viewers so that each branch sees
         //           only its own family data plus shared ancestors.
+        //
+        // Exception – forAssign=1: Branch Admins searching for cross-branch persons
+        //           to assign to their branch (e.g. in-laws) pass ?forAssign=1 to
+        //           bypass Layer 2 and see all non-private persons regardless of branch.
 
         // Layer 1: exclude private
         $qb->andWhere("$alias.visibility != :private_vis")
            ->setParameter('private_vis', Visibility::Private->value);
+
+        // forAssign=1 bypass: Branch Admins only — skip branch scope so they can
+        // find and assign persons from any branch (e.g. in-laws, cross-branch people).
+        $request = $this->requestStack->getCurrentRequest();
+        if ($request !== null
+            && $request->query->get('forAssign') === '1'
+            && $this->security->isGranted('ROLE_BRANCH_ADMIN')
+        ) {
+            return; // Layer 1 (privacy) applied; branch scope intentionally skipped
+        }
 
         // Collect branch IDs accessible by this user (via membership or branch admin role)
         $memberBranchIds     = $this->membershipRepo->getBranchIdsForUser($user->getId());

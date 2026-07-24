@@ -31,16 +31,11 @@ function AssignPersonPanel({
 
   // Use a dedicated key so we always get a clean Person[] array,
   // independent of the paginated cache used by PersonsPage.
+  // forAssign=1 tells the backend to bypass branch-scope filtering so
+  // cross-branch persons (e.g. in-laws) are also searchable here.
   const { data: allPersons = [], isLoading: personsLoading } = useQuery<Person[]>({
     queryKey: ['persons-all-for-branch-assign'],
-    queryFn: async () => {
-      const raw = await personsService.getAll()
-      // API Platform may return: plain array | { member: [] } | { 'hydra:member': [] }
-      if (Array.isArray(raw)) return raw as Person[]
-      const col = raw as Record<string, unknown>
-      const items = col['member'] ?? col['hydra:member']
-      return Array.isArray(items) ? (items as Person[]) : []
-    },
+    queryFn: () => personsService.getAllForAssign(),
     staleTime: 60_000,
   })
 

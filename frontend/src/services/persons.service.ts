@@ -11,6 +11,16 @@ export const personsService = {
     return data
   },
 
+  /** Fetch all non-private persons across ALL branches (used by branch-assign panel). */
+  async getAllForAssign(): Promise<Person[]> {
+    const { data } = await api.get<ApiCollection<Person>>('/persons', {
+      params: { forAssign: '1', itemsPerPage: 1000 },
+    })
+    const col = data as Record<string, unknown>
+    const items = col['member'] ?? col['hydra:member']
+    return Array.isArray(items) ? (items as Person[]) : []
+  },
+
   async getById(id: string): Promise<Person> {
     const { data } = await api.get<Person>(`/persons/${id}`)
     return data

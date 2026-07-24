@@ -189,8 +189,8 @@ missing is the UX workflow to make cross-branch assignment friction-free.
 
 | Task | Status |
 |------|--------|
-| Wire `forAssign=1` flag in `PersonVisibilityExtension` so the "Add Person to Branch" search returns **all non-private persons** across all branches (not just the admin's own branch) | ⏳ |
-| Frontend: pass `?forAssign=1` query param when branch admin opens the assign-person panel in `BranchDetailPage` | ⏳ |
+| Wire `forAssign=1` flag in `PersonVisibilityExtension` so the "Add Person to Branch" search returns **all non-private persons** across all branches (not just the admin's own branch) | ✅ Done |
+| Frontend: pass `?forAssign=1` query param when branch admin opens the assign-person panel in `BranchDetailPage` | ✅ Done |
 | Post-marriage suggestion: after saving a marriage between persons from different branches, show a prompt "Add [Spouse] to your branch as an in-law?" (Accept / Skip) | ⏳ |
 | (Optional) Per-`PersonBranch` visibility override — in-law visible in branch but with limited info shown to that branch's members | ⏳ |
 
