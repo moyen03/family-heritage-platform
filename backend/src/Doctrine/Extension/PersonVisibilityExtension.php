@@ -92,15 +92,23 @@ final class PersonVisibilityExtension implements QueryCollectionExtensionInterfa
         $accessibleBranchIds = array_values(array_unique(array_merge($memberBranchIds, $adminBranchIds)));
 
         // Layer 2: branch scope
+        // A person is visible if they are:
+        //   (a) in a shared branch, OR
+        //   (b) in one of this user's accessible branches, OR
+        //   (c) not assigned to any branch at all (unassigned / just removed from a branch)
+        $unassigned = "NOT EXISTS (SELECT 1 FROM App\\Entity\\PersonBranch pb_ua WHERE pb_ua.person = $alias)";
+
         if (empty($accessibleBranchIds)) {
-            // No branch membership yet → only shared/common ancestor persons visible
+            // No branch membership yet → shared-branch persons OR unassigned
             $qb->andWhere(
                 "EXISTS (SELECT 1 FROM App\\Entity\\PersonBranch pb_chk JOIN pb_chk.branch b_chk WHERE pb_chk.person = $alias AND b_chk.deletedAt IS NULL AND b_chk.isShared = true)"
+                . " OR $unassigned"
             );
         } else {
-            // Has branch access → persons in shared branches OR in accessible branches
+            // Has branch access → persons in shared/accessible branches OR unassigned
             $qb->andWhere(
                 "EXISTS (SELECT 1 FROM App\\Entity\\PersonBranch pb_chk JOIN pb_chk.branch b_chk WHERE pb_chk.person = $alias AND b_chk.deletedAt IS NULL AND (b_chk.isShared = true OR b_chk.id IN (:accessible_branches)))"
+                . " OR $unassigned"
             )
             ->setParameter('accessible_branches', $accessibleBranchIds);
         }

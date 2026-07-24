@@ -162,21 +162,6 @@ class BranchPersonController extends AbstractController
 
         foreach ($branch->getPersonBranches() as $pb) {
             if ($pb->getPerson()->getId() === $person->getId()) {
-                // Guard: prevent orphaning the person (no remaining visible branch).
-                // If this is the person's only branch, branch-scoped visibility would
-                // hide them from all non-super-admin users — indistinguishable from
-                // deletion. Require re-assignment before unlink.
-                $remainingBranches = $person->getPersonBranches()->filter(
-                    fn (PersonBranch $other) => $other->getBranch()->getId() !== $branch->getId()
-                        && $other->getBranch()->getDeletedAt() === null
-                )->count();
-
-                if ($remainingBranches === 0) {
-                    return $this->json([
-                        'error' => 'Cannot remove: this is the only branch this person belongs to. '
-                            . 'Assign them to another branch first, or delete the person entirely.',
-                    ], 422);
-                }
 
                 $this->em->remove($pb);
                 $this->em->flush();
