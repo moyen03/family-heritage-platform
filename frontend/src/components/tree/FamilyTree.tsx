@@ -316,6 +316,7 @@ export const FamilyTree = forwardRef<FamilyTreeHandle, FamilyTreeProps>(function
           <LegendItem color="#94a3b8" dash={false} label="Parent / child" />
           <LegendItem color="#f97316" dash label="Step parent" />
           <LegendItem color="#8b5cf6" dash label="Adopted" />
+          <LegendItem color="#a78bfa" dash label="Sibling" />
           <LegendItem color="#fb7185" dash label="Married" heart />
           <LegendItem color="#94a3b8" dash label="Divorced" faded />        </div>
 

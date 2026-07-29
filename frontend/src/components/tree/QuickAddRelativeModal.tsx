@@ -122,9 +122,18 @@ export function QuickAddRelativeModal({
       return newPerson
     },
     onSuccess: (newPerson) => {
-      queryClient.invalidateQueries({ queryKey: ['persons'] })
-      queryClient.invalidateQueries({ queryKey: ['relationships'] })
-      queryClient.invalidateQueries({ queryKey: ['marriages'] })
+      // Invalidate all tree-related caches so both the global tree
+      // and branch-scoped trees (useBranchTreeData) pick up the new person
+      void queryClient.invalidateQueries({ queryKey: ['persons'],        refetchType: 'active' })
+      void queryClient.invalidateQueries({ queryKey: ['relationships'],  refetchType: 'active' })
+      void queryClient.invalidateQueries({ queryKey: ['marriages'],      refetchType: 'active' })
+      // 'branch-persons' partial key invalidates ALL ['branch-persons', branchId]
+      // queries so useBranchTreeData re-fetches and includes the new person in
+      // combinedIds (otherwise the branch tree filters the person out).
+      void queryClient.invalidateQueries({ queryKey: ['branch-persons'], refetchType: 'active' })
+      // Also refresh branch detail stats (memberCount)
+      void queryClient.invalidateQueries({ queryKey: ['branch'],         refetchType: 'active' })
+      void queryClient.invalidateQueries({ queryKey: ['branches'],       refetchType: 'active' })
       onSaved(newPerson)
     },
     onError: (err: unknown) => {
@@ -154,12 +163,14 @@ export function QuickAddRelativeModal({
   const handleSaveAndEdit = (e: React.MouseEvent) => {
     e.preventDefault()
     if (!validate()) return
-    // Override onSuccess for this path to open full edit form
     mutate(undefined, {
       onSuccess: (newPerson) => {
-        queryClient.invalidateQueries({ queryKey: ['persons'] })
-        queryClient.invalidateQueries({ queryKey: ['relationships'] })
-        queryClient.invalidateQueries({ queryKey: ['marriages'] })
+        void queryClient.invalidateQueries({ queryKey: ['persons'],        refetchType: 'active' })
+        void queryClient.invalidateQueries({ queryKey: ['relationships'],  refetchType: 'active' })
+        void queryClient.invalidateQueries({ queryKey: ['marriages'],      refetchType: 'active' })
+        void queryClient.invalidateQueries({ queryKey: ['branch-persons'], refetchType: 'active' })
+        void queryClient.invalidateQueries({ queryKey: ['branch'],         refetchType: 'active' })
+        void queryClient.invalidateQueries({ queryKey: ['branches'],       refetchType: 'active' })
         onSavedAndEdit(newPerson)
       },
     })

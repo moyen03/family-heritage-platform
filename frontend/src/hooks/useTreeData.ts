@@ -133,6 +133,7 @@ export function buildTreeLayout(
   const yOverride = new Map<string, number>()
   const xOverride = new Map<string, number>()
 
+  // ── 4a. Marriage snap (existing) ────────────────────────────────────────────
   visibleMarriages.forEach((m) => {
     const n1 = graph.node(m.spouse1.id)
     const n2 = graph.node(m.spouse2.id)
@@ -160,6 +161,40 @@ export function buildTreeLayout(
   // Helper: resolved position for a person after overrides
   const posX = (id: string) => xOverride.get(id) ?? graph.node(id).x
   const posY = (id: string) => yOverride.get(id) ?? graph.node(id).y
+
+  // ── 4b. Sibling Y-snap + X-placement ────────────────────────────────────────
+  // Siblings must appear at the same generation level. Newly-added siblings
+  // have no parent edges so Dagre places them at rank 0 (Y ≈ 60). We snap
+  // them to the same Y as their sibling and move them horizontally next to them.
+  const visibleSiblingRels = relationships.filter(
+    (r) =>
+      (r.type === 'sibling' || r.type === 'half_sibling') &&
+      visibleIdSet.has(r.person1.id) &&
+      visibleIdSet.has(r.person2.id),
+  )
+
+  visibleSiblingRels.forEach((r) => {
+    const n1 = graph.node(r.person1.id)
+    const n2 = graph.node(r.person2.id)
+    if (!n1 || !n2) return
+
+    const y1 = yOverride.get(r.person1.id) ?? n1.y
+    const y2 = yOverride.get(r.person2.id) ?? n2.y
+
+    // Snap both to the deeper (larger Y) level — the "anchored" sibling
+    const targetY = Math.max(y1, y2)
+    if (!yOverride.has(r.person1.id)) yOverride.set(r.person1.id, targetY)
+    if (!yOverride.has(r.person2.id)) yOverride.set(r.person2.id, targetY)
+
+    // X: place the floating sibling (shallower Y = newly added, no parents in tree)
+    // immediately to the right of the anchored one.
+    const SIBLING_X_GAP = NODE_WIDTH + 40
+    if (y1 > y2 && !xOverride.has(r.person2.id)) {
+      xOverride.set(r.person2.id, (xOverride.get(r.person1.id) ?? n1.x) + SIBLING_X_GAP)
+    } else if (y2 > y1 && !xOverride.has(r.person1.id)) {
+      xOverride.set(r.person1.id, (xOverride.get(r.person2.id) ?? n2.x) + SIBLING_X_GAP)
+    }
+  })
 
   // ── 5. Family connector nodes ───────────────────────────────────────────────
   // For each marriage where BOTH parents share at least one child in the tree,
@@ -309,9 +344,25 @@ export function buildTreeLayout(
     })
   })
 
+  // ── 8. Sibling visual edges ─────────────────────────────────────────────────
+  // Drawn AFTER layout so they don't affect Dagre ranking; purely visual.
+  const siblingEdges: Edge[] = visibleSiblingRels.map((r) => ({
+    id: `sib-${r.id}`,
+    source: r.person1.id,
+    target: r.person2.id,
+    type: 'smoothstep',
+    style: { stroke: '#a78bfa', strokeWidth: 1.5, strokeDasharray: '5 3' },
+    ...(r.type === 'half_sibling' && {
+      label: 'half',
+      labelStyle: { fontSize: 9, fill: '#a78bfa', fontWeight: 600 },
+      labelBgStyle: { fill: 'white', fillOpacity: 0.85 },
+    }),
+    zIndex: 4,
+  }))
+
   return {
     nodes: [...personNodes, ...connectorNodes] as Node<PersonNodeData>[],
-    edges: [...directEdges, ...connectorEdges],
+    edges: [...directEdges, ...connectorEdges, ...siblingEdges],
   }
 }
 
