@@ -4,6 +4,7 @@ import { X, UserPlus, Loader2, AlertCircle } from 'lucide-react'
 import { personsService } from '@/services/persons.service'
 import { relationshipsService } from '@/services/relationships.service'
 import type { Person, Gender } from '@/types/person'
+import type { Relationship } from '@/types/relationship'
 
 // ── Role type (also exported for use in PersonNode / FamilyTree) ──────────────
 
@@ -40,6 +41,8 @@ async function createRelativeLink(
   forPersonId: string,
   newPersonId: string,
   role: RelativeRole,
+  /** forPerson's existing parent relationships — used to inherit ancestry for siblings */
+  parentRels: Relationship[] = [],
 ): Promise<void> {
   switch (role) {
     case 'father':
@@ -57,7 +60,19 @@ async function createRelativeLink(
       break
     case 'brother':
     case 'sister':
-      await relationshipsService.createRelationship(forPersonId, newPersonId, 'sibling')
+      if (parentRels.length > 0) {
+        // ✅ Correct genealogical approach: link new sibling to the SAME PARENTS
+        // as forPerson. This automatically inherits the full ancestor chain
+        // (grandparents, great-grandparents, other siblings via shared parent node).
+        await Promise.all(
+          parentRels.map((r) =>
+            relationshipsService.createRelationship(r.person1.id, newPersonId, r.type),
+          ),
+        )
+      } else {
+        // No parents known → fall back to a direct sibling relationship
+        await relationshipsService.createRelationship(forPersonId, newPersonId, 'sibling')
+      }
       break
   }
 }
@@ -68,6 +83,12 @@ interface QuickAddRelativeModalProps {
   /** The person we are adding a relative to */
   forPerson: Person
   role: RelativeRole
+  /**
+   * forPerson's existing parent relationships (passed from the tree which already
+   * has them loaded). Used so sibling additions automatically inherit the full
+   * ancestor chain without an extra API call.
+   */
+  parentRels?: Relationship[]
   onClose: () => void
   /** Called after save (just close + refresh) */
   onSaved: (newPerson: Person) => void
@@ -85,6 +106,7 @@ const GENDERS: { value: Gender; label: string; color: string }[] = [
 export function QuickAddRelativeModal({
   forPerson,
   role,
+  parentRels = [],
   onClose,
   onSaved,
   onSavedAndEdit,
@@ -118,7 +140,7 @@ export function QuickAddRelativeModal({
         birthDate,
         birthDatePrecision: birthYear.trim() ? 'year' : 'unknown',
       })
-      await createRelativeLink(forPerson.id, newPerson.id, role)
+      await createRelativeLink(forPerson.id, newPerson.id, role, parentRels)
       return newPerson
     },
     onSuccess: (newPerson) => {

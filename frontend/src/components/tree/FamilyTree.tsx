@@ -25,6 +25,7 @@ import { LoadingSpinner } from '@/components/ui/LoadingSpinner'
 import { useAuthStore } from '@/store/auth.store'
 import type { PersonNodeData } from '@/hooks/useTreeData'
 import type { Person } from '@/types/person'
+import type { Relationship } from '@/types/relationship'
 
 const NODE_TYPES = { person: PersonNode, familyConnector: FamilyConnectorNode }
 const EDGE_TYPES = { marriage: MarriageEdge }
@@ -66,17 +67,30 @@ export const FamilyTree = forwardRef<FamilyTreeHandle, FamilyTreeProps>(function
   const [quickAdd, setQuickAdd] = useState<{
     forPerson: Person
     role: RelativeRole
+    /** forPerson's parent-type relationships — passed to modal so sibling
+     *  additions can inherit the full ancestor chain without an extra API call */
+    parentRels: Relationship[]
   } | null>(null)
 
   // After quick-add save, optionally open full edit form for the new person
   const [fullEditPerson, setFullEditPerson] = useState<Person | null>(null)
 
+  const PARENT_TYPE_SET = useMemo(() => new Set(['parent', 'step_parent', 'adopted_parent']), [])
+
   const handleAddRelative = useCallback(
     (personId: string, role: RelativeRole) => {
       const found = persons.find((p) => p.id === personId)
-      if (found) setQuickAdd({ forPerson: found, role })
+      if (found) {
+        // Collect forPerson's parent relationships from the already-loaded tree data.
+        // These are passed to the modal so sibling roles can link the new person
+        // to the SAME parents (inheriting grandparents, uncles, etc. automatically).
+        const parentRels = relationships.filter(
+          (r) => PARENT_TYPE_SET.has(r.type) && r.person2.id === personId,
+        )
+        setQuickAdd({ forPerson: found, role, parentRels })
+      }
     },
-    [persons],
+    [persons, relationships, PARENT_TYPE_SET],
   )
 
   const handleQuickAddSaved = useCallback(
@@ -373,6 +387,7 @@ export const FamilyTree = forwardRef<FamilyTreeHandle, FamilyTreeProps>(function
         <QuickAddRelativeModal
           forPerson={quickAdd.forPerson}
           role={quickAdd.role}
+          parentRels={quickAdd.parentRels}
           onClose={() => setQuickAdd(null)}
           onSaved={(newPerson) => handleQuickAddSaved(newPerson, false)}
           onSavedAndEdit={(newPerson) => handleQuickAddSaved(newPerson, true)}
