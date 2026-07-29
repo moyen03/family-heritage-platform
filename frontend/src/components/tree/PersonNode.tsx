@@ -1,8 +1,9 @@
-import { memo } from 'react'
+import { memo, useState, useRef, useEffect } from 'react'
 import { Handle, Position, type NodeProps } from '@xyflow/react'
 import { clsx } from 'clsx'
-import { ChevronDown, ChevronUp } from 'lucide-react'
+import { ChevronDown, ChevronUp, Plus } from 'lucide-react'
 import type { PersonNodeData } from '@/hooks/useTreeData'
+import { ROLE_META, type RelativeRole } from './QuickAddRelativeModal'
 
 interface PersonNodeProps extends NodeProps {
   data: PersonNodeData & {
@@ -12,6 +13,8 @@ interface PersonNodeProps extends NodeProps {
     onHighlightAncestors?: (id: string) => void
     onHighlightDescendants?: (id: string) => void
     onToggleCollapse?: (id: string) => void
+    onAddRelative?: (id: string, role: RelativeRole) => void
+    canAddRelative?: boolean
   }
 }
 
@@ -22,19 +25,37 @@ const genderColors = {
   unknown: { ring: 'ring-gray-300',   bg: 'bg-gray-50',    dot: 'bg-gray-300',   text: 'text-gray-500' },
 }
 
+const MENU_ROLES: RelativeRole[] = ['father', 'mother', 'son', 'daughter', 'partner', 'brother', 'sister']
+
 export const PersonNode = memo(({ data }: PersonNodeProps) => {
   const {
     person, isSelected, highlightState,
     onSelect, onHighlightAncestors: _onHighlightAncestors, onHighlightDescendants: _onHighlightDescendants, onToggleCollapse,
     hasChildren, isCollapsed, collapsedChildCount,
+    onAddRelative, canAddRelative,
   } = data
   const colors = genderColors[person.gender] ?? genderColors.unknown
 
   const birthYear = person.birthDate ? new Date(person.birthDate).getFullYear() : null
   const deathYear = person.deathDate ? new Date(person.deathDate).getFullYear() : null
 
+  const [menuOpen, setMenuOpen] = useState(false)
+  const menuRef = useRef<HTMLDivElement>(null)
+
+  // Close menu on outside click
+  useEffect(() => {
+    if (!menuOpen) return
+    const handler = (e: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
+        setMenuOpen(false)
+      }
+    }
+    document.addEventListener('mousedown', handler)
+    return () => document.removeEventListener('mousedown', handler)
+  }, [menuOpen])
+
   return (
-    <>
+    <div className="relative">
       <Handle type="target" position={Position.Top} className="!bg-slate-400 !border-slate-300" />
 
       <div
@@ -87,6 +108,49 @@ export const PersonNode = memo(({ data }: PersonNodeProps) => {
         )}
       </div>
 
+      {/* ── + Add Relative button ─────────────────────────────────────────────── */}
+      {canAddRelative && (
+        <div ref={menuRef} className="absolute -top-2.5 -right-2.5 z-[100]">
+          <button
+            onClick={(e) => { e.stopPropagation(); setMenuOpen((o) => !o) }}
+            title="Add relative"
+            className={clsx(
+              'w-6 h-6 rounded-full flex items-center justify-center shadow-md transition-all border',
+              menuOpen
+                ? 'bg-amber-500 border-amber-600 text-white'
+                : 'bg-white border-gray-200 text-gray-400 hover:bg-amber-500 hover:border-amber-600 hover:text-white',
+            )}
+          >
+            <Plus className="h-3.5 w-3.5" />
+          </button>
+
+          {menuOpen && (
+            <div className="absolute top-8 right-0 w-44 bg-white rounded-xl shadow-xl border border-gray-100 py-1 z-[200]">
+              <p className="px-3 pt-1.5 pb-1 text-[10px] font-semibold text-gray-400 uppercase tracking-wide">
+                Add relative
+              </p>
+              {MENU_ROLES.map((role) => {
+                const m = ROLE_META[role]
+                return (
+                  <button
+                    key={role}
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      setMenuOpen(false)
+                      onAddRelative?.(person.id, role)
+                    }}
+                    className="w-full px-3 py-2 text-left text-sm text-gray-700 hover:bg-amber-50 hover:text-amber-700 flex items-center gap-2 transition-colors"
+                  >
+                    <span className="text-base leading-none">{m.emoji}</span>
+                    {m.label}
+                  </button>
+                )
+              })}
+            </div>
+          )}
+        </div>
+      )}
+
       {/* Collapse / expand toggle — shown below the node when it has children */}
       {hasChildren && (
         <div className="absolute -bottom-4 left-1/2 -translate-x-1/2 z-10">
@@ -118,7 +182,7 @@ export const PersonNode = memo(({ data }: PersonNodeProps) => {
         className="!bg-slate-400 !border-slate-300"
         style={{ bottom: hasChildren ? 16 : 0 }}
       />
-    </>
+    </div>
   )
 })
 

@@ -24,6 +24,8 @@ export interface PersonNodeData {
   onHighlightAncestors?: (id: string) => void
   onHighlightDescendants?: (id: string) => void
   onToggleCollapse?: (id: string) => void
+  onAddRelative?: (id: string, role: import('@/components/tree/QuickAddRelativeModal').RelativeRole) => void
+  canAddRelative?: boolean
   isSelected?: boolean
   highlightState?: 'ancestor' | 'descendant' | 'dimmed' | null
   [key: string]: unknown

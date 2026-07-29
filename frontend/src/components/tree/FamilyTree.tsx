@@ -17,10 +17,14 @@ import { PersonNode } from './PersonNode'
 import { MarriageEdge } from './MarriageEdge'
 import { FamilyConnectorNode } from './FamilyConnectorNode'
 import { PersonDetailPanel } from './PersonDetailPanel'
+import { QuickAddRelativeModal, type RelativeRole } from './QuickAddRelativeModal'
+import { PersonFormModal } from '@/components/persons/PersonFormModal'
 import { useTreeData, buildTreeLayout } from '@/hooks/useTreeData'
 import { personsService } from '@/services/persons.service'
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner'
+import { useAuthStore } from '@/store/auth.store'
 import type { PersonNodeData } from '@/hooks/useTreeData'
+import type { Person } from '@/types/person'
 
 const NODE_TYPES = { person: PersonNode, familyConnector: FamilyConnectorNode }
 const EDGE_TYPES = { marriage: MarriageEdge }
@@ -51,6 +55,37 @@ export const FamilyTree = forwardRef<FamilyTreeHandle, FamilyTreeProps>(function
   const isLoading     = propLoading       ?? treeData.isLoading
   const isError       = propError         ?? treeData.isError
   const { fitView, setCenter } = useReactFlow()
+
+  // ── Quick-add relative state ─────────────────────────────────────────────────
+  const { user } = useAuthStore()
+  const canAddRelative = !!(
+    user?.roles?.includes('ROLE_SUPER_ADMIN') ||
+    user?.roles?.includes('ROLE_BRANCH_ADMIN')
+  )
+
+  const [quickAdd, setQuickAdd] = useState<{
+    forPerson: Person
+    role: RelativeRole
+  } | null>(null)
+
+  // After quick-add save, optionally open full edit form for the new person
+  const [fullEditPerson, setFullEditPerson] = useState<Person | null>(null)
+
+  const handleAddRelative = useCallback(
+    (personId: string, role: RelativeRole) => {
+      const found = persons.find((p) => p.id === personId)
+      if (found) setQuickAdd({ forPerson: found, role })
+    },
+    [persons],
+  )
+
+  const handleQuickAddSaved = useCallback(
+    (newPerson: Person, openFullEdit: boolean) => {
+      setQuickAdd(null)
+      if (openFullEdit) setFullEditPerson(newPerson)
+    },
+    [],
+  )
 
   // ── Collapse state ───────────────────────────────────────────────────────────
   const [collapsedIds, setCollapsedIds] = useState<Set<string>>(new Set())
@@ -180,17 +215,19 @@ export const FamilyTree = forwardRef<FamilyTreeHandle, FamilyTreeProps>(function
           hs = highlightedIds.has(node.id) ? highlightMode : 'dimmed'
         }
         return {
-          ...node,
-          data: {
-            ...node.data,
-            isSelected,
-            highlightState: hs,
-            onSelect: handleSelect,
-            onHighlightAncestors: handleHighlightAncestors,
-            onHighlightDescendants: handleHighlightDescendants,
-            onToggleCollapse: handleToggleCollapse,
-          },
-        } as Node<PersonNodeData>
+            ...node,
+            data: {
+              ...node.data,
+              isSelected,
+              highlightState: hs,
+              onSelect: handleSelect,
+              onHighlightAncestors: handleHighlightAncestors,
+              onHighlightDescendants: handleHighlightDescendants,
+              onToggleCollapse: handleToggleCollapse,
+              onAddRelative: handleAddRelative,
+              canAddRelative,
+            },
+          } as Node<PersonNodeData>
       })
     )
     setEdges(layoutEdges)
@@ -198,6 +235,7 @@ export const FamilyTree = forwardRef<FamilyTreeHandle, FamilyTreeProps>(function
     layoutNodes, layoutEdges,
     selectedId, highlightedIds, highlightMode,
     handleSelect, handleHighlightAncestors, handleHighlightDescendants, handleToggleCollapse,
+    handleAddRelative, canAddRelative,
     setNodes, setEdges,
   ])
 
@@ -326,6 +364,26 @@ export const FamilyTree = forwardRef<FamilyTreeHandle, FamilyTreeProps>(function
           onHighlightAncestors={handleHighlightAncestors}
           onHighlightDescendants={handleHighlightDescendants}
           onClearHighlight={handleClearHighlight}
+        />
+      )}
+
+      {/* Quick-add relative modal */}
+      {quickAdd && (
+        <QuickAddRelativeModal
+          forPerson={quickAdd.forPerson}
+          role={quickAdd.role}
+          onClose={() => setQuickAdd(null)}
+          onSaved={(newPerson) => handleQuickAddSaved(newPerson, false)}
+          onSavedAndEdit={(newPerson) => handleQuickAddSaved(newPerson, true)}
+        />
+      )}
+
+      {/* Full edit form for the newly added person (opened via "Save & Edit Details") */}
+      {fullEditPerson && (
+        <PersonFormModal
+          person={fullEditPerson}
+          onClose={() => setFullEditPerson(null)}
+          onSaved={() => setFullEditPerson(null)}
         />
       )}
     </div>
