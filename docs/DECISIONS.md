@@ -532,3 +532,96 @@ Implement in two steps:
 - `backend/src/Doctrine/Extension/PersonVisibilityExtension.php` — honour `forAssign` context flag
 - `frontend/src/pages/BranchDetailPage.tsx` — pass `?forAssign=1` in assign-person query
 - `frontend/src/components/PersonFormModal.tsx` or marriage form — post-marriage suggestion prompt
+
+---
+
+## ADR-023: Family Tree Layout Algorithm — Subtree-Width Centering + Cross-Family Marriage Rendering
+
+**Date:** 2026-07-30
+**Status:** Accepted
+
+### Context
+
+The original tree layout delegated all node positioning to Dagre (a directed-graph layout library). This produced two recurring visual problems:
+
+1. **Row-width overflow** — Generation N rows were not wide enough to span all of their descendants. If Gen 1 has 4 siblings and each has 3+ children (Gen 2) and each of those has more children (Gen 3), Gen 1 nodes were placed too close together, causing descendant lines to cross unrelated subtrees.
+
+2. **Cross-family marriage displacement** — When Person A (from Royes family) married Person B (from Siraz family), the layout algorithm picked a "primary" spouse (lower ID) and physically placed the "secondary" spouse adjacent to the primary — yanking them out of their own family's subtree. This caused the secondary's entire lineage (parents, siblings, grandparents) to shift into the wrong territory, producing overlapping lines between the two families.
+
+### Decision
+
+Replace Dagre's X-positioning entirely with a custom **bottom-up subtree-width + top-down centering** algorithm, implemented in `frontend/src/hooks/useTreeData.ts → buildTreeLayout`.
+
+Dagre is still run for an initial reference (its X values are used as a relative ordering tiebreak when sorting children), but all final X coordinates come from the custom algorithm.
+
+### Algorithm
+
+**Y-axis (unchanged):** Each person's Y coordinate = `generation_depth × GEN_RANKSEP`. Generation depth is computed by tracing parent edges upward; persons at the same generation depth are placed on the same horizontal row.
+
+**X-axis (custom):**
+
+```
+1. Couple units
+   - Each visible marriage produces a "couple unit".
+   - PRIMARY of a couple:
+       • Cross-family (both spouses have visible parents in tree) → BOTH are primary;
+         each stays in their own family's subtree.
+       • Orphan spouse (one has no visible parents) → the in-tree partner is primary;
+         the orphan is secondary and placed adjacent to their partner.
+       • Both orphans → lower numeric/string id is primary.
+   - Secondary spouses are positioned by their primary's assignXPos() call.
+
+2. Child assignment
+   - Each child is assigned to exactly ONE layout-parent (primary of their parent couple).
+   - Cross-family children (both parents are cross-family primaries) are excluded from
+     both families' subtree widths — they are placed separately in step 5b.
+
+3. Bottom-up subtree width   (computeW)
+   - Leaf (no layout children): width = NODE_WIDTH (single) or COUPLE_SPAN (orphan couple).
+   - Internal node: width = max(selfWidth, Σ(children widths) + gaps).
+   - This propagates full descendant width upward — Gen 1 width = full span of all descendants.
+
+4. Root layout
+   - Root primaries (no visible parents) are sorted by Dagre X for consistent left-to-right order.
+   - Each root subtree is assigned X by assignXPos() with a 600 px gap between families (NODE_HSEP × 6).
+
+5. Top-down X assignment   (assignXPos)
+   - Each node/couple is centred over its allocated subtree block.
+   - Children are spread evenly underneath, each centred over their own subtree.
+   - Orphan secondary spouses are placed 20 px to the right of their primary.
+   - Cross-family spouses are NOT forced adjacent — each receives only their own centred position.
+
+5b. Cross-family children re-centering
+   - After connector node positions are computed (midpoint of the two cross-family parents),
+     shared children are moved to be centred directly below the connector node.
+   - This places cross-family children in the visual gap between the two families,
+     with clean edges from each parent → connector → child.
+
+6. Fallback snap
+   - Any node not yet positioned (disconnected orphan, secondary of secondary) is snapped
+     to its spouse's X + (NODE_WIDTH + 20), or falls back to Dagre X.
+```
+
+### Visual result
+
+- **Every generation row is exactly as wide as its widest descendant generation** — no row-width overflow, no crossing lines between unrelated subtrees.
+- **Cross-family married persons each remain in their own family section** with a clear 600 px gap between sections. Their shared children appear between the two families, connected by a central connector node.
+
+### Files changed
+
+- `frontend/src/hooks/useTreeData.ts` — `buildTreeLayout` function (steps 4–5b).
+- `frontend/src/components/tree/PersonNode.tsx` — photo/initials avatar, gender-coloured border.
+- `frontend/src/components/tree/FamilyConnectorNode.tsx` — invisible 10×10 routing point.
+- `frontend/src/components/tree/FamilyTree.tsx` — legend, MiniMap colours.
+
+### Constants (tunable)
+
+| Constant | Value | Purpose |
+|---|---|---|
+| `NODE_WIDTH` | 210 px | Width of each person card |
+| `NODE_HEIGHT` | 100 px | Height of each person card |
+| `GEN_RANKSEP` | 220 px | Vertical distance between generations |
+| `NODE_HSEP` | 100 px | Minimum horizontal gap between sibling subtrees |
+| `COUPLE_SPAN` | 440 px | Total width allocated to an orphan-couple unit (2×210+20) |
+| Root gap | 600 px | Gap between independent family tree sections (`NODE_HSEP × 6`) |
+

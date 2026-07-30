@@ -1,7 +1,6 @@
 import { useQuery, useQueries } from '@tanstack/react-query'
 import { useMemo } from 'react'
 import type { Node, Edge } from '@xyflow/react'
-import { MarkerType } from '@xyflow/react'
 import dagre from '@dagrejs/dagre'
 import { personsService } from '@/services/persons.service'
 import { relationshipsService } from '@/services/relationships.service'
@@ -9,8 +8,10 @@ import { branchesService } from '@/services/branches.service'
 import type { Person } from '@/types/person'
 import type { Relationship, Marriage } from '@/types/relationship'
 
-const NODE_WIDTH = 210
+const NODE_WIDTH  = 210
 const NODE_HEIGHT = 100
+const GEN_RANKSEP = 220   // vertical pixels between generations (Y grid)
+const NODE_HSEP   = 100   // min horizontal gap between sibling subtrees
 
 // Relationship types that form parent→child tree edges
 const PARENT_TYPES = new Set(['parent', 'step_parent', 'adopted_parent'])
@@ -31,28 +32,25 @@ export interface PersonNodeData {
   [key: string]: unknown
 }
 
-function edgeStyle(type: string): Pick<Edge, 'style' | 'label' | 'labelStyle' | 'labelBgStyle' | 'markerEnd'> {
+function edgeStyle(type: string): Pick<Edge, 'style' | 'label' | 'labelStyle' | 'labelBgStyle'> {
   switch (type) {
     case 'step_parent':
       return {
-        style: { stroke: '#f97316', strokeWidth: 2, strokeDasharray: '6 4' },
+        style: { stroke: '#f97316', strokeWidth: 1.5, strokeDasharray: '6 4' },
         label: 'step',
         labelStyle: { fontSize: 9, fill: '#f97316', fontWeight: 600 },
-        labelBgStyle: { fill: 'white', fillOpacity: 0.85 },
-        markerEnd: { type: MarkerType.ArrowClosed, width: 12, height: 12, color: '#f97316' },
+        labelBgStyle: { fill: 'white', fillOpacity: 0.9 },
       }
     case 'adopted_parent':
       return {
-        style: { stroke: '#8b5cf6', strokeWidth: 2, strokeDasharray: '6 4' },
+        style: { stroke: '#8b5cf6', strokeWidth: 1.5, strokeDasharray: '6 4' },
         label: 'adopted',
         labelStyle: { fontSize: 9, fill: '#8b5cf6', fontWeight: 600 },
-        labelBgStyle: { fill: 'white', fillOpacity: 0.85 },
-        markerEnd: { type: MarkerType.ArrowClosed, width: 12, height: 12, color: '#8b5cf6' },
+        labelBgStyle: { fill: 'white', fillOpacity: 0.9 },
       }
     default:
       return {
-        style: { stroke: '#94a3b8', strokeWidth: 2 },
-        markerEnd: { type: MarkerType.ArrowClosed, width: 12, height: 12, color: '#94a3b8' },
+        style: { stroke: '#cbd5e1', strokeWidth: 1.5 },
       }
   }
 }
@@ -116,85 +114,251 @@ export function buildTreeLayout(
     (m) => visibleIdSet.has(m.spouse1.id) && visibleIdSet.has(m.spouse2.id),
   )
 
-  // ── 3. Dagre layout (parent→child DAG only — no marriage edges to avoid cycles)
+  // ── 3. Dagre layout — used ONLY for X positions; Y will be overridden ────────
   const graph = new dagre.graphlib.Graph()
   graph.setDefaultEdgeLabel(() => ({}))
-  // ranksep: vertical gap between generations (larger = more breathing room per row)
-  // nodesep: horizontal gap between sibling subtrees (larger = clearer lane separation)
-  graph.setGraph({ rankdir: 'TB', ranksep: 220, nodesep: 100, marginx: 60, marginy: 60 })
+  graph.setGraph({ rankdir: 'TB', ranksep: GEN_RANKSEP, nodesep: NODE_HSEP, marginx: 80, marginy: 80 })
   visiblePersons.forEach((p) => graph.setNode(p.id, { width: NODE_WIDTH, height: NODE_HEIGHT }))
   visibleRels.forEach((r) => graph.setEdge(r.person1.id, r.person2.id, { weight: 2, minlen: 1 }))
   dagre.layout(graph)
 
-  // ── 4. Post-layout: Y-snap + X-clamp for married couples ───────────────────
-  const hasParentEdge = new Set<string>()
-  visibleRels.forEach((r) => hasParentEdge.add(r.person2.id))
+  // ── 3b. Generation-depth Y alignment ──────────────────────────────────────
+  // Compute "generation depth" for every visible person: depth 0 = oldest known
+  // ancestor in the tree; depth increases toward descendants.  All persons at the
+  // same generation depth are placed on the same Y row, so parent→child edges are
+  // always strictly vertical and never cross unrelated nodes.
+  const genDepths = new Map<string, number>()
 
+  function calcGenDepth(id: string): number {
+    if (genDepths.has(id)) return genDepths.get(id)!
+    const parents = [...(parentsOf.get(id) ?? [])].filter((pid) => visibleIdSet.has(pid))
+    if (parents.length === 0) { genDepths.set(id, 0); return 0 }
+    const depth = 1 + Math.max(...parents.map(calcGenDepth))
+    genDepths.set(id, depth)
+    return depth
+  }
+  visiblePersons.forEach((p) => calcGenDepth(p.id))
+
+  // ── 4. Post-layout: Y-override (generation grid) ────────────────────────────
   const yOverride = new Map<string, number>()
-  const xOverride = new Map<string, number>()
 
-  // ── 4a. Marriage snap (existing) ────────────────────────────────────────────
-  visibleMarriages.forEach((m) => {
-    const n1 = graph.node(m.spouse1.id)
-    const n2 = graph.node(m.spouse2.id)
-    if (!n1 || !n2) return
-
-    // Y-snap: pull both to the deeper (larger Y) position
-    const targetY = Math.max(n1.y, n2.y)
-    if (!yOverride.has(m.spouse1.id)) yOverride.set(m.spouse1.id, targetY)
-    if (!yOverride.has(m.spouse2.id)) yOverride.set(m.spouse2.id, targetY)
-
-    // X-clamp: if far apart and one is an orphan, move them together
-    const COUPLE_GAP = NODE_WIDTH + 20
-    const xDiff = Math.abs(n1.x - n2.x)
-    if (xDiff > COUPLE_GAP * 1.5) {
-      const s1anchored = hasParentEdge.has(m.spouse1.id)
-      const s2anchored = hasParentEdge.has(m.spouse2.id)
-      if (s1anchored && !s2anchored && !xOverride.has(m.spouse2.id)) {
-        xOverride.set(m.spouse2.id, n1.x + (n1.x <= n2.x ? COUPLE_GAP : -COUPLE_GAP))
-      } else if (s2anchored && !s1anchored && !xOverride.has(m.spouse1.id)) {
-        xOverride.set(m.spouse1.id, n2.x + (n2.x <= n1.x ? COUPLE_GAP : -COUPLE_GAP))
-      }
-    }
+  // 4-0. Place every person at exactly depth * GEN_RANKSEP so all generations
+  //      form clean horizontal rows.
+  visiblePersons.forEach((p) => {
+    const depth = genDepths.get(p.id) ?? 0
+    yOverride.set(p.id, depth * GEN_RANKSEP)
   })
 
-  // Helper: resolved position for a person after overrides
-  const posX = (id: string) => xOverride.get(id) ?? graph.node(id).x
-  const posY = (id: string) => yOverride.get(id) ?? graph.node(id).y
+  // ── 4a. Marriage Y-snap ──────────────────────────────────────────────────────
+  // Pull an orphan spouse (depth 0, no parents in tree) to the same Y row as
+  // their tree-connected partner.
+  visibleMarriages.forEach((m) => {
+    const y1 = yOverride.get(m.spouse1.id) ?? 0
+    const y2 = yOverride.get(m.spouse2.id) ?? 0
+    const targetY = Math.max(y1, y2)
+    yOverride.set(m.spouse1.id, targetY)
+    yOverride.set(m.spouse2.id, targetY)
+  })
 
-  // ── 4b. Sibling Y-snap + X-placement ────────────────────────────────────────
-  // Siblings must appear at the same generation level. Newly-added siblings
-  // have no parent edges so Dagre places them at rank 0 (Y ≈ 60). We snap
-  // them to the same Y as their sibling and move them horizontally next to them.
+  // ── 4b. Sibling Y-snap ───────────────────────────────────────────────────────
+  // If one sibling has no parents in the visible tree (depth 0) but their
+  // sibling is at a deeper generation, snap them to the correct row.
   const visibleSiblingRels = relationships.filter(
     (r) =>
       (r.type === 'sibling' || r.type === 'half_sibling') &&
       visibleIdSet.has(r.person1.id) &&
       visibleIdSet.has(r.person2.id),
   )
-
   visibleSiblingRels.forEach((r) => {
-    const n1 = graph.node(r.person1.id)
-    const n2 = graph.node(r.person2.id)
-    if (!n1 || !n2) return
+    const y1 = yOverride.get(r.person1.id) ?? 0
+    const y2 = yOverride.get(r.person2.id) ?? 0
+    if (y1 > y2) yOverride.set(r.person2.id, y1)
+    else if (y2 > y1) yOverride.set(r.person1.id, y2)
+  })
 
-    const y1 = yOverride.get(r.person1.id) ?? n1.y
-    const y2 = yOverride.get(r.person2.id) ?? n2.y
+  // ── 4c. Custom X layout: bottom-up subtree widths + top-down centering ───────
+  //
+  // This completely replaces Dagre's X positions.  The algorithm:
+  //   1. Each marriage forms a "couple unit" (primary = in-tree partner, or lower id).
+  //   2. Each child is assigned to exactly ONE layout-parent (the primary of their
+  //      parent couple, or the leftmost single parent by Dagre X).
+  //   3. Bottom-up: each unit's subtree width = max(selfWidth, Σ(child widths) + gaps).
+  //   4. Top-down: assign X centering each unit over its full subtree span.
+  //
+  // Result: Gen 1 row is always exactly as wide as Gen 2, Gen 2 as Gen 3, etc.,
+  // so lines from parent to child never cross unrelated subtrees.
 
-    // Snap both to the deeper (larger Y) level — the "anchored" sibling
-    const targetY = Math.max(y1, y2)
-    if (!yOverride.has(r.person1.id)) yOverride.set(r.person1.id, targetY)
-    if (!yOverride.has(r.person2.id)) yOverride.set(r.person2.id, targetY)
+  const COUPLE_SPAN = NODE_WIDTH * 2 + 20   // width occupied by two side-by-side spouses
 
-    // X: place the floating sibling (shallower Y = newly added, no parents in tree)
-    // immediately to the right of the anchored one.
-    const SIBLING_X_GAP = NODE_WIDTH + 40
-    if (y1 > y2 && !xOverride.has(r.person2.id)) {
-      xOverride.set(r.person2.id, (xOverride.get(r.person1.id) ?? n1.x) + SIBLING_X_GAP)
-    } else if (y2 > y1 && !xOverride.has(r.person1.id)) {
-      xOverride.set(r.person1.id, (xOverride.get(r.person2.id) ?? n2.x) + SIBLING_X_GAP)
+  // i. Layout spouse: first visible marriage wins
+  const spouseOf = new Map<string, string>()
+  visibleMarriages.forEach((m) => {
+    if (!spouseOf.has(m.spouse1.id)) spouseOf.set(m.spouse1.id, m.spouse2.id)
+    if (!spouseOf.has(m.spouse2.id)) spouseOf.set(m.spouse2.id, m.spouse1.id)
+  })
+
+  // "In-tree" = has at least one visible parent edge (not a married-in orphan)
+  const hasVisibleParents = (id: string) =>
+    [...(parentsOf.get(id) ?? [])].some((pid) => visibleIdSet.has(pid))
+
+  // Primary of a couple:
+  //  • Cross-family marriage (BOTH spouses have parents in the visible tree):
+  //    BOTH are "primary" — each person stays within their own family's subtree.
+  //    The connector node between them bridges the two families visually.
+  //  • Orphan spouse (only one has parents): in-tree partner is primary;
+  //    the orphan is secondary and gets placed adjacent to their partner.
+  //  • Both orphans: smaller numeric/string id wins.
+  const isPrimary = (id: string): boolean => {
+    const sp = spouseOf.get(id)
+    if (!sp) return true
+    const meTree = hasVisibleParents(id), spTree = hasVisibleParents(sp)
+    if (meTree && spTree) return true    // Cross-family: both are independent primaries
+    if (meTree && !spTree) return true   // I'm in-tree, spouse is orphan → I'm primary
+    if (!meTree && spTree) return false  // Spouse is in-tree, I'm orphan → I'm secondary
+    // Both orphans — smaller numeric/string id wins
+    const nId = parseInt(id, 10), nSp = parseInt(sp, 10)
+    return isNaN(nId) || isNaN(nSp) ? id < sp : nId < nSp
+  }
+
+  // Cross-family child: a person whose parents are a married couple where BOTH
+  // parents have their own parents in the visible tree (i.e., they come from
+  // two separate family subtrees).  These children are excluded from both
+  // families' layout widths and are re-centred between the two families in
+  // step 5b after the connector positions are known.
+  const isCrossFamilyChild = (id: string): boolean => {
+    const parents = [...(parentsOf.get(id) ?? [])].filter((pid) => visibleIdSet.has(pid))
+    for (const par of parents) {
+      const sp = spouseOf.get(par)
+      if (sp && parents.includes(sp) && hasVisibleParents(par) && hasVisibleParents(sp)) {
+        return true
+      }
+    }
+    return false
+  }
+
+  // ii. Assign each child to exactly one layout-parent (primary of their parent couple)
+  const layoutParentOf = new Map<string, string>()
+  visiblePersons.forEach((p) => {
+    const parents = [...(parentsOf.get(p.id) ?? [])].filter((pid) => visibleIdSet.has(pid))
+    if (parents.length === 0) return
+    // Prefer a married-couple parent pair → assign to their primary
+    for (const par of parents) {
+      const sp = spouseOf.get(par)
+      if (sp && parents.includes(sp)) {
+        layoutParentOf.set(p.id, isPrimary(par) ? par : sp)
+        return
+      }
+    }
+    // No married couple — assign to parent with smallest Dagre X
+    const chosen = parents.reduce((a, b) =>
+      (graph.node(a)?.x ?? 0) <= (graph.node(b)?.x ?? 0) ? a : b,
+    )
+    layoutParentOf.set(p.id, chosen)
+  })
+
+  // iii. Get layout-children of a primary person, sorted by Dagre X
+  //      Cross-family children are excluded — they're positioned in step 5b.
+  const getLayoutKids = (primaryId: string): string[] =>
+    visiblePersons
+      .filter(
+        (p) =>
+          !hiddenIds.has(p.id) &&
+          isPrimary(p.id) &&
+          !isCrossFamilyChild(p.id) &&
+          layoutParentOf.get(p.id) === primaryId,
+      )
+      .sort((a, b) => (graph.node(a.id)?.x ?? 0) - (graph.node(b.id)?.x ?? 0))
+      .map((p) => p.id)
+
+  // iv. Bottom-up: compute how much horizontal space each subtree needs
+  const subtreeW = new Map<string, number>()
+
+  function computeW(id: string): number {
+    if (subtreeW.has(id)) return subtreeW.get(id)!
+    // Use COUPLE_SPAN only for orphan-spouse pairs (secondary is next to us).
+    // Cross-family spouses are independent — each uses NODE_WIDTH.
+    const sp = spouseOf.get(id)
+    const selfW = (sp && !isPrimary(sp)) ? COUPLE_SPAN : NODE_WIDTH
+    const kids = getLayoutKids(id)
+    if (kids.length === 0) {
+      subtreeW.set(id, selfW)
+      return selfW
+    }
+    const kidsW =
+      kids.reduce((s, k) => s + computeW(k), 0) +
+      Math.max(0, kids.length - 1) * NODE_HSEP
+    const w = Math.max(selfW, kidsW)
+    subtreeW.set(id, w)
+    return w
+  }
+
+  // v. Root primaries: primary persons with no visible parents
+  //    Married-in orphans (isPrimary=false because spouse is in-tree) are excluded
+  //    here — they're positioned by their spouse's assignXPos call.
+  const rootPrimaries = visiblePersons
+    .filter((p) => {
+      if (!isPrimary(p.id)) return false
+      const pars = [...(parentsOf.get(p.id) ?? [])].filter((pid) => visibleIdSet.has(pid))
+      return pars.length === 0
+    })
+    .sort((a, b) => (graph.node(a.id)?.x ?? 0) - (graph.node(b.id)?.x ?? 0))
+
+  rootPrimaries.forEach((p) => computeW(p.id))
+
+  // vi. Top-down X assignment — center each couple/person over their full subtree
+  const layoutX = new Map<string, number>()
+
+  function assignXPos(primaryId: string, leftEdge: number): void {
+    const w = subtreeW.get(primaryId) ?? NODE_WIDTH
+    const center = leftEdge + w / 2
+    const sp = spouseOf.get(primaryId)
+
+    if (sp && !isPrimary(sp)) {
+      // Orphan spouse (secondary) — place adjacent with 20 px gap
+      layoutX.set(primaryId, center - (NODE_WIDTH / 2 + 10))
+      layoutX.set(sp, center + (NODE_WIDTH / 2 + 10))
+    } else {
+      // No spouse, or cross-family spouse (each stays in their own family)
+      layoutX.set(primaryId, center)
+    }
+
+    const kids = getLayoutKids(primaryId)
+    if (kids.length === 0) return
+
+    const kidsTotal =
+      kids.reduce((s, k) => s + (subtreeW.get(k) ?? NODE_WIDTH), 0) +
+      Math.max(0, kids.length - 1) * NODE_HSEP
+
+    // Centre the children block under this couple/person
+    let cursor = leftEdge + (w - kidsTotal) / 2
+    for (const kid of kids) {
+      assignXPos(kid, cursor)
+      cursor += (subtreeW.get(kid) ?? NODE_WIDTH) + NODE_HSEP
+    }
+  }
+
+  let xCursor = 80   // left margin
+  for (const root of rootPrimaries) {
+    assignXPos(root.id, xCursor)
+    xCursor += (subtreeW.get(root.id) ?? NODE_WIDTH) + NODE_HSEP * 6   // clear gap between family trees
+  }
+
+  // vii. Snap any still-unpositioned persons (disconnected nodes, orphan siblings,
+  //      secondary spouses with only their own children in tree) to their
+  //      positioned spouse, or fall back to Dagre X as a last resort.
+  visiblePersons.forEach((p) => {
+    if (layoutX.has(p.id)) return
+    const sp = spouseOf.get(p.id)
+    if (sp && layoutX.has(sp)) {
+      layoutX.set(p.id, layoutX.get(sp)! + NODE_WIDTH + 20)
+    } else if (graph.node(p.id)) {
+      layoutX.set(p.id, graph.node(p.id).x)
     }
   })
+
+  // ── Position helpers ───────────────────────────────────────────────────────
+  const posX = (id: string) => layoutX.get(id) ?? graph.node(id)?.x ?? 0
+  const posY = (id: string) => yOverride.get(id) ?? graph.node(id)?.y ?? 0
 
   // ── 5. Family connector nodes ───────────────────────────────────────────────
   // For each marriage where BOTH parents share at least one child in the tree,
@@ -254,6 +418,36 @@ export function buildTreeLayout(
     unroutedKids.forEach((childId) => routedPairs.add(`${parentId}|${childId}`))
   })
 
+  // ── 5b. Re-centre cross-family children between the two families ─────────────
+  // For marriages where BOTH spouses have parents in the tree, both spouses were
+  // positioned independently above (each inside their own family).  The connector
+  // node already sits at their midpoint.  Now we move the shared children to be
+  // centred directly below that connector so they appear in the visual gap between
+  // the two families rather than buried inside either one.
+  visibleMarriages.forEach((m) => {
+    if (!hasVisibleParents(m.spouse1.id) || !hasVisibleParents(m.spouse2.id)) return
+    const connector = connectors.find((c) => c.id === `fc-${m.id}`)
+    if (!connector || connector.childIds.length === 0) return
+
+    // Only primary children need explicit placement; secondaries are set by their primary
+    const primaryKids = connector.childIds.filter(isPrimary)
+    if (primaryKids.length === 0) return
+
+    // Ensure widths are computed (they were excluded from family subtrees above)
+    primaryKids.forEach((k) => computeW(k))
+
+    const totalW =
+      primaryKids.reduce((s, k) => s + (subtreeW.get(k) ?? NODE_WIDTH), 0) +
+      Math.max(0, primaryKids.length - 1) * NODE_HSEP
+
+    // Centre the children block below the connector
+    let cursor = connector.x - totalW / 2
+    primaryKids.forEach((kid) => {
+      assignXPos(kid, cursor)
+      cursor += (subtreeW.get(kid) ?? NODE_WIDTH) + NODE_HSEP
+    })
+  })
+
   // ── 6. Build React Flow nodes ───────────────────────────────────────────────
   const personNodes: Node<PersonNodeData>[] = visiblePersons.map((p) => {
     const children = childrenOf.get(p.id) ?? new Set()
@@ -282,8 +476,7 @@ export function buildTreeLayout(
   }))
 
   // ── 7. Build React Flow edges ───────────────────────────────────────────────
-  const EDGE_STYLE = { stroke: '#94a3b8', strokeWidth: 2 }
-  const EDGE_ARROW = { type: MarkerType.ArrowClosed, width: 12, height: 12, color: '#94a3b8' } as const
+  const EDGE_STYLE = { stroke: '#cbd5e1', strokeWidth: 1.5 }
 
   // Direct parent→child edges (those NOT routed through a connector)
   const directEdges: Edge[] = visibleRels
@@ -319,7 +512,6 @@ export function buildTreeLayout(
         })
       }
     } else {
-      // Single parent connector: "sfc-{parentId}"
       const parentId = c.id.replace('sfc-', '')
       connectorEdges.push({
         id: `fce-p-${c.id}`,
@@ -330,39 +522,26 @@ export function buildTreeLayout(
       })
     }
 
-    // Connector → each child: orthogonal 'step' edges so every child gets
-    // its own right-angle lane and subtrees don't visually bleed into each other.
+    // Connector → each child: smoothstep for consistent look
     c.childIds.forEach((childId) => {
       connectorEdges.push({
         id: `fce-c-${c.id}-${childId}`,
         source: c.id,
         target: childId,
-        type: 'step',
-        style: { stroke: '#64748b', strokeWidth: 2 },
-        markerEnd: EDGE_ARROW,
+        type: 'smoothstep',
+        style: EDGE_STYLE,
       })
     })
   })
 
-  // ── 8. Sibling visual edges ─────────────────────────────────────────────────
-  // Drawn AFTER layout so they don't affect Dagre ranking; purely visual.
-  const siblingEdges: Edge[] = visibleSiblingRels.map((r) => ({
-    id: `sib-${r.id}`,
-    source: r.person1.id,
-    target: r.person2.id,
-    type: 'smoothstep',
-    style: { stroke: '#a78bfa', strokeWidth: 1.5, strokeDasharray: '5 3' },
-    ...(r.type === 'half_sibling' && {
-      label: 'half',
-      labelStyle: { fontSize: 9, fill: '#a78bfa', fontWeight: 600 },
-      labelBgStyle: { fill: 'white', fillOpacity: 0.85 },
-    }),
-    zIndex: 4,
-  }))
-
+  // ── 8. Return ────────────────────────────────────────────────────────────────
+  // Sibling relationships are used only for positioning (step 4b above).
+  // We deliberately do NOT draw sibling edges — siblings with shared parents
+  // are already visually connected through the family-connector node, and
+  // drawing an extra edge would add visual clutter.
   return {
     nodes: [...personNodes, ...connectorNodes] as Node<PersonNodeData>[],
-    edges: [...directEdges, ...connectorEdges, ...siblingEdges],
+    edges: [...directEdges, ...connectorEdges],
   }
 }
 

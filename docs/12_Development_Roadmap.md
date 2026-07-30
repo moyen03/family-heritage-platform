@@ -78,6 +78,13 @@
 | Family connector nodes (genealogy bracket layout) | ✅ Done |
 | Married couples Y-aligned side by side in tree | ✅ Done |
 | Form fields 2-column layout (50% width pairs) | ✅ Done |
+| Tree — add relative from node (+button, QuickAddRelativeModal, 7 roles) | ✅ Done |
+| Tree — sibling inherits full parent/grandparent chain on add | ✅ Done |
+| Tree — generation-depth Y grid (clean horizontal rows per generation) | ✅ Done |
+| Tree — bottom-up subtree-width + top-down centering (no row width overflow) | ✅ Done |
+| Tree — cross-family marriage layout (both spouses stay in own family, children centred between) | ✅ Done |
+| Tree — person card with photo/initials avatar + gender-coloured border | ✅ Done |
+| Tree — invisible connector node (clean routing point, no visual dot) | ✅ Done |
 
 ---
 

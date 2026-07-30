@@ -327,12 +327,12 @@ export const FamilyTree = forwardRef<FamilyTreeHandle, FamilyTreeProps>(function
         {/* Edge legend */}
         <div className="absolute bottom-4 left-4 z-10 bg-white/90 backdrop-blur-sm rounded-xl border border-gray-100 shadow-sm px-3 py-2 space-y-1">
           <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-1.5">Legend</p>
-          <LegendItem color="#94a3b8" dash={false} label="Parent / child" />
+          <LegendItem color="#cbd5e1" dash={false} label="Parent / child" />
           <LegendItem color="#f97316" dash label="Step parent" />
           <LegendItem color="#8b5cf6" dash label="Adopted" />
-          <LegendItem color="#a78bfa" dash label="Sibling" />
           <LegendItem color="#fb7185" dash label="Married" heart />
-          <LegendItem color="#94a3b8" dash label="Divorced" faded />        </div>
+          <LegendItem color="#94a3b8" dash label="Divorced" faded />
+        </div>
 
         <ReactFlow
           nodes={nodes}
@@ -355,10 +355,10 @@ export const FamilyTree = forwardRef<FamilyTreeHandle, FamilyTreeProps>(function
           <MiniMap
             nodeColor={(n) => {
               const gender = (n.data as PersonNodeData)?.person?.gender
-              if (gender === 'male') return '#93c5fd'
-              if (gender === 'female') return '#f9a8d4'
-              if (n.type === 'familyConnector') return '#cbd5e1'
-              return '#d1d5db'
+              if (gender === 'male') return '#bfdbfe'
+              if (gender === 'female') return '#fbcfe8'
+              if (n.type === 'familyConnector') return 'transparent'
+              return '#e5e7eb'
             }}
             className="!shadow-md !rounded-xl !border !border-gray-100"
           />

@@ -18,104 +18,116 @@ interface PersonNodeProps extends NodeProps {
   }
 }
 
-const genderColors = {
-  male:    { ring: 'ring-blue-400',   bg: 'bg-blue-50',    dot: 'bg-blue-400',   text: 'text-blue-700' },
-  female:  { ring: 'ring-pink-400',   bg: 'bg-pink-50',    dot: 'bg-pink-400',   text: 'text-pink-700' },
-  other:   { ring: 'ring-purple-400', bg: 'bg-purple-50',  dot: 'bg-purple-400', text: 'text-purple-700' },
-  unknown: { ring: 'ring-gray-300',   bg: 'bg-gray-50',    dot: 'bg-gray-300',   text: 'text-gray-500' },
+// Gender-based colour palette
+const genderStyle = {
+  male:    { border: 'border-blue-300',   avatar: 'bg-blue-100 text-blue-700',   dot: 'bg-blue-400' },
+  female:  { border: 'border-pink-300',   avatar: 'bg-pink-100 text-pink-700',   dot: 'bg-pink-400' },
+  other:   { border: 'border-purple-300', avatar: 'bg-purple-100 text-purple-700', dot: 'bg-purple-400' },
+  unknown: { border: 'border-gray-200',   avatar: 'bg-gray-100 text-gray-500',   dot: 'bg-gray-300' },
 }
 
 const MENU_ROLES: RelativeRole[] = ['father', 'mother', 'son', 'daughter', 'partner', 'brother', 'sister']
 
+function initials(firstName: string, lastName: string) {
+  return `${firstName.charAt(0)}${lastName.charAt(0)}`.toUpperCase()
+}
+
 export const PersonNode = memo(({ data }: PersonNodeProps) => {
   const {
     person, isSelected, highlightState,
-    onSelect, onHighlightAncestors: _onHighlightAncestors, onHighlightDescendants: _onHighlightDescendants, onToggleCollapse,
+    onSelect, onHighlightAncestors: _oa, onHighlightDescendants: _od, onToggleCollapse,
     hasChildren, isCollapsed, collapsedChildCount,
     onAddRelative, canAddRelative,
   } = data
-  const colors = genderColors[person.gender] ?? genderColors.unknown
 
+  const style = genderStyle[person.gender] ?? genderStyle.unknown
   const birthYear = person.birthDate ? new Date(person.birthDate).getFullYear() : null
   const deathYear = person.deathDate ? new Date(person.deathDate).getFullYear() : null
 
   const [menuOpen, setMenuOpen] = useState(false)
   const menuRef = useRef<HTMLDivElement>(null)
 
-  // Close menu on outside click
   useEffect(() => {
     if (!menuOpen) return
     const handler = (e: MouseEvent) => {
-      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
-        setMenuOpen(false)
-      }
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) setMenuOpen(false)
     }
     document.addEventListener('mousedown', handler)
     return () => document.removeEventListener('mousedown', handler)
   }, [menuOpen])
 
+  const cardBorder = isSelected
+    ? 'border-amber-400 shadow-amber-100 shadow-lg ring-2 ring-amber-300'
+    : highlightState === 'ancestor'
+      ? 'border-blue-400 bg-blue-50'
+      : highlightState === 'descendant'
+        ? 'border-green-400 bg-green-50'
+        : highlightState === 'dimmed'
+          ? `opacity-30 ${style.border}`
+          : `${style.border} hover:shadow-md hover:border-opacity-70`
+
   return (
     <div className="relative">
-      <Handle type="target" position={Position.Top} className="!bg-slate-400 !border-slate-300" />
+      <Handle type="target" position={Position.Top} className="!bg-slate-300 !border-white !w-2 !h-2" />
 
+      {/* Card */}
       <div
         onClick={() => onSelect?.(person.id)}
         className={clsx(
-          'w-[200px] rounded-xl border-2 bg-white shadow-sm cursor-pointer transition-all duration-200 select-none',
-          isSelected && 'border-amber-400 shadow-amber-100 shadow-md ring-2 ring-amber-300',
-          !isSelected && highlightState === 'ancestor'   && 'border-blue-400 bg-blue-50 shadow-blue-100',
-          !isSelected && highlightState === 'descendant' && 'border-green-400 bg-green-50 shadow-green-100',
-          !isSelected && highlightState === 'dimmed'     && 'opacity-30 border-gray-200',
-          !isSelected && !highlightState                 && `border-gray-200 hover:border-gray-300 hover:shadow-md`,
+          'w-[190px] rounded-2xl border-2 bg-white shadow-sm cursor-pointer transition-all duration-200 select-none overflow-hidden',
+          cardBorder,
         )}
       >
-        {/* Header */}
-        <div className="flex items-center gap-2 px-3 pt-2.5 pb-1">
-          <span className={clsx('h-2 w-2 rounded-full flex-shrink-0', colors.dot)} />
-          <span className="text-xs font-medium text-gray-400 uppercase tracking-wide truncate">
-            {person.gender}
-          </span>
+        <div className="flex items-center gap-2.5 px-3 py-2.5">
+          {/* Avatar: photo or initials */}
+          <div className={clsx('h-10 w-10 rounded-full flex-shrink-0 overflow-hidden flex items-center justify-center font-semibold text-sm', style.avatar)}>
+            {person.profilePictureUrl
+              ? <img src={person.profilePictureUrl} alt="" className="h-10 w-10 object-cover" />
+              : <span>{initials(person.firstName, person.lastName)}</span>
+            }
+          </div>
+
+          {/* Name + dates */}
+          <div className="min-w-0 flex-1">
+            <p className="font-semibold text-gray-900 text-sm leading-tight truncate">
+              {person.firstName} {person.lastName}
+            </p>
+            {person.maidenName && (
+              <p className="text-[11px] text-gray-400 truncate">née {person.maidenName}</p>
+            )}
+            <p className="text-[11px] text-gray-400 mt-0.5">
+              {birthYear ?? '?'}
+              {!person.isLiving && ` – ${deathYear ?? '?'}`}
+            </p>
+          </div>
+
+          {/* Deceased cross */}
           {!person.isLiving && (
-            <span className="ml-auto text-xs text-gray-400">†</span>
+            <span className="text-xs text-gray-300 self-start mt-0.5 flex-shrink-0">†</span>
           )}
         </div>
 
-        {/* Name */}
-        <div className="px-3 pb-1">
-          <p className="font-semibold text-gray-900 text-sm leading-tight truncate">
-            {person.firstName} {person.lastName}
-          </p>
-          {person.maidenName && (
-            <p className="text-xs text-gray-400 truncate">née {person.maidenName}</p>
-          )}
-        </div>
+        {/* Birth place */}
+        {person.birthPlace && (
+          <p className="text-[10px] text-gray-400 truncate px-3 pb-2 -mt-1">{person.birthPlace}</p>
+        )}
 
-        {/* Dates */}
-        <div className="px-3 pb-2">
-          <p className="text-xs text-gray-500">
-            {birthYear ?? '?'} {!person.isLiving ? `– ${deathYear ?? '?'}` : ''}
-          </p>
-          {person.birthPlace && (
-            <p className="text-xs text-gray-400 truncate">{person.birthPlace}</p>
-          )}
-        </div>
-
-        {/* Subtle selected indicator */}
+        {/* Selected hint */}
         {isSelected && (
-          <div className="border-t border-amber-200 mx-3 pt-1 pb-1.5 text-center">
-            <span className="text-xs text-amber-500 font-medium">Selected — see panel →</span>
+          <div className="border-t border-amber-100 mx-3 pt-1 pb-1.5 text-center">
+            <span className="text-[11px] text-amber-500 font-medium">See panel →</span>
           </div>
         )}
       </div>
 
-      {/* ── + Add Relative button ─────────────────────────────────────────────── */}
+      {/* ── + Add Relative button ───────────────────────────────────────────── */}
       {canAddRelative && (
         <div ref={menuRef} className="absolute -top-2.5 -right-2.5 z-[100]">
           <button
             onClick={(e) => { e.stopPropagation(); setMenuOpen((o) => !o) }}
             title="Add relative"
             className={clsx(
-              'w-6 h-6 rounded-full flex items-center justify-center shadow-md transition-all border',
+              'w-6 h-6 rounded-full flex items-center justify-center shadow transition-all border text-xs',
               menuOpen
                 ? 'bg-amber-500 border-amber-600 text-white'
                 : 'bg-white border-gray-200 text-gray-400 hover:bg-amber-500 hover:border-amber-600 hover:text-white',
@@ -129,29 +141,22 @@ export const PersonNode = memo(({ data }: PersonNodeProps) => {
               <p className="px-3 pt-1.5 pb-1 text-[10px] font-semibold text-gray-400 uppercase tracking-wide">
                 Add relative
               </p>
-              {MENU_ROLES.map((role) => {
-                const m = ROLE_META[role]
-                return (
-                  <button
-                    key={role}
-                    onClick={(e) => {
-                      e.stopPropagation()
-                      setMenuOpen(false)
-                      onAddRelative?.(person.id, role)
-                    }}
-                    className="w-full px-3 py-2 text-left text-sm text-gray-700 hover:bg-amber-50 hover:text-amber-700 flex items-center gap-2 transition-colors"
-                  >
-                    <span className="text-base leading-none">{m.emoji}</span>
-                    {m.label}
-                  </button>
-                )
-              })}
+              {MENU_ROLES.map((role) => (
+                <button
+                  key={role}
+                  onClick={(e) => { e.stopPropagation(); setMenuOpen(false); onAddRelative?.(person.id, role) }}
+                  className="w-full px-3 py-2 text-left text-sm text-gray-700 hover:bg-amber-50 hover:text-amber-700 flex items-center gap-2 transition-colors"
+                >
+                  <span className="text-base leading-none">{ROLE_META[role].emoji}</span>
+                  {ROLE_META[role].label}
+                </button>
+              ))}
             </div>
           )}
         </div>
       )}
 
-      {/* Collapse / expand toggle — shown below the node when it has children */}
+      {/* Collapse / expand toggle */}
       {hasChildren && (
         <div className="absolute -bottom-4 left-1/2 -translate-x-1/2 z-10">
           <button
@@ -164,14 +169,10 @@ export const PersonNode = memo(({ data }: PersonNodeProps) => {
             )}
             title={isCollapsed ? `Expand ${collapsedChildCount} hidden` : 'Collapse children'}
           >
-            {isCollapsed ? (
-              <>
-                <ChevronDown className="h-3 w-3" />
-                <span>+{collapsedChildCount}</span>
-              </>
-            ) : (
-              <ChevronUp className="h-3 w-3" />
-            )}
+            {isCollapsed
+              ? <><ChevronDown className="h-3 w-3" /><span>+{collapsedChildCount}</span></>
+              : <ChevronUp className="h-3 w-3" />
+            }
           </button>
         </div>
       )}
@@ -179,7 +180,7 @@ export const PersonNode = memo(({ data }: PersonNodeProps) => {
       <Handle
         type="source"
         position={Position.Bottom}
-        className="!bg-slate-400 !border-slate-300"
+        className="!bg-slate-300 !border-white !w-2 !h-2"
         style={{ bottom: hasChildren ? 16 : 0 }}
       />
     </div>
